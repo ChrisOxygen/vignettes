@@ -9,9 +9,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "HireCo - Automated Job Leads for Freelancers",
-  description:
-    "Find freelance opportunities faster with automated job lead discovery from LinkedIn, Indeed, and top job boards. Never miss your next project.",
+  title: "Insights and Vignettes",
+  description: "Visa, Citizenship & Immigration Services",
 };
 export default function RootLayout({
   children,

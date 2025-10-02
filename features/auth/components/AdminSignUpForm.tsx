@@ -17,9 +17,9 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+} from "@/shared/components/ui/form";
+import { Input } from "@/shared/components/ui/input";
+import { Button } from "@/shared/components/ui/button";
 
 import Image from "next/image";
 
@@ -82,8 +82,8 @@ export function AdminSignUpForm() {
       <div className="w-full max-w-[320px] sm:max-w-[400px] items-center relative gap-6 sm:gap-8 flex flex-col">
         <div className="flex flex-col items-center gap-2">
           <Image
-            src="/assets/snap-logo-dark.webp"
-            alt="Snap Logo"
+            src="/I&V-no-bg.png"
+            alt="Vignettes Logo"
             width={400}
             height={150}
             className="w-[160px] sm:w-[200px] object-contain"
@@ -158,9 +158,9 @@ export function AdminSignUpForm() {
                         <Input
                           placeholder="Enter your admin invitation code (e.g., admin2025)"
                           disabled={isCreatingUser}
-                          className={`h-10 sm:h-12 rounded bg-white text-sm sm:text-base ${
+                          className={`h-10 sm:h-12 rounded bg-white text-sm sm:text-base focus-visible:ring-0 focus-visible:ring-offset-0 ${
                             form.formState.errors.adminCode
-                              ? "border-destructive focus:border-destructive focus:ring-destructive"
+                              ? "border-destructive"
                               : ""
                           }`}
                           {...field}
@@ -182,9 +182,9 @@ export function AdminSignUpForm() {
                         <Input
                           placeholder="Enter your full name"
                           disabled={isCreatingUser}
-                          className={`h-10 sm:h-12 rounded bg-white text-sm sm:text-base ${
+                          className={`h-10 sm:h-12 rounded bg-white text-sm sm:text-base focus-visible:ring-0 focus-visible:ring-offset-0 ${
                             form.formState.errors.name
-                              ? "border-destructive focus:border-destructive focus:ring-destructive"
+                              ? "border-destructive"
                               : ""
                           }`}
                           {...field}
@@ -207,9 +207,9 @@ export function AdminSignUpForm() {
                           placeholder="Enter your email address"
                           type="email"
                           disabled={isCreatingUser}
-                          className={`h-10 sm:h-12 rounded bg-white text-sm sm:text-base ${
+                          className={`h-10 sm:h-12 rounded bg-white text-sm sm:text-base focus-visible:ring-0 focus-visible:ring-offset-0 ${
                             form.formState.errors.email
-                              ? "border-destructive focus:border-destructive focus:ring-destructive"
+                              ? "border-destructive"
                               : ""
                           }`}
                           {...field}
@@ -233,9 +233,9 @@ export function AdminSignUpForm() {
                             placeholder="Enter your password"
                             type={showPassword ? "text" : "password"}
                             disabled={isCreatingUser}
-                            className={`h-10 sm:h-12 rounded pr-10 bg-white text-sm sm:text-base ${
+                            className={`h-10 sm:h-12 rounded pr-10 bg-white text-sm sm:text-base focus-visible:ring-0 focus-visible:ring-offset-0 ${
                               form.formState.errors.password
-                                ? "border-destructive focus:border-destructive focus:ring-destructive"
+                                ? "border-destructive"
                                 : ""
                             }`}
                             {...field}
@@ -268,9 +268,9 @@ export function AdminSignUpForm() {
                             placeholder="Confirm your password"
                             type={showConfirmPassword ? "text" : "password"}
                             disabled={isCreatingUser}
-                            className={`h-10 sm:h-12 rounded pr-10 bg-white text-sm sm:text-base ${
+                            className={`h-10 sm:h-12 rounded pr-10 bg-white text-sm sm:text-base focus-visible:ring-0 focus-visible:ring-offset-0 ${
                               form.formState.errors.confirmPassword
-                                ? "border-destructive focus:border-destructive focus:ring-destructive"
+                                ? "border-destructive"
                                 : ""
                             }`}
                             {...field}

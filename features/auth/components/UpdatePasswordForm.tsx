@@ -17,9 +17,9 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+} from "@/shared/components/ui/form";
+import { Input } from "@/shared/components/ui/input";
+import { Button } from "@/shared/components/ui/button";
 import Image from "next/image";
 
 export function UpdatePasswordForm() {
@@ -75,8 +75,8 @@ export function UpdatePasswordForm() {
       />
       <div className="w-full max-w-[320px] sm:max-w-[400px] items-center relative gap-6 sm:gap-8 flex flex-col">
         <Image
-          src="/assets/snap-logo-dark.webp"
-          alt="Snap Logo"
+          src="/I&V-no-bg.png"
+          alt="I&V Logo"
           width={400}
           height={150}
           className="w-[160px] sm:w-[200px] object-contain"
@@ -109,9 +109,9 @@ export function UpdatePasswordForm() {
                           placeholder="Enter your new password"
                           type={showPassword ? "text" : "password"}
                           disabled={isUpdatingPassword}
-                          className={`h-10 sm:h-12 rounded pr-10 bg-white text-sm sm:text-base ${
+                          className={`h-10 sm:h-12 rounded pr-10 bg-white text-sm sm:text-base focus-visible:ring-0 focus-visible:ring-offset-0 ${
                             form.formState.errors.password
-                              ? "border-destructive focus:border-destructive focus:ring-destructive"
+                              ? "border-destructive"
                               : ""
                           }`}
                           {...field}
@@ -143,9 +143,9 @@ export function UpdatePasswordForm() {
                           placeholder="Confirm your new password"
                           type={showConfirmPassword ? "text" : "password"}
                           disabled={isUpdatingPassword}
-                          className={`h-10 sm:h-12 rounded pr-10 bg-white text-sm sm:text-base ${
+                          className={`h-10 sm:h-12 rounded pr-10 bg-white text-sm sm:text-base focus-visible:ring-0 focus-visible:ring-offset-0 ${
                             form.formState.errors.confirmPassword
-                              ? "border-destructive focus:border-destructive focus:ring-destructive"
+                              ? "border-destructive"
                               : ""
                           }`}
                           {...field}
