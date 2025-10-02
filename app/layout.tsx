@@ -1,20 +1,10 @@
 import type { Metadata } from "next";
-import { Inter, Lora, Fira_Code } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
 import Providers from "@/shared/providers";
 
 const inter = Inter({
   variable: "--font-inter",
-  subsets: ["latin"],
-});
-
-const lora = Lora({
-  variable: "--font-lora",
-  subsets: ["latin"],
-});
-
-const firaCode = Fira_Code({
-  variable: "--font-fira",
   subsets: ["latin"],
 });
 
@@ -30,10 +20,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        suppressHydrationWarning
-        className={`${inter.variable} ${lora.variable} ${firaCode.variable} antialiased`}
-      >
+      <body suppressHydrationWarning className={`${inter.variable}antialiased`}>
         <Providers>{children}</Providers>
       </body>
     </html>
