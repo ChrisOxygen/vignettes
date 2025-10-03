@@ -1,10 +1,9 @@
-// "use server";
-// import VerifyEmail from "@/react-email-starter/emails/VerifyEmail";
-// import WelcomeEmail from "@/react-email-starter/emails/WelcomeEmail";
+"use server";
 
-// import { Resend } from "resend";
+import VerifyEmail from "@/emails/VerifyEmail";
+import { Resend } from "resend";
 
-// const resend = new Resend(process.env.RESEND_API_KEY);
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 // export async function sendWelcomeEmail(name: string, email: string) {
 //   try {
@@ -38,38 +37,42 @@
 //   }
 // }
 
-// export async function sendVerificationEmail(
-//   email: string,
-//   name: string,
-//   verificationCode: string,
-// ) {
-//   try {
-//     // Validate the required fields
-//     if (!name || !email || !verificationCode) {
-//       throw new Error("Name, email, and verificationCode are required");
-//     }
+export async function sendVerificationEmail(
+  email: string,
+  name: string,
+  verificationToken: string
+) {
+  try {
+    // Validate the required fields
+    if (!name || !email || !verificationToken) {
+      throw new Error("Name, email, and verificationToken are required");
+    }
 
-//     // Send the welcome email
-//     const data = await resend.emails.send({
-//       from: "verify@propreso.com",
-//       to: email,
-//       subject: "Email Verification",
-//       react: VerifyEmail({
-//         name,
-//         verificationCode,
-//       }),
-//     });
+    // Send the welcome email
+    const { data, error } = await resend.emails.send({
+      from: "verify@insights4globaltalents.com",
+      to: email,
+      subject: "Email Verification",
+      react: VerifyEmail({
+        name,
+        verificationToken,
+      }),
+    });
 
-//     return {
-//       ok: true,
-//       message: "Email sent successfully",
-//       data,
-//     };
-//   } catch (error) {
-//     console.error("Error sending verification email:", error);
-//     return {
-//       ok: false,
-//       message: "Failed to send verification email",
-//     };
-//   }
-// }
+    if (error) {
+      throw new Error(`Resend error: ${error.message}`);
+    }
+
+    return {
+      ok: true,
+      message: "Email sent successfully",
+      data,
+    };
+  } catch (error) {
+    console.error("Error sending verification email:", error);
+    return {
+      ok: false,
+      message: "Failed to send verification email",
+    };
+  }
+}

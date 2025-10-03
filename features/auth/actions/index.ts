@@ -189,7 +189,6 @@ export const _createUser = async (
             name,
             role: "USER", // Set role in auth metadata
           },
-          emailRedirectTo: `${process.env.SITE_URL}/app`,
         },
       });
 
@@ -200,12 +199,16 @@ export const _createUser = async (
 
       // Create user in database only after Supabase auth succeeds
       // No password field - Supabase handles all password management
-      await tx.user.create({
+      const newUser = await tx.user.create({
         data: {
           email,
           name,
+          accountStatus: "PENDING_VERIFICATION", // New users need to verify email
         },
       });
+
+      // generate email verification token and send verification email here
+      await _createEmailVerificationToken(newUser.id);
     });
 
     return {
@@ -215,6 +218,118 @@ export const _createUser = async (
     };
   } catch (error) {
     return handleUserCreationError(error);
+  }
+};
+
+// Error handling function for email verification token creation
+const handleEmailVerificationTokenError = (
+  error: unknown
+): ApiResponse<string> => {
+  console.error("Error creating email verification token:", error);
+
+  if (error instanceof Error) {
+    // Handle user not found errors
+    if (error.message.includes("User not found")) {
+      return {
+        success: false,
+        message: "User not found",
+        error: ApiErrorCode.USER_NOT_FOUND,
+      };
+    }
+
+    // Handle Prisma connection errors
+    if (
+      error.message.includes("Connection") ||
+      error.message.includes("ECONNREFUSED")
+    ) {
+      return {
+        success: false,
+        message: "Database connection failed. Please try again later.",
+        error: ApiErrorCode.DATABASE_CONNECTION_ERROR,
+      };
+    }
+
+    // Handle validation errors
+    if (error.message.includes("Argument validation failed")) {
+      return {
+        success: false,
+        message: "Invalid data provided. Please check your input.",
+        error: ApiErrorCode.INVALID_DATA,
+      };
+    }
+  }
+
+  // Default error response
+  return {
+    success: false,
+    message: "An unexpected error occurred while creating verification token",
+    error: ApiErrorCode.INTERNAL_ERROR,
+  };
+};
+
+export const _createEmailVerificationToken = async (
+  userId: string
+): Promise<ApiResponse<string>> => {
+  try {
+    // Validate userId
+    if (!userId) {
+      return {
+        success: false,
+        message: "User ID is required",
+        error: ApiErrorCode.MISSING_FIELDS,
+      };
+    }
+
+    let token: string;
+
+    // Use transaction to ensure data consistency
+    await prisma.$transaction(async (tx) => {
+      // Check if user exists
+      const user = await tx.user.findUnique({
+        where: { id: userId },
+      });
+
+      if (!user) {
+        throw new Error("User not found");
+      }
+
+      // Check if user already has a verification token and delete it
+      const existingToken = await tx.emailVerificationToken.findUnique({
+        where: { userId },
+      });
+
+      if (existingToken) {
+        await tx.emailVerificationToken.delete({
+          where: { userId },
+        });
+      }
+
+      // Generate new token with prefix and UUID
+      const uuid = crypto.randomUUID();
+      const tokenSuffix = uuid.replace(/-/g, "").substring(0, 18); // 18 chars + 7 char prefix = 25 total
+      token = `e_v_token${tokenSuffix}`;
+
+      // Set expiration to 24 hours from now
+      const expiresAt = new Date();
+      expiresAt.setHours(expiresAt.getHours() + 24);
+
+      // Create new verification token
+      await tx.emailVerificationToken.create({
+        data: {
+          userId,
+          token,
+          expiresAt,
+        },
+      });
+    });
+
+    return {
+      success: true,
+      message: "Email verification token created successfully",
+      data: token!,
+    };
+  } catch (error) {
+    return handleEmailVerificationTokenError(error);
   }
 };
 
