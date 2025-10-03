@@ -10,142 +10,16 @@ import {
 import { ApiResponse } from "@/features/shared/types/api";
 import { ApiErrorCode } from "@/features/shared/types/error";
 import { PrismaClient, User, UserRole } from "@prisma/client";
+import { sendVerificationEmail } from "./email.actions";
+import {
+  handleUserCreationError,
+  handleAdminUserCreationError,
+  handleEmailVerificationTokenError,
+  handleUserRetrievalError,
+} from "../utils/errorHandlers";
+import { validateAdminCode } from "../utils/adminHelpers";
 
 const prisma = new PrismaClient();
-
-// Error handling function for user creation
-const handleUserCreationError = (error: unknown): ApiResponse => {
-  console.error("Error creating user:", error);
-
-  if (error instanceof Error) {
-    // Handle Supabase auth errors
-    if (error.message.includes("Supabase auth creation failed")) {
-      return {
-        success: false,
-        message: "Failed to create authentication account. Please try again.",
-        error: ApiErrorCode.AUTH_CREATION_FAILED,
-      };
-    }
-
-    // Handle email already exists error
-    if (error.message.includes("Email already exists")) {
-      return {
-        success: false,
-        message: "An account with this email already exists",
-        error: ApiErrorCode.EMAIL_EXISTS,
-      };
-    }
-
-    // Handle Prisma unique constraint errors
-    if (error.message.includes("Unique constraint")) {
-      return {
-        success: false,
-        message: "An account with this email already exists",
-        error: ApiErrorCode.EMAIL_EXISTS,
-      };
-    }
-
-    // Handle Prisma connection errors
-    if (
-      error.message.includes("Connection") ||
-      error.message.includes("ECONNREFUSED")
-    ) {
-      return {
-        success: false,
-        message: "Database connection failed. Please try again later.",
-        error: ApiErrorCode.DATABASE_CONNECTION_ERROR,
-      };
-    }
-
-    // Handle validation errors from Prisma
-    if (error.message.includes("Argument validation failed")) {
-      return {
-        success: false,
-        message: "Invalid data provided. Please check your input.",
-        error: ApiErrorCode.INVALID_DATA,
-      };
-    }
-  }
-
-  // Default error response
-  return {
-    success: false,
-    message: "An unexpected error occurred. Please try again.",
-    error: ApiErrorCode.INTERNAL_ERROR,
-  };
-};
-
-// Admin code validation function
-const _validateAdminCode = async (
-  code: string,
-  tx: any
-): Promise<{ isValid: boolean; invitationId?: string; error?: string }> => {
-  try {
-    // Find admin invitation with the provided code
-    const invitation = await tx.adminInvitation.findUnique({
-      where: { code },
-    });
-
-    if (!invitation) {
-      return { isValid: false, error: "Invalid admin code" };
-    }
-
-    return { isValid: true, invitationId: invitation.id };
-  } catch (error) {
-    console.error("Error validating admin code:", error);
-    return { isValid: false, error: "Failed to validate admin code" };
-  }
-};
-
-// Error handling function for admin user creation
-const handleAdminUserCreationError = (error: unknown): ApiResponse => {
-  console.error("Error creating admin user:", error);
-
-  if (error instanceof Error) {
-    // Handle admin code specific errors
-    if (error.message.includes("Invalid admin code")) {
-      return {
-        success: false,
-        message: "Invalid admin code provided",
-        error: ApiErrorCode.INVALID_DATA,
-      };
-    }
-
-    if (error.message.includes("Admin code has already been used")) {
-      return {
-        success: false,
-        message: "This admin code has already been used",
-        error: ApiErrorCode.INVALID_DATA,
-      };
-    }
-
-    if (error.message.includes("Admin code has expired")) {
-      return {
-        success: false,
-        message: "This admin code has expired",
-        error: ApiErrorCode.INVALID_DATA,
-      };
-    }
-
-    if (error.message.includes("Admin code usage limit exceeded")) {
-      return {
-        success: false,
-        message: "This admin code has reached its usage limit",
-        error: ApiErrorCode.INVALID_DATA,
-      };
-    }
-
-    // Fall back to regular user creation error handling
-    return handleUserCreationError(error);
-  }
-
-  // Default error response
-  return {
-    success: false,
-    message: "An unexpected error occurred while creating admin account",
-    error: ApiErrorCode.INTERNAL_ERROR,
-  };
-};
 
 export const _createUser = async (
   input: ZUserCreationData
@@ -207,8 +81,27 @@ export const _createUser = async (
         },
       });
 
-      // generate email verification token and send verification email here
-      await _createEmailVerificationToken(newUser.id);
+      // Generate email verification token directly in the same transaction
+      const uuid = crypto.randomUUID();
+      const tokenSuffix = uuid.replace(/-/g, "").substring(0, 18); // 18 chars + 7 char prefix = 25 total
+      const verificationToken = `evtk_${tokenSuffix}`;
+
+      // Set expiration to 24 hours from now
+      const expiresAt = new Date();
+      expiresAt.setHours(expiresAt.getHours() + 24);
+
+      // Create email verification token in the same transaction
+      await tx.emailVerificationToken.create({
+        data: {
+          userId: newUser.id,
+          token: verificationToken,
+          expiresAt,
+        },
+      });
+
+      // TODO: Send verification email with the token outside the transaction
+
+      await sendVerificationEmail(email, name, verificationToken);
     });
 
     return {
@@ -219,52 +112,6 @@ export const _createUser = async (
   } catch (error) {
     return handleUserCreationError(error);
   }
-};
-
-// Error handling function for email verification token creation
-const handleEmailVerificationTokenError = (
-  error: unknown
-): ApiResponse<string> => {
-  console.error("Error creating email verification token:", error);
-
-  if (error instanceof Error) {
-    // Handle user not found errors
-    if (error.message.includes("User not found")) {
-      return {
-        success: false,
-        message: "User not found",
-        error: ApiErrorCode.USER_NOT_FOUND,
-      };
-    }
-
-    // Handle Prisma connection errors
-    if (
-      error.message.includes("Connection") ||
-      error.message.includes("ECONNREFUSED")
-    ) {
-      return {
-        success: false,
-        message: "Database connection failed. Please try again later.",
-        error: ApiErrorCode.DATABASE_CONNECTION_ERROR,
-      };
-    }
-
-    // Handle validation errors
-    if (error.message.includes("Argument validation failed")) {
-      return {
-        success: false,
-        message: "Invalid data provided. Please check your input.",
-        error: ApiErrorCode.INVALID_DATA,
-      };
-    }
-  }
-
-  // Default error response
-  return {
-    success: false,
-    message: "An unexpected error occurred while creating verification token",
-    error: ApiErrorCode.INTERNAL_ERROR,
-  };
 };
 
 export const _createEmailVerificationToken = async (
@@ -355,7 +202,7 @@ export const _createAdminUser = async (
     // Use transaction to ensure data consistency
     await prisma.$transaction(async (tx) => {
       // 1. Validate admin code first
-      const codeValidation = await _validateAdminCode(adminCode, tx);
+      const codeValidation = await validateAdminCode(adminCode, tx);
 
       if (!codeValidation.isValid) {
         throw new Error(codeValidation.error || "Invalid admin code");
@@ -415,56 +262,6 @@ export const _createAdminUser = async (
   } catch (error) {
     return handleAdminUserCreationError(error);
   }
-};
-
-// Error handling function for user retrieval
-const handleUserRetrievalError = (error: unknown): ApiResponse<any> => {
-  console.error("Error retrieving user:", error);
-
-  if (error instanceof Error) {
-    // Handle Prisma not found errors
-    if (
-      error.message.includes("not found") ||
-      error.message.includes("No user found")
-    ) {
-      return {
-        success: false,
-        message: "User not found",
-        error: ApiErrorCode.USER_NOT_FOUND,
-      };
-    }
-
-    // Handle Prisma connection errors
-    if (
-      error.message.includes("Connection") ||
-      error.message.includes("ECONNREFUSED")
-    ) {
-      return {
-        success: false,
-        message: "Database connection failed. Please try again later.",
-        error: ApiErrorCode.DATABASE_CONNECTION_ERROR,
-      };
-    }
-
-    // Handle validation errors
-    if (
-      error.message.includes("Invalid") ||
-      error.message.includes("validation")
-    ) {
-      return {
-        success: false,
-        message: "Invalid user identifier provided",
-        error: ApiErrorCode.INVALID_DATA,
-      };
-    }
-  }
-
-  // Default error response
-  return {
-    success: false,
-    message: "An unexpected error occurred while retrieving user",
-    error: ApiErrorCode.INTERNAL_ERROR,
-  };
 };
 
 // Get user by ID or email
@@ -532,5 +329,99 @@ export const _getCurrentUser = async (): Promise<ApiResponse<User>> => {
     return await _getUser({ email: authUser.email });
   } catch (error) {
     return handleUserRetrievalError(error);
+  }
+};
+
+// Resend email verification token
+export const _resendVerificationEmail = async (
+  email: string
+): Promise<ApiResponse> => {
+  try {
+    // Validate email
+    if (!email) {
+      return {
+        success: false,
+        message: "Email is required",
+        error: ApiErrorCode.MISSING_FIELDS,
+      };
+    }
+
+    // Use transaction to ensure data consistency
+    await prisma.$transaction(async (tx) => {
+      // Find user by email
+      const user = await tx.user.findUnique({
+        where: { email },
+      });
+
+      if (!user) {
+        throw new Error("User not found");
+      }
+
+      // Check if user is already verified
+      if (user.accountStatus === "ACTIVE") {
+        throw new Error("User already verified");
+      }
+
+      // Delete any existing verification token
+      const existingToken = await tx.emailVerificationToken.findUnique({
+        where: { userId: user.id },
+      });
+
+      if (existingToken) {
+        await tx.emailVerificationToken.delete({
+          where: { userId: user.id },
+        });
+      }
+
+      // Generate new token with prefix and UUID
+      const uuid = crypto.randomUUID();
+      const tokenSuffix = uuid.replace(/-/g, "").substring(0, 18); // 18 chars + 7 char prefix = 25 total
+      const verificationToken = `evtk_${tokenSuffix}`;
+
+      // Set expiration to 24 hours from now
+      const expiresAt = new Date();
+      expiresAt.setHours(expiresAt.getHours() + 24);
+
+      // Create new verification token
+      await tx.emailVerificationToken.create({
+        data: {
+          userId: user.id,
+          token: verificationToken,
+          expiresAt,
+        },
+      });
+
+      // Send verification email
+      await sendVerificationEmail(
+        email,
+        user.name || "User",
+        verificationToken
+      );
+    });
+
+    return {
+      success: true,
+      message: "Verification email sent successfully. Please check your inbox.",
+    };
+  } catch (error) {
+    if (error instanceof Error) {
+      if (error.message.includes("User not found")) {
+        return {
+          success: false,
+          message: "No account found with this email address",
+          error: ApiErrorCode.USER_NOT_FOUND,
+        };
+      }
+
+      if (error.message.includes("User already verified")) {
+        return {
+          success: false,
+          message: "Your account is already verified. You can sign in now.",
+          error: ApiErrorCode.INVALID_DATA,
+        };
+      }
+    }
+
+    return handleEmailVerificationTokenError(error);
   }
 };

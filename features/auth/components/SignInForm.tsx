@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { FaRegEye, FaRegEyeSlash, FaGoogle } from "react-icons/fa6";
 import { loginSchema, type ZLoginInput } from "../validators/user.validator";
 import { useSignInWithCredentials } from "../hooks/useSignInWithCridentials";
@@ -24,7 +24,35 @@ import { Separator } from "@/shared/components/ui/separator";
 
 export function SignInForm() {
   const [showPassword, setShowPassword] = useState(false);
+  const [urlMessage, setUrlMessage] = useState<{
+    type: "success" | "error" | null;
+    message: string;
+  }>({ type: null, message: "" });
+
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // Handle URL parameters for email verification messages
+  useEffect(() => {
+    const success = searchParams.get("success");
+    const error = searchParams.get("error");
+    const message = searchParams.get("message");
+
+    if (success === "true" && message) {
+      setUrlMessage({ type: "success", message: decodeURIComponent(message) });
+    } else if (error && message) {
+      setUrlMessage({ type: "error", message: decodeURIComponent(message) });
+    }
+
+    // Clear URL parameters after reading them
+    if (success || error) {
+      const url = new URL(window.location.href);
+      url.searchParams.delete("success");
+      url.searchParams.delete("error");
+      url.searchParams.delete("message");
+      window.history.replaceState({}, "", url.toString());
+    }
+  }, [searchParams]);
 
   const form = useForm<ZLoginInput>({
     resolver: zodResolver(loginSchema),
@@ -186,18 +214,36 @@ export function SignInForm() {
                 )}
               </Button>
 
-              {/* Error Message */}
-              {(isError && error) ||
-                (form.formState.errors.root && (
+              {/* URL Error Message (from email verification) */}
+              {urlMessage.type === "error" && (
+                <div className="p-2 sm:p-3 bg-red-50 border border-red-200 rounded-lg">
+                  <span className="text-red-600 text-xs sm:text-sm">
+                    {urlMessage.message}
+                  </span>
+                </div>
+              )}
+
+              {/* Form Error Message */}
+              {!urlMessage.message &&
+                ((isError && error) || form.formState.errors.root) && (
                   <div className="p-2 sm:p-3 bg-red-50 border border-red-200 rounded-lg">
                     <span className="text-red-600 text-xs sm:text-sm">
                       {error || form.formState.errors.root?.message}
                     </span>
                   </div>
-                ))}
+                )}
 
-              {/* Success Message */}
-              {isSuccess && (
+              {/* URL Success Message (from email verification) */}
+              {urlMessage.type === "success" && (
+                <div className="p-2 sm:p-3 bg-green-50 border border-green-200 rounded-lg">
+                  <span className="text-green-600 text-xs sm:text-sm">
+                    {urlMessage.message}
+                  </span>
+                </div>
+              )}
+
+              {/* Form Success Message */}
+              {!urlMessage.message && isSuccess && (
                 <div className="p-2 sm:p-3 bg-green-50 border border-green-200 rounded-lg">
                   <span className="text-green-600 text-xs sm:text-sm">
                     Welcome back! You have been signed in successfully.
