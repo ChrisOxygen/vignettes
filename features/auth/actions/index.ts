@@ -18,6 +18,7 @@ import {
   handleUserRetrievalError,
 } from "../utils/errorHandlers";
 import { validateAdminCode } from "../utils/adminHelpers";
+import { generateEmailVerificationToken } from "../utils/tokenGenerator";
 
 const prisma = new PrismaClient();
 
@@ -53,7 +54,7 @@ export const _createUser = async (
 
       console.log("Email is unique, proceeding to create user");
 
-      // Create user in Supabase Auth first
+      // Create Supabase auth user first
       const supabase = await createClient();
       const { error: authError } = await supabase.auth.signUp({
         email,
@@ -62,6 +63,8 @@ export const _createUser = async (
           data: {
             name,
             role: "USER", // Set role in auth metadata
+            email_confirm: false,
+            status: "PENDING_VERIFICATION",
           },
         },
       });
@@ -71,8 +74,11 @@ export const _createUser = async (
         throw new Error(`Supabase auth creation failed: ${authError.message}`);
       }
 
+      console.log(
+        "Supabase auth user created successfully, creating database user"
+      );
+
       // Create user in database only after Supabase auth succeeds
-      // No password field - Supabase handles all password management
       const newUser = await tx.user.create({
         data: {
           email,
@@ -81,14 +87,10 @@ export const _createUser = async (
         },
       });
 
-      // Generate email verification token directly in the same transaction
-      const uuid = crypto.randomUUID();
-      const tokenSuffix = uuid.replace(/-/g, "").substring(0, 18); // 18 chars + 7 char prefix = 25 total
-      const verificationToken = `evtk_${tokenSuffix}`;
+      // Generate email verification token using utility function
 
-      // Set expiration to 24 hours from now
-      const expiresAt = new Date();
-      expiresAt.setHours(expiresAt.getHours() + 24);
+      const { token: verificationToken, expiresAt } =
+        generateEmailVerificationToken();
 
       // Create email verification token in the same transaction
       await tx.emailVerificationToken.create({
@@ -99,8 +101,8 @@ export const _createUser = async (
         },
       });
 
-      // TODO: Send verification email with the token outside the transaction
-
+      // Send verification email
+      // Note: Supabase will also send its own verification email, but we're using our custom flow
       await sendVerificationEmail(email, name, verificationToken);
     });
 
@@ -151,14 +153,13 @@ export const _createEmailVerificationToken = async (
         });
       }
 
-      // Generate new token with prefix and UUID
-      const uuid = crypto.randomUUID();
-      const tokenSuffix = uuid.replace(/-/g, "").substring(0, 18); // 18 chars + 7 char prefix = 25 total
-      token = `e_v_token${tokenSuffix}`;
-
-      // Set expiration to 24 hours from now
-      const expiresAt = new Date();
-      expiresAt.setHours(expiresAt.getHours() + 24);
+      // Generate new token using utility function
+      const { generateEmailVerificationToken } = await import(
+        "../utils/tokenGenerator"
+      );
+      const { token: generatedToken, expiresAt } =
+        generateEmailVerificationToken();
+      token = generatedToken;
 
       // Create new verification token
       await tx.emailVerificationToken.create({
@@ -333,6 +334,8 @@ export const _getCurrentUser = async (): Promise<ApiResponse<User>> => {
 };
 
 // Resend email verification token
+// Note: Since we now create Supabase auth users only after email verification,
+// users who lose their verification email will need to register again to provide the password
 export const _resendVerificationEmail = async (
   email: string
 ): Promise<ApiResponse> => {
@@ -346,82 +349,52 @@ export const _resendVerificationEmail = async (
       };
     }
 
-    // Use transaction to ensure data consistency
-    await prisma.$transaction(async (tx) => {
-      // Find user by email
-      const user = await tx.user.findUnique({
-        where: { email },
-      });
-
-      if (!user) {
-        throw new Error("User not found");
-      }
-
-      // Check if user is already verified
-      if (user.accountStatus === "ACTIVE") {
-        throw new Error("User already verified");
-      }
-
-      // Delete any existing verification token
-      const existingToken = await tx.emailVerificationToken.findUnique({
-        where: { userId: user.id },
-      });
-
-      if (existingToken) {
-        await tx.emailVerificationToken.delete({
-          where: { userId: user.id },
-        });
-      }
-
-      // Generate new token with prefix and UUID
-      const uuid = crypto.randomUUID();
-      const tokenSuffix = uuid.replace(/-/g, "").substring(0, 18); // 18 chars + 7 char prefix = 25 total
-      const verificationToken = `evtk_${tokenSuffix}`;
-
-      // Set expiration to 24 hours from now
-      const expiresAt = new Date();
-      expiresAt.setHours(expiresAt.getHours() + 24);
-
-      // Create new verification token
-      await tx.emailVerificationToken.create({
-        data: {
-          userId: user.id,
-          token: verificationToken,
-          expiresAt,
-        },
-      });
-
-      // Send verification email
-      await sendVerificationEmail(
-        email,
-        user.name || "User",
-        verificationToken
-      );
+    // Find user by email
+    const user = await prisma.user.findUnique({
+      where: { email },
+      include: { emailVerificationToken: true },
     });
+
+    if (!user) {
+      return {
+        success: false,
+        message:
+          "No account found with this email address. Please register again.",
+        error: ApiErrorCode.USER_NOT_FOUND,
+      };
+    }
+
+    // Check if user is already verified
+    if (user.accountStatus === "ACTIVE") {
+      return {
+        success: false,
+        message: "Your account is already verified. You can sign in now.",
+        error: ApiErrorCode.INVALID_DATA,
+      };
+    }
+
+    // Check if user has an existing verification token
+    if (!user.emailVerificationToken) {
+      return {
+        success: false,
+        message: "Your verification token has expired. Please register again.",
+        error: ApiErrorCode.INVALID_DATA,
+      };
+    }
+
+    // Resend the existing verification token
+    await sendVerificationEmail(
+      email,
+      user.name || "User",
+      user.emailVerificationToken.token
+    );
 
     return {
       success: true,
-      message: "Verification email sent successfully. Please check your inbox.",
+      message:
+        "Verification email resent successfully. Please check your inbox.",
     };
   } catch (error) {
-    if (error instanceof Error) {
-      if (error.message.includes("User not found")) {
-        return {
-          success: false,
-          message: "No account found with this email address",
-          error: ApiErrorCode.USER_NOT_FOUND,
-        };
-      }
-
-      if (error.message.includes("User already verified")) {
-        return {
-          success: false,
-          message: "Your account is already verified. You can sign in now.",
-          error: ApiErrorCode.INVALID_DATA,
-        };
-      }
-    }
-
     return handleEmailVerificationTokenError(error);
   }
 };

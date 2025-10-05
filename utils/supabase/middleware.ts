@@ -4,13 +4,15 @@ import { NextResponse, type NextRequest } from "next/server";
 
 // Types
 type UserRole = "ADMIN" | "USER";
-type RouteType = "auth" | "admin" | "user" | "public";
+type UserStatus = "PENDING_VERIFICATION" | "ACTIVE";
+type RouteType = "auth" | "admin" | "user" | "verification" | "public";
 
 // Route configuration
 const ROUTE_CONFIG = {
   auth: ["/sign-in", "/sign-up", "/reset-password"],
   admin: ["/admin"],
   user: ["/app"],
+  verification: ["/welcome-and-verify"],
   public: ["/", "/about", "/contact", "/pricing"], // Explicit public routes
   redirects: {
     ADMIN: "/admin",
@@ -35,6 +37,8 @@ function getRouteType(pathname: string): RouteType {
   // Exact matching for better precision - avoid false positives
   if (pathname === "/admin" || pathname.startsWith("/admin/")) return "admin";
   if (pathname === "/app" || pathname.startsWith("/app/")) return "user";
+  if (ROUTE_CONFIG.verification.some((route) => pathname.startsWith(route)))
+    return "verification";
   if (ROUTE_CONFIG.auth.some((route) => pathname.startsWith(route)))
     return "auth";
   if (ROUTE_CONFIG.public.some((route) => pathname === route)) return "public";
@@ -95,6 +99,14 @@ function isValidUserRole(role: any): role is UserRole {
   return typeof role === "string" && ["ADMIN", "USER"].includes(role);
 }
 
+// Helper function to validate user status
+function isValidUserStatus(status: any): status is UserStatus {
+  return (
+    typeof status === "string" &&
+    ["PENDING_VERIFICATION", "ACTIVE"].includes(status)
+  );
+}
+
 // Route protection logic separated from session management
 function protectRoute(
   user: User | null,
@@ -104,10 +116,15 @@ function protectRoute(
 ): NextResponse | null {
   const routeType = getRouteType(pathname);
   const userRole = user?.user_metadata?.role;
+  const userStatus = user?.user_metadata?.status;
 
   // Handle unauthenticated users
   if (!user) {
-    if (routeType === "admin" || routeType === "user") {
+    if (
+      routeType === "admin" ||
+      routeType === "user" ||
+      routeType === "verification"
+    ) {
       const signInUrl = new URL("/sign-in", request.url);
       signInUrl.searchParams.set("redirectTo", pathname);
       return createRedirectWithCookies(
@@ -119,14 +136,37 @@ function protectRoute(
     return null; // Allow access to auth and public routes
   }
 
+  // Handle authenticated users based on verification status
+  if (isValidUserStatus(userStatus) && userStatus === "PENDING_VERIFICATION") {
+    // Users with pending verification should only access verification routes
+    if (routeType !== "verification" && routeType !== "public") {
+      return createRedirectWithCookies(
+        "/welcome-and-verify",
+        request,
+        supabaseResponse
+      );
+    }
+    return null; // Allow access to verification and public routes
+  }
+
+  // Handle authenticated users on verification routes (already verified)
+  if (routeType === "verification") {
+    // Only verified users with valid roles should be redirected away from verification
+    if (isValidUserRole(userRole) && (!userStatus || userStatus === "ACTIVE")) {
+      const redirectUrl = ROUTE_CONFIG.redirects[userRole];
+      return createRedirectWithCookies(redirectUrl, request, supabaseResponse);
+    }
+    return null; // Allow access if not properly verified/setup
+  }
+
   // Handle authenticated users on auth routes
   if (routeType === "auth") {
-    // Only redirect if user has a valid role
-    if (isValidUserRole(userRole)) {
+    // Only redirect if user has a valid role and is verified
+    if (isValidUserRole(userRole) && (!userStatus || userStatus === "ACTIVE")) {
       const redirectUrl = ROUTE_CONFIG.redirects[userRole];
       return createRedirectWithCookies(redirectUrl, request, supabaseResponse);
     } else {
-      // User exists but has invalid role - force logout
+      // User exists but has invalid role or pending verification - force logout
       return createLogoutRedirect(request, supabaseResponse, "invalid_role");
     }
   }
@@ -141,7 +181,7 @@ function protectRoute(
     return null;
   }
 
-  // Role-based access control for users with valid roles
+  // Role-based access control for users with valid roles and verified status
   if (userRole === "ADMIN") {
     // Admin trying to access user routes - redirect to admin dashboard
     if (routeType === "user") {

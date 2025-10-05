@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
+import { createClient } from "@/utils/supabase/server";
 
 const prisma = new PrismaClient();
 
@@ -49,11 +50,30 @@ export async function GET(
         return { success: true, message: "already-verified" };
       }
 
-      // Update user status to ACTIVE
+      // Update user status to ACTIVE (Supabase auth user already exists)
       await tx.user.update({
         where: { id: verificationToken.userId },
         data: { accountStatus: "ACTIVE" },
       });
+
+      // Update Supabase auth user status
+      const supabase = await createClient();
+
+      // Get the Supabase auth user by email to get their ID
+      const { data: authUser } = await supabase.auth.admin.listUsers();
+      const supabaseUser = authUser.users.find(
+        (u) => u.email === verificationToken.user.email
+      );
+
+      if (supabaseUser) {
+        await supabase.auth.admin.updateUserById(supabaseUser.id, {
+          email_confirm: true,
+          user_metadata: {
+            ...supabaseUser.user_metadata,
+            status: "ACTIVE",
+          },
+        });
+      }
 
       // Delete the verification token after successful verification
       await tx.emailVerificationToken.delete({
