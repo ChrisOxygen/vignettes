@@ -4,13 +4,20 @@ import { NextResponse, type NextRequest } from "next/server";
 import { UserRole, AccountStatus } from "@prisma/client";
 
 // Types
-type RouteType = "auth" | "admin" | "user" | "verification" | "public";
+type RouteType =
+  | "auth"
+  | "admin"
+  | "user"
+  | "onboarding"
+  | "verification"
+  | "public";
 
 // Route configuration
 const ROUTE_CONFIG = {
   auth: ["/sign-in", "/sign-up", "/reset-password"],
   admin: ["/admin"],
   user: ["/app"],
+  onboarding: ["/app/onboarding"],
   verification: ["/welcome-and-verify"],
   public: ["/", "/about", "/contact", "/pricing"], // Explicit public routes
   redirects: {
@@ -35,6 +42,8 @@ function copyCookies(
 function getRouteType(pathname: string): RouteType {
   // Exact matching for better precision - avoid false positives
   if (pathname === "/admin" || pathname.startsWith("/admin/")) return "admin";
+  if (ROUTE_CONFIG.onboarding.some((route) => pathname.startsWith(route)))
+    return "onboarding";
   if (pathname === "/app" || pathname.startsWith("/app/")) return "user";
   if (ROUTE_CONFIG.verification.some((route) => pathname.startsWith(route)))
     return "verification";
@@ -125,6 +134,7 @@ function protectRoute(
     if (
       routeType === "admin" ||
       routeType === "user" ||
+      routeType === "onboarding" ||
       routeType === "verification"
     ) {
       const signInUrl = new URL("/sign-in", request.url);
@@ -195,10 +205,33 @@ function protectRoute(
   // Role-based access control for users with valid roles and verified status
   if (userRole === UserRole.ADMIN) {
     // Admin trying to access user routes - redirect to admin dashboard
-    if (routeType === "user") {
+    if (routeType === "user" || routeType === "onboarding") {
       return createRedirectWithCookies("/admin", request, supabaseResponse);
     }
   } else if (userRole === UserRole.USER) {
+    // Check onboarding status for USER role only
+    const hasBasicApplicantData = user?.user_metadata?.hasBasicApplicantData;
+
+    // Handle onboarding flow for users with ACTIVE status
+    if (userStatus === AccountStatus.ACTIVE || !userStatus) {
+      if (hasBasicApplicantData === false) {
+        // User hasn't completed onboarding - redirect to onboarding unless already there
+        if (routeType !== "onboarding") {
+          return createRedirectWithCookies(
+            "/app/onboarding",
+            request,
+            supabaseResponse
+          );
+        }
+      } else if (hasBasicApplicantData === true) {
+        // User has completed onboarding - redirect away from onboarding to main app
+        if (routeType === "onboarding") {
+          return createRedirectWithCookies("/app", request, supabaseResponse);
+        }
+      }
+      // If hasBasicApplicantData is undefined, allow access (backward compatibility)
+    }
+
     // User trying to access admin routes - redirect to user dashboard
     if (routeType === "admin") {
       return createRedirectWithCookies("/app", request, supabaseResponse);

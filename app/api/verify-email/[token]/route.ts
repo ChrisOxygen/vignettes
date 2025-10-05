@@ -86,6 +86,7 @@ export async function GET(
             user_metadata: {
               ...supabaseUser.user_metadata,
               status: "ACTIVE",
+              hasBasicApplicantData: false,
             },
           });
 

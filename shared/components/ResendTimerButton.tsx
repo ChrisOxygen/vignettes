@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/shared/components/ui/button";
 import { RefreshCw } from "lucide-react";
+import { Spinner } from "@/shared/components/ui/spinner";
 
 interface ResendTimerButtonProps {
   onResend: () => void;
@@ -102,7 +103,7 @@ export function ResendTimerButton({
     >
       {isPending ? (
         <>
-          <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+          <Spinner size="sm" variant="white" className="mr-2" />
           Sending...
         </>
       ) : isOnCooldown ? (

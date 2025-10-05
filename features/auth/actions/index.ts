@@ -9,6 +9,7 @@ import {
 } from "../validators/user.validator";
 import { ApiResponse } from "@/features/shared/types/api";
 import { ApiErrorCode } from "@/features/shared/types/error";
+import { UserWithBasicApplicantData } from "@/features/shared/types/user";
 import { PrismaClient, User, UserRole } from "@prisma/client";
 import { sendVerificationEmail } from "./email.actions";
 import {
@@ -269,7 +270,7 @@ export const _createAdminUser = async (
 export const _getUser = async (identifier: {
   id?: string;
   email?: string;
-}): Promise<ApiResponse<User>> => {
+}): Promise<ApiResponse<UserWithBasicApplicantData>> => {
   try {
     // Validate that at least one identifier is provided
     if (!identifier.id && !identifier.email) {
@@ -288,6 +289,7 @@ export const _getUser = async (identifier: {
     // Fetch user from database
     const user = await prisma.user.findUnique({
       where: whereClause,
+      include: { basicApplicantData: true },
     });
 
     if (!user) {
@@ -309,7 +311,9 @@ export const _getUser = async (identifier: {
 };
 
 // Get current authenticated user (combines Supabase auth + database data)
-export const _getCurrentUser = async (): Promise<ApiResponse<User>> => {
+export const _getCurrentUser = async (): Promise<
+  ApiResponse<UserWithBasicApplicantData>
+> => {
   try {
     // Get current session from Supabase
     const supabase = await createClient();

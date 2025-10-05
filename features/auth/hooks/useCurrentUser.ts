@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { _getCurrentUser } from "../actions";
-import { User } from "@prisma/client";
+import { UserWithBasicApplicantData } from "@/features/shared/types/user";
 
 interface UseCurrentUserOptions {
   enabled?: boolean;
@@ -20,7 +20,7 @@ export function useCurrentUser(options?: UseCurrentUserOptions) {
         throw new Error(result.message || "Failed to get current user");
       }
 
-      return result.data as User;
+      return result.data as UserWithBasicApplicantData;
     },
     enabled: options?.enabled !== false,
     refetchOnWindowFocus: options?.refetchOnWindowFocus !== false,
