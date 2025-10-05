@@ -40,6 +40,25 @@ model EmailVerificationToken {
   @@map("email_verification_tokens")
 }
 
+model BasicApplicantData {
+  id                   String   @id @default(uuid()) @db.Uuid
+  userId               String   @unique @db.Uuid
+  fullLegalName        String   @db.VarChar(200)
+  currentCountryOfResidence String @db.VarChar(100)
+  nationality          String   @db.VarChar(100)
+  dateOfBirth          DateTime @db.Date
+  phoneNumber          String   @db.VarChar(20)
+  passportNumber       String   @db.VarChar(50)
+  createdAt            DateTime @default(now()) @db.Timestamptz
+  updatedAt            DateTime @updatedAt @db.Timestamptz
+
+  user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([passportNumber])
+  @@map("basic_applicant_data")
+}
+
 model User {
   id        String   @id @default(uuid()) @db.Uuid
   email     String   @unique @db.VarChar(255)
@@ -52,6 +71,9 @@ model User {
   updatedAt DateTime @updatedAt @db.Timestamptz
 
   emailVerificationToken EmailVerificationToken?
+  basicApplicantData     BasicApplicantData?
+
+  
 
   @@index([email])
   @@index([role])
