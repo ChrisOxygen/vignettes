@@ -1,10 +1,9 @@
 import { createServerClient } from "@supabase/ssr";
 import { User } from "@supabase/supabase-js";
 import { NextResponse, type NextRequest } from "next/server";
+import { UserRole, AccountStatus } from "@prisma/client";
 
 // Types
-type UserRole = "ADMIN" | "USER";
-type UserStatus = "PENDING_VERIFICATION" | "ACTIVE";
 type RouteType = "auth" | "admin" | "user" | "verification" | "public";
 
 // Route configuration
@@ -96,14 +95,17 @@ function createLogoutRedirect(
 
 // Helper function to validate user role
 function isValidUserRole(role: any): role is UserRole {
-  return typeof role === "string" && ["ADMIN", "USER"].includes(role);
+  return (
+    typeof role === "string" &&
+    Object.values(UserRole).includes(role as UserRole)
+  );
 }
 
 // Helper function to validate user status
-function isValidUserStatus(status: any): status is UserStatus {
+function isValidUserStatus(status: any): status is AccountStatus {
   return (
     typeof status === "string" &&
-    ["PENDING_VERIFICATION", "ACTIVE"].includes(status)
+    Object.values(AccountStatus).includes(status as AccountStatus)
   );
 }
 
@@ -137,7 +139,10 @@ function protectRoute(
   }
 
   // Handle authenticated users based on verification status
-  if (isValidUserStatus(userStatus) && userStatus === "PENDING_VERIFICATION") {
+  if (
+    isValidUserStatus(userStatus) &&
+    userStatus === AccountStatus.PENDING_VERIFICATION
+  ) {
     // Users with pending verification should only access verification routes
     if (routeType !== "verification" && routeType !== "public") {
       return createRedirectWithCookies(
@@ -152,7 +157,10 @@ function protectRoute(
   // Handle authenticated users on verification routes (already verified)
   if (routeType === "verification") {
     // Only verified users with valid roles should be redirected away from verification
-    if (isValidUserRole(userRole) && (!userStatus || userStatus === "ACTIVE")) {
+    if (
+      isValidUserRole(userRole) &&
+      (!userStatus || userStatus === AccountStatus.ACTIVE)
+    ) {
       const redirectUrl = ROUTE_CONFIG.redirects[userRole];
       return createRedirectWithCookies(redirectUrl, request, supabaseResponse);
     }
@@ -162,7 +170,10 @@ function protectRoute(
   // Handle authenticated users on auth routes
   if (routeType === "auth") {
     // Only redirect if user has a valid role and is verified
-    if (isValidUserRole(userRole) && (!userStatus || userStatus === "ACTIVE")) {
+    if (
+      isValidUserRole(userRole) &&
+      (!userStatus || userStatus === AccountStatus.ACTIVE)
+    ) {
       const redirectUrl = ROUTE_CONFIG.redirects[userRole];
       return createRedirectWithCookies(redirectUrl, request, supabaseResponse);
     } else {
@@ -182,12 +193,12 @@ function protectRoute(
   }
 
   // Role-based access control for users with valid roles and verified status
-  if (userRole === "ADMIN") {
+  if (userRole === UserRole.ADMIN) {
     // Admin trying to access user routes - redirect to admin dashboard
     if (routeType === "user") {
       return createRedirectWithCookies("/admin", request, supabaseResponse);
     }
-  } else if (userRole === "USER") {
+  } else if (userRole === UserRole.USER) {
     // User trying to access admin routes - redirect to user dashboard
     if (routeType === "admin") {
       return createRedirectWithCookies("/app", request, supabaseResponse);

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { createClient } from "@/utils/supabase/server";
+import { createClient as createAdminClient } from "@supabase/supabase-js";
 
 const prisma = new PrismaClient();
 
@@ -19,69 +20,105 @@ export async function GET(
     }
 
     // Use transaction to ensure data consistency
-    const result = await prisma.$transaction(async (tx) => {
-      // Find the email verification token
-      const verificationToken = await tx.emailVerificationToken.findUnique({
-        where: { token },
-        include: { user: true },
-      });
+    const result = await prisma.$transaction(
+      async (tx) => {
+        // Find the email verification token
+        const verificationToken = await tx.emailVerificationToken.findUnique({
+          where: { token },
+          include: { user: true },
+        });
 
-      // Check if token exists
-      if (!verificationToken) {
-        return { success: false, error: "invalid-token" };
-      }
+        // Check if token exists
+        if (!verificationToken) {
+          return { success: false, error: "invalid-token" };
+        }
 
-      // Check if token has expired
-      const now = new Date();
-      if (verificationToken.expiresAt < now) {
-        // Delete expired token
+        // Check if token has expired
+        const now = new Date();
+        if (verificationToken.expiresAt < now) {
+          // Delete expired token
+          await tx.emailVerificationToken.delete({
+            where: { token },
+          });
+          return { success: false, error: "expired-token" };
+        }
+
+        // Check if user is already verified
+        if (verificationToken.user.accountStatus === "ACTIVE") {
+          // Delete the token since user is already verified
+          await tx.emailVerificationToken.delete({
+            where: { token },
+          });
+          return { success: true, message: "already-verified" };
+        }
+
+        // Prepare Supabase auth operations first (before database changes)
+        // Create admin client with service role key for admin operations
+        const supabase = createAdminClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL!,
+          process.env.SUPABASE_SERVICE_ROLE_KEY!
+        );
+
+        // Get the Supabase auth user by email to get their ID
+        const { data: authUser, error: listUsersError } =
+          await supabase.auth.admin.listUsers();
+
+        if (listUsersError) {
+          throw new Error(
+            `Failed to list Supabase users: ${listUsersError.message}`
+          );
+        }
+
+        const supabaseUser = authUser.users.find(
+          (u) => u.email === verificationToken.user.email
+        );
+
+        if (!supabaseUser) {
+          throw new Error(
+            `Supabase auth user not found for email: ${verificationToken.user.email}`
+          );
+        }
+
+        // Update Supabase auth user status first
+        const { error: updateAuthError } =
+          await supabase.auth.admin.updateUserById(supabaseUser.id, {
+            email_confirm: true,
+            user_metadata: {
+              ...supabaseUser.user_metadata,
+              status: "ACTIVE",
+            },
+          });
+
+        if (updateAuthError) {
+          throw new Error(
+            `Failed to update Supabase auth user: ${updateAuthError.message}`
+          );
+        }
+
+        // Only update database after Supabase auth update succeeds
+        // Update user status to ACTIVE
+        await tx.user.update({
+          where: { id: verificationToken.userId },
+          data: { accountStatus: "ACTIVE" },
+        });
+
+        // Delete the verification token after successful verification
         await tx.emailVerificationToken.delete({
           where: { token },
         });
-        return { success: false, error: "expired-token" };
+
+        return {
+          success: true,
+          message: "verified",
+          supabaseUserId: supabaseUser.id,
+        };
+      },
+      {
+        // Transaction options for better error handling
+        maxWait: 10000, // 10 seconds
+        timeout: 15000, // 15 seconds
       }
-
-      // Check if user is already verified
-      if (verificationToken.user.accountStatus === "ACTIVE") {
-        // Delete the token since user is already verified
-        await tx.emailVerificationToken.delete({
-          where: { token },
-        });
-        return { success: true, message: "already-verified" };
-      }
-
-      // Update user status to ACTIVE (Supabase auth user already exists)
-      await tx.user.update({
-        where: { id: verificationToken.userId },
-        data: { accountStatus: "ACTIVE" },
-      });
-
-      // Update Supabase auth user status
-      const supabase = await createClient();
-
-      // Get the Supabase auth user by email to get their ID
-      const { data: authUser } = await supabase.auth.admin.listUsers();
-      const supabaseUser = authUser.users.find(
-        (u) => u.email === verificationToken.user.email
-      );
-
-      if (supabaseUser) {
-        await supabase.auth.admin.updateUserById(supabaseUser.id, {
-          email_confirm: true,
-          user_metadata: {
-            ...supabaseUser.user_metadata,
-            status: "ACTIVE",
-          },
-        });
-      }
-
-      // Delete the verification token after successful verification
-      await tx.emailVerificationToken.delete({
-        where: { token },
-      });
-
-      return { success: true, message: "verified" };
-    });
+    );
 
     // Handle transaction results and redirect accordingly
     if (!result.success) {
@@ -112,6 +149,22 @@ export async function GET(
     );
   } catch (error) {
     console.error("Error verifying email token:", error);
+
+    // If we have a partial success (Supabase updated but database failed),
+    // we should attempt to rollback the Supabase changes
+    if (error instanceof Error && error.message.includes("Supabase")) {
+      console.error("Supabase auth operation failed:", error.message);
+
+      return NextResponse.redirect(
+        new URL(
+          "/sign-in?error=auth-sync-error&message=" +
+            encodeURIComponent(
+              "Authentication service error. Please try again or contact support."
+            ),
+          request.url
+        )
+      );
+    }
 
     return NextResponse.redirect(
       new URL(
