@@ -62,7 +62,7 @@ model BasicApplicantData {
 model User {
   id        String   @id @default(uuid()) @db.Uuid
   email     String   @unique @db.VarChar(255)
-  name      String?  @db.VarChar(100)
+  name      String  @db.VarChar(100)
   accountStatus AccountStatus   @default(PENDING_VERIFICATION)
   
 

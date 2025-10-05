@@ -117,14 +117,14 @@ export const _createUser = async (
 };
 
 export const _createEmailVerificationToken = async (
-  userId: string
+  email: string
 ): Promise<ApiResponse<string>> => {
   try {
-    // Validate userId
-    if (!userId) {
+    // Validate email
+    if (!email) {
       return {
         success: false,
-        message: "User ID is required",
+        message: "Email is required",
         error: ApiErrorCode.MISSING_FIELDS,
       };
     }
@@ -135,7 +135,7 @@ export const _createEmailVerificationToken = async (
     await prisma.$transaction(async (tx) => {
       // Check if user exists
       const user = await tx.user.findUnique({
-        where: { id: userId },
+        where: { email },
       });
 
       if (!user) {
@@ -144,19 +144,16 @@ export const _createEmailVerificationToken = async (
 
       // Check if user already has a verification token and delete it
       const existingToken = await tx.emailVerificationToken.findUnique({
-        where: { userId },
+        where: { userId: user.id },
       });
 
       if (existingToken) {
         await tx.emailVerificationToken.delete({
-          where: { userId },
+          where: { userId: user.id },
         });
       }
 
       // Generate new token using utility function
-      const { generateEmailVerificationToken } = await import(
-        "../utils/tokenGenerator"
-      );
       const { token: generatedToken, expiresAt } =
         generateEmailVerificationToken();
       token = generatedToken;
@@ -164,11 +161,14 @@ export const _createEmailVerificationToken = async (
       // Create new verification token
       await tx.emailVerificationToken.create({
         data: {
-          userId,
+          userId: user.id,
           token,
           expiresAt,
         },
       });
+
+      // Send verification email within the transaction
+      await sendVerificationEmail(user.email, user.name, token);
     });
 
     return {
