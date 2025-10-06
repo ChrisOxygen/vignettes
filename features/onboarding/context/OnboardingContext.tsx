@@ -7,21 +7,31 @@ import { COUNTRIES } from "../constants";
 export { COUNTRIES };
 
 // Derive country code type from COUNTRIES constant
-export type CountryCode = typeof COUNTRIES[number]['value'];
+export type CountryCode = (typeof COUNTRIES)[number]["value"];
 
 // Helper functions for country code/label conversion
 export const getCountryLabel = (code: CountryCode): string => {
-  const country = COUNTRIES.find(c => c.value === code);
+  const country = COUNTRIES.find((c) => c.value === code);
   return country?.label || code;
 };
 
+export const getCountryFlag = (code: CountryCode): string => {
+  const country = COUNTRIES.find((c) => c.value === code);
+  return country?.flag || "";
+};
+
+export const getCountryData = (code: CountryCode) => {
+  const country = COUNTRIES.find((c) => c.value === code);
+  return country || null;
+};
+
 export const getCountryCode = (label: string): CountryCode | null => {
-  const country = COUNTRIES.find(c => c.label === label);
+  const country = COUNTRIES.find((c) => c.label === label);
   return country?.value || null;
 };
 
 export const isValidCountryCode = (code: string): code is CountryCode => {
-  return COUNTRIES.some(c => c.value === code);
+  return COUNTRIES.some((c) => c.value === code);
 };
 
 // Types for the onboarding form data
@@ -166,8 +176,13 @@ interface OnboardingContextType {
   resetForm: () => void;
   resetState: () => void;
   // Country-specific helpers
-  updateCountryField: (field: 'currentCountryOfResidence' | 'nationality', countryCode: CountryCode) => void;
+  updateCountryField: (
+    field: "currentCountryOfResidence" | "nationality",
+    countryCode: CountryCode
+  ) => void;
   getCountryLabel: (code: CountryCode) => string;
+  getCountryFlag: (code: CountryCode) => string;
+  getCountryData: (code: CountryCode) => (typeof COUNTRIES)[number] | null;
   getCountryCode: (label: string) => CountryCode | null;
   isValidCountryCode: (code: string) => code is CountryCode;
   countries: typeof COUNTRIES;
@@ -237,7 +252,7 @@ export function OnboardingProvider({
 
   // Country-specific helper functions
   const updateCountryField = (
-    field: 'currentCountryOfResidence' | 'nationality', 
+    field: "currentCountryOfResidence" | "nationality",
     countryCode: CountryCode
   ) => {
     dispatch({ type: "UPDATE_FIELD", field, value: countryCode });
@@ -275,6 +290,8 @@ export function OnboardingProvider({
     // Country-specific helpers
     updateCountryField,
     getCountryLabel,
+    getCountryFlag,
+    getCountryData,
     getCountryCode,
     isValidCountryCode,
     countries: COUNTRIES,

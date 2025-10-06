@@ -1,31 +1,18 @@
 "use client";
 
 import React, { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
 } from "@/shared/components/ui/card";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/shared/components/ui/form";
-import { Input } from "@/shared/components/ui/input";
 import { Button } from "@/shared/components/ui/button";
 import { Badge } from "@/shared/components/ui/badge";
 import { Separator } from "@/shared/components/ui/separator";
 import { LoadingSpinner } from "@/shared/components/LoadingSpinner";
+import { Label } from "@/shared/components/ui/label";
 import {
-  Shield,
   CheckCircle,
   User,
   Calendar,
@@ -35,89 +22,98 @@ import {
   Lock,
 } from "lucide-react";
 import { ScrollArea } from "@/shared/components/ui/scroll-area";
-
-// Form schema
-const onboardingSchema = z.object({
-  fullLegalName: z
-    .string()
-    .min(2, "Full name must be at least 2 characters")
-    .max(100, "Full name must not exceed 100 characters")
-    .regex(
-      /^[a-zA-Z\s'-]+$/,
-      "Full name can only contain letters, spaces, hyphens, and apostrophes"
-    ),
-  currentCountryOfResidence: z
-    .string()
-    .min(2, "Please enter your current country of residence")
-    .max(100, "Country name is too long"),
-  nationality: z
-    .string()
-    .min(2, "Please enter your nationality")
-    .max(100, "Nationality name is too long"),
-  dateOfBirth: z
-    .string()
-    .regex(/^\d{2}\/\d{2}\/\d{4}$/, "Date must be in DD/MM/YYYY format")
-    .refine((date) => {
-      const [day, month, year] = date.split("/").map(Number);
-      const inputDate = new Date(year, month - 1, day);
-      const today = new Date();
-      const minAge = new Date(
-        today.getFullYear() - 100,
-        today.getMonth(),
-        today.getDate()
-      );
-      const maxAge = new Date(
-        today.getFullYear() - 16,
-        today.getMonth(),
-        today.getDate()
-      );
-
-      return inputDate >= minAge && inputDate <= maxAge;
-    }, "You must be between 16 and 100 years old"),
-  phoneNumber: z
-    .string()
-    .regex(
-      /^\+\d{1,4}\d{6,14}$/,
-      "Phone number must include country code (e.g., +234 for Nigeria) and be valid"
-    ),
-  passportNumber: z
-    .string()
-    .min(4, "Passport number must be at least 4 characters")
-    .max(20, "Passport number must not exceed 20 characters")
-    .regex(
-      /^[A-Z0-9]+$/,
-      "Passport number can only contain uppercase letters and numbers"
-    ),
-});
-
-type OnboardingFormData = z.infer<typeof onboardingSchema>;
+import { useOnboarding } from "@/features/onboarding/context";
+import {
+  CountrySelect,
+  DatePicker,
+  TextInput,
+} from "@/features/onboarding/components";
 
 function OnboardingPage() {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSubmitted, setIsSubmitted] = useState(false);
+  const {
+    state: { formData, isSubmitting, isSubmitted },
+    updateField,
+    setSubmitting,
+    setSubmitted,
+    resetForm,
+  } = useOnboarding();
 
-  const form = useForm<OnboardingFormData>({
-    resolver: zodResolver(onboardingSchema),
-    defaultValues: {
-      fullLegalName: "",
-      currentCountryOfResidence: "",
-      nationality: "",
-      dateOfBirth: "",
-      phoneNumber: "",
-      passportNumber: "",
-    },
-  });
+  // All form fields are now managed by context
 
-  // Dummy submit function
-  const onSubmit = async (data: OnboardingFormData) => {
-    console.log("Form submitted with data:", data);
-    setIsSubmitting(true);
+  // Error states
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+
+  // Basic validation function
+  const validateForm = () => {
+    const newErrors: { [key: string]: string } = {};
+
+    if (!formData.fullLegalName.trim()) {
+      newErrors.fullLegalName = "Full legal name is required";
+    } else if (formData.fullLegalName.length < 2) {
+      newErrors.fullLegalName = "Full name must be at least 2 characters";
+    } else if (!/^[a-zA-Z\s'-]+$/.test(formData.fullLegalName)) {
+      newErrors.fullLegalName =
+        "Full name can only contain letters, spaces, hyphens, and apostrophes";
+    }
+
+    if (!formData.currentCountryOfResidence.trim()) {
+      newErrors.currentCountryOfResidence =
+        "Current country of residence is required";
+    }
+
+    if (!formData.nationality.trim()) {
+      newErrors.nationality = "Nationality is required";
+    }
+
+    if (!formData.dateOfBirth.trim()) {
+      newErrors.dateOfBirth = "Date of birth is required";
+    } else if (!/^\d{2}\/\d{2}\/\d{4}$/.test(formData.dateOfBirth)) {
+      newErrors.dateOfBirth = "Date must be in DD/MM/YYYY format";
+    }
+
+    if (!formData.phoneNumber.trim()) {
+      newErrors.phoneNumber = "Phone number is required";
+    } else if (!/^\+\d{1,4}\d{6,14}$/.test(formData.phoneNumber)) {
+      newErrors.phoneNumber =
+        "Phone number must include country code (e.g., +234 for Nigeria) and be valid";
+    }
+
+    if (!formData.passportNumber.trim()) {
+      newErrors.passportNumber = "Passport number is required";
+    } else if (!/^[A-Z0-9]+$/.test(formData.passportNumber)) {
+      newErrors.passportNumber =
+        "Passport number can only contain uppercase letters and numbers";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  // Submit function
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!validateForm()) {
+      return;
+    }
+
+    const submitData = {
+      fullLegalName: formData.fullLegalName,
+      currentCountryOfResidence: formData.currentCountryOfResidence,
+      nationality: formData.nationality,
+      dateOfBirth: formData.dateOfBirth,
+      phoneNumber: formData.phoneNumber,
+      passportNumber: formData.passportNumber,
+    };
+
+    console.log("Form submitted with data:", submitData);
+    setSubmitting(true);
 
     // Simulate API call
     await new Promise((resolve) => setTimeout(resolve, 2000));
 
-    setIsSubmitting(false);
-    setIsSubmitted(true);
+    setSubmitting(false);
+    setSubmitted(true);
 
     // Simulate redirect after success
     setTimeout(() => {
@@ -126,10 +122,11 @@ function OnboardingPage() {
     }, 3000);
   };
 
-  // Dummy function to go back to editing
+  // Reset form function
   const handleEditProfile = () => {
-    setIsSubmitted(false);
-    form.reset();
+    setSubmitted(false);
+    resetForm();
+    setErrors({});
   };
 
   if (isSubmitted) {
@@ -188,6 +185,7 @@ function OnboardingPage() {
             <h1 className="scroll-m-20 text-2xl md:text-4xl lg:text-5xl font-bold tracking-tight">
               Let's Get Your Profile Started
             </h1>
+
             <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
               We need a few essential details to create your migration profile.
               This information will be used across all your visa applications,
@@ -233,187 +231,151 @@ function OnboardingPage() {
             </CardHeader>
 
             <CardContent className="space-y-6">
-              <Form {...form}>
-                <form
-                  onSubmit={form.handleSubmit(onSubmit)}
-                  className="space-y-6"
-                >
-                  {/* Full Legal Name */}
-                  <FormField
-                    control={form.control}
-                    name="fullLegalName"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-base font-medium flex items-center gap-2">
-                          <User className="w-4 h-4" />
-                          Full Legal Name
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="John Michael Smith"
-                            className="h-12 text-base"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormDescription>
-                          Enter your name exactly as it appears on your passport
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+              <form onSubmit={handleSubmit} className="space-y-6">
+                {/* Full Legal Name */}
+                <div className="space-y-2">
+                  <Label className="text-base font-medium flex items-center gap-2">
+                    <User className="w-4 h-4" />
+                    Full Legal Name
+                  </Label>
+                  <TextInput
+                    field="fullLegalName"
+                    placeholder="John Michael Smith"
                   />
+                  <p className="text-sm text-muted-foreground">
+                    Enter your name exactly as it appears on your passport
+                  </p>
+                  {errors.fullLegalName && (
+                    <p className="text-sm text-destructive">
+                      {errors.fullLegalName}
+                    </p>
+                  )}
+                </div>
 
-                  <div className="grid gap-6 md:grid-cols-2">
-                    {/* Current Country of Residence */}
-                    <FormField
-                      control={form.control}
-                      name="currentCountryOfResidence"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-base font-medium flex items-center gap-2">
-                            <Globe className="w-4 h-4" />
-                            Current Country of Residence
-                          </FormLabel>
-                          <FormControl>
-                            <Input
-                              placeholder="United Kingdom"
-                              className="h-12 text-base"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormDescription>
-                            The country where you currently live
-                          </FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
+                <div className="grid gap-6 md:grid-cols-2">
+                  {/* Current Country of Residence */}
+                  <div className="space-y-2">
+                    <Label className="text-base font-medium flex items-center gap-2">
+                      <Globe className="w-4 h-4" />
+                      Current Country of Residence
+                    </Label>
+                    <CountrySelect
+                      field="currentCountryOfResidence"
+                      placeholder="Select your current country..."
                     />
-
-                    {/* Nationality */}
-                    <FormField
-                      control={form.control}
-                      name="nationality"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-base font-medium flex items-center gap-2">
-                            <FileText className="w-4 h-4" />
-                            Nationality
-                          </FormLabel>
-                          <FormControl>
-                            <Input
-                              placeholder="Nigerian"
-                              className="h-12 text-base"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormDescription>
-                            Your citizenship/country of passport
-                          </FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
-                  <div className="grid gap-6 md:grid-cols-2">
-                    {/* Date of Birth */}
-                    <FormField
-                      control={form.control}
-                      name="dateOfBirth"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-base font-medium flex items-center gap-2">
-                            <Calendar className="w-4 h-4" />
-                            Date of Birth
-                          </FormLabel>
-                          <FormControl>
-                            <Input
-                              placeholder="25/12/1990"
-                              className="h-12 text-base"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormDescription>DD/MM/YYYY</FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    {/* Phone Number */}
-                    <FormField
-                      control={form.control}
-                      name="phoneNumber"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-base font-medium flex items-center gap-2">
-                            <Phone className="w-4 h-4" />
-                            Phone Number
-                          </FormLabel>
-                          <FormControl>
-                            <Input
-                              placeholder="+234 801 234 5678"
-                              className="h-12 text-base"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormDescription>
-                            Include country code (e.g., +234 for Nigeria)
-                          </FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
-                  {/* Passport Number */}
-                  <FormField
-                    control={form.control}
-                    name="passportNumber"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-base font-medium flex items-center gap-2">
-                          <FileText className="w-4 h-4" />
-                          Passport Number
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="A12345678"
-                            className="h-12 text-base"
-                            {...field}
-                            onChange={(e) => {
-                              // Convert to uppercase automatically
-                              field.onChange(e.target.value.toUpperCase());
-                            }}
-                          />
-                        </FormControl>
-                        <FormDescription>
-                          Your current valid passport number
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
+                    <p className="text-sm text-muted-foreground">
+                      The country where you currently live
+                    </p>
+                    {errors.currentCountryOfResidence && (
+                      <p className="text-sm text-destructive">
+                        {errors.currentCountryOfResidence}
+                      </p>
                     )}
-                  />
-
-                  {/* Submit Button */}
-                  <div className="pt-6">
-                    <Button
-                      type="submit"
-                      disabled={isSubmitting}
-                      size="lg"
-                      className="w-full h-12 text-lg bg-gradient-to-r from-primary via-primary/90 to-primary/80 hover:shadow-lg hover:scale-[1.02] transition-all duration-200"
-                    >
-                      {isSubmitting ? (
-                        <>
-                          <LoadingSpinner size="sm" className="mr-2" />
-                          Processing...
-                        </>
-                      ) : (
-                        "Complete My Profile"
-                      )}
-                    </Button>
                   </div>
-                </form>
-              </Form>
+
+                  {/* Nationality */}
+                  <div className="space-y-2">
+                    <Label className="text-base font-medium flex items-center gap-2">
+                      <FileText className="w-4 h-4" />
+                      Nationality
+                    </Label>
+                    <CountrySelect
+                      field="nationality"
+                      placeholder="Select your nationality..."
+                    />
+                    <p className="text-sm text-muted-foreground">
+                      Your citizenship/country of passport
+                    </p>
+                    {errors.nationality && (
+                      <p className="text-sm text-destructive">
+                        {errors.nationality}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="grid gap-6 md:grid-cols-2">
+                  {/* Date of Birth */}
+                  <div className="space-y-2">
+                    <Label className="text-base font-medium flex items-center gap-2">
+                      <Calendar className="w-4 h-4" />
+                      Date of Birth
+                    </Label>
+                    <DatePicker
+                      field="dateOfBirth"
+                      placeholder="Select your date of birth..."
+                    />
+                    <p className="text-sm text-muted-foreground">
+                      Select from calendar
+                    </p>
+                    {errors.dateOfBirth && (
+                      <p className="text-sm text-destructive">
+                        {errors.dateOfBirth}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Phone Number */}
+                  <div className="space-y-2">
+                    <Label className="text-base font-medium flex items-center gap-2">
+                      <Phone className="w-4 h-4" />
+                      Phone Number
+                    </Label>
+                    <TextInput
+                      field="phoneNumber"
+                      placeholder="+234 801 234 5678"
+                    />
+                    <p className="text-sm text-muted-foreground">
+                      Include country code (e.g., +234 for Nigeria)
+                    </p>
+                    {errors.phoneNumber && (
+                      <p className="text-sm text-destructive">
+                        {errors.phoneNumber}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Passport Number */}
+                <div className="space-y-2">
+                  <Label className="text-base font-medium flex items-center gap-2">
+                    <FileText className="w-4 h-4" />
+                    Passport Number
+                  </Label>
+                  <TextInput
+                    field="passportNumber"
+                    placeholder="A12345678"
+                    transform="uppercase"
+                  />
+                  <p className="text-sm text-muted-foreground">
+                    Your current valid passport number
+                  </p>
+                  {errors.passportNumber && (
+                    <p className="text-sm text-destructive">
+                      {errors.passportNumber}
+                    </p>
+                  )}
+                </div>
+
+                {/* Submit Button */}
+                <div className="pt-6">
+                  <Button
+                    type="submit"
+                    disabled={isSubmitting}
+                    size="lg"
+                    className="w-full h-12 text-lg bg-gradient-to-r from-primary via-primary/90 to-primary/80 hover:shadow-lg hover:scale-[1.02] transition-all duration-200"
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <LoadingSpinner size="sm" className="mr-2" />
+                        Processing...
+                      </>
+                    ) : (
+                      "Complete My Profile"
+                    )}
+                  </Button>
+                </div>
+              </form>
             </CardContent>
           </Card>
         </div>

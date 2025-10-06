@@ -48,15 +48,20 @@
   --shadow-color: hsl(240 3.8% 46.1%);
   --shadow-2xs: 0px 4px 10px 0px hsl(240 3.8% 46.1% / 0);
   --shadow-xs: 0px 4px 10px 0px hsl(240 3.8% 46.1% / 0);
-  --shadow-sm: 0px 4px 10px 0px hsl(240 3.8% 46.1% / 0),
+  --shadow-sm:
+    0px 4px 10px 0px hsl(240 3.8% 46.1% / 0),
     0px 1px 2px -1px hsl(240 3.8% 46.1% / 0);
-  --shadow: 0px 4px 10px 0px hsl(240 3.8% 46.1% / 0),
+  --shadow:
+    0px 4px 10px 0px hsl(240 3.8% 46.1% / 0),
     0px 1px 2px -1px hsl(240 3.8% 46.1% / 0);
-  --shadow-md: 0px 4px 10px 0px hsl(240 3.8% 46.1% / 0),
+  --shadow-md:
+    0px 4px 10px 0px hsl(240 3.8% 46.1% / 0),
     0px 2px 4px -1px hsl(240 3.8% 46.1% / 0);
-  --shadow-lg: 0px 4px 10px 0px hsl(240 3.8% 46.1% / 0),
+  --shadow-lg:
+    0px 4px 10px 0px hsl(240 3.8% 46.1% / 0),
     0px 4px 6px -1px hsl(240 3.8% 46.1% / 0);
-  --shadow-xl: 0px 4px 10px 0px hsl(240 3.8% 46.1% / 0),
+  --shadow-xl:
+    0px 4px 10px 0px hsl(240 3.8% 46.1% / 0),
     0px 8px 10px -1px hsl(240 3.8% 46.1% / 0);
   --shadow-2xl: 0px 4px 10px 0px hsl(240 3.8% 46.1% / 0);
   --tracking-normal: 0em;
@@ -108,15 +113,20 @@
   --shadow-color: hsl(240 3.8% 46.1%);
   --shadow-2xs: 0px 4px 10px 0px hsl(240 3.8% 46.1% / 0);
   --shadow-xs: 0px 4px 10px 0px hsl(240 3.8% 46.1% / 0);
-  --shadow-sm: 0px 4px 10px 0px hsl(240 3.8% 46.1% / 0),
+  --shadow-sm:
+    0px 4px 10px 0px hsl(240 3.8% 46.1% / 0),
     0px 1px 2px -1px hsl(240 3.8% 46.1% / 0);
-  --shadow: 0px 4px 10px 0px hsl(240 3.8% 46.1% / 0),
+  --shadow:
+    0px 4px 10px 0px hsl(240 3.8% 46.1% / 0),
     0px 1px 2px -1px hsl(240 3.8% 46.1% / 0);
-  --shadow-md: 0px 4px 10px 0px hsl(240 3.8% 46.1% / 0),
+  --shadow-md:
+    0px 4px 10px 0px hsl(240 3.8% 46.1% / 0),
     0px 2px 4px -1px hsl(240 3.8% 46.1% / 0);
-  --shadow-lg: 0px 4px 10px 0px hsl(240 3.8% 46.1% / 0),
+  --shadow-lg:
+    0px 4px 10px 0px hsl(240 3.8% 46.1% / 0),
     0px 4px 6px -1px hsl(240 3.8% 46.1% / 0);
-  --shadow-xl: 0px 4px 10px 0px hsl(240 3.8% 46.1% / 0),
+  --shadow-xl:
+    0px 4px 10px 0px hsl(240 3.8% 46.1% / 0),
     0px 8px 10px -1px hsl(240 3.8% 46.1% / 0);
   --shadow-2xl: 0px 4px 10px 0px hsl(240 3.8% 46.1% / 0);
 }
@@ -176,6 +186,13 @@
 
 body {
   letter-spacing: var(--tracking-normal);
+}
+
+/* Emoji font support */
+.font-emoji {
+  font-family:
+    "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Android Emoji",
+    "EmojiSymbols", "EmojiOne Mozilla", "Twemoji Mozilla", sans-serif;
 }
 
 /* @layer base {
