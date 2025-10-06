@@ -18,7 +18,8 @@ interface VerifyEmailProps {
   email?: string;
 }
 
-const baseURL = process.env.SITE_URL as string;
+const baseURL =
+  process.env.NODE_ENV === "production" ? `${process.env.SITE_URL}` : "";
 
 // Email Logo Component
 const EmailLogo = () => {
@@ -27,7 +28,7 @@ const EmailLogo = () => {
       <Link href={baseURL} style={linkStyle}>
         <Row>
           <Img
-            src={`/static/I&V-no-bg.png`}
+            src={`${baseURL}/static/I&V-no-bg.png`}
             alt="Insights and Vignettes Logo"
             width={160}
           />

@@ -142,7 +142,7 @@ export default function Home() {
               size="lg"
               asChild
             >
-              <Link href="/signup">
+              <Link href="/sign-up">
                 Start Your Application
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Link>

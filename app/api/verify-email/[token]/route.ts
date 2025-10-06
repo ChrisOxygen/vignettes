@@ -3,7 +3,6 @@ import { PrismaClient } from "@prisma/client";
 import { createClient } from "@/utils/supabase/server";
 import { createClient as createAdminClient } from "@supabase/supabase-js";
 import { sendWelcomeEmail } from "@/features/auth/actions/email.actions";
-import { email } from "zod";
 
 const prisma = new PrismaClient();
 

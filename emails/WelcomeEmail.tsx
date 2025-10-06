@@ -17,7 +17,8 @@ interface WelcomeEmailProps {
   founderName?: string;
 }
 
-const baseURL = process.env.SITE_URL as string;
+const baseURL =
+  process.env.NODE_ENV === "production" ? `${process.env.SITE_URL}` : "";
 
 // Email Logo Component
 const EmailLogo = () => {
