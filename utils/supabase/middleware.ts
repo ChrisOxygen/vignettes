@@ -17,7 +17,7 @@ const ROUTE_CONFIG = {
   auth: ["/sign-in", "/sign-up", "/reset-password"],
   admin: ["/admin"],
   user: ["/app"],
-  onboarding: ["/app/onboarding"],
+  onboarding: ["/onboarding"],
   verification: ["/welcome-and-verify"],
   public: ["/", "/about", "/contact", "/pricing"], // Explicit public routes
   redirects: {
@@ -218,7 +218,7 @@ function protectRoute(
         // User hasn't completed onboarding - redirect to onboarding unless already there
         if (routeType !== "onboarding") {
           return createRedirectWithCookies(
-            "/app/onboarding",
+            "/onboarding",
             request,
             supabaseResponse
           );
