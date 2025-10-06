@@ -6,7 +6,6 @@ import { WelcomeDialog } from "@/features/onboarding/components";
 
 function UserDashboard() {
   const searchParams = useSearchParams();
-  const router = useRouter();
   const [showWelcome, setShowWelcome] = useState(false);
 
   useEffect(() => {

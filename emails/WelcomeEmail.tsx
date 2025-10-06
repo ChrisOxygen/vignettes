@@ -1,374 +1,244 @@
-// import {
-//   Body,
-//   Button,
-//   Container,
-//   Head,
-//   Hr,
-//   Html,
-//   Img,
-//   Preview,
-//   Section,
-//   Text,
-//   Row,
-//   Column,
-// } from "@react-email/components";
-// import { Link as EmailLink } from "@react-email/components";
+import {
+  Body,
+  Container,
+  Head,
+  Hr,
+  Html,
+  Img,
+  Link,
+  Preview,
+  Section,
+  Text,
+  Row,
+} from "@react-email/components";
 
-// interface WelcomeEmailProps {
-//   name?: string;
-// }
+interface WelcomeEmailProps {
+  name?: string;
+  founderName?: string;
+}
 
-// const baseURL = process.env.BASE_URL as string;
+const baseURL = process.env.SITE_URL as string;
 
-// // Create a wrapper component to fix type issues
-// interface SafeLinkProps extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
-//   href: string;
-//   style?: React.CSSProperties;
-//   children?: React.ReactNode;
-// }
+// Email Logo Component
+const EmailLogo = () => {
+  return (
+    <div style={{ textAlign: "center", margin: "0 auto 20px" }}>
+      <Link href={baseURL} style={linkStyle}>
+        <Row>
+          <Img
+            src={`/static/I&V-no-bg.png`}
+            alt="Insights and Vignettes Logo"
+            width={160}
+          />
+        </Row>
+      </Link>
+    </div>
+  );
+};
 
-// const SafeLink = (props: SafeLinkProps) => <EmailLink {...props} />;
+export default function WelcomeEmail({
+  name = "Chris",
+  founderName = "Christopher Oxygen",
+}: WelcomeEmailProps) {
+  return (
+    <Html>
+      <Head>
+        <style>{`
+          @media only screen and (max-width: 600px) {
+            .container {
+              width: 100% !important;
+              margin: 0 auto !important;
+            }
+            .content {
+              padding: 0 16px !important;
+            }
+            .header {
+              font-size: 26px !important;
+            }
+            .greeting {
+              font-size: 20px !important;
+            }
+            .paragraph {
+              font-size: 15px !important;
+            }
+          }
+        `}</style>
+      </Head>
+      <Preview>
+        Welcome to Vignettes - Your migration journey starts here!
+      </Preview>
+      <Body style={main}>
+        <Container style={container} className="container">
+          <Section style={box} className="content">
+            <EmailLogo />
 
-// // Email Logo Component
-// const EmailLogo = () => {
-//   return (
-//     <div style={{ textAlign: "center", margin: "0 auto 20px" }}>
-//       <SafeLink href="https://propreso.com" style={linkStyle}>
-//         <Row>
-//           <Column style={logoContainerStyle}>
-//             <div style={iconContainerStyle}>
-//               <Img
-//                 src={`${baseURL}/static/site-icon-white.svg`}
-//                 alt="Propreso Logo"
-//                 width="14"
-//                 height="19"
-//                 style={iconStyle}
-//               />
-//             </div>
-//           </Column>
-//           <Column style={textContainerStyle}>
-//             <Text style={logoTextStyle}>Propreso</Text>
-//           </Column>
-//         </Row>
-//       </SafeLink>
-//     </div>
-//   );
-// };
+            <Text style={greeting} className="greeting">
+              Welcome to Vignettes 🎉
+            </Text>
 
-// export default function WelcomeEmail({ name = "there" }: WelcomeEmailProps) {
-//   return (
-//     <Html>
-//       <Head>
-//         <style>{`
-//           @media only screen and (max-width: 600px) {
-//             .container {
-//               width: 100% !important;
-//               margin: 0 auto !important;
-//             }
-//             .content {
-//               padding: 0 16px !important;
-//             }
-//             .header {
-//               font-size: 26px !important;
-//               line-height: 1.3 !important;
-//             }
-//             .greeting {
-//               font-size: 20px !important;
-//               margin: 25px 0 12px !important;
-//             }
-//             .paragraph {
-//               font-size: 15px !important;
-//             }
-//             .list-item {
-//               font-size: 15px !important;
-//             }
-//             .founder-box {
-//               padding: 20px 15px !important;
-//             }
-//             .founder-message {
-//               font-size: 15px !important;
-//             }
-//             .button {
-//               padding: 10px !important;
-//             }
-//           }
-//         `}</style>
-//       </Head>
-//       <Preview>
-//         Welcome to Propreso - Start creating winning proposals today!
-//       </Preview>
-//       <Body style={main}>
-//         <Container style={container} className="container">
-//           <Section style={box} className="content">
-//             <EmailLogo />
+            <Hr style={hr} />
 
-//             <Text style={greeting} className="greeting">
-//               Hi {name}!
-//             </Text>
-//             <Text style={header} className="header">
-//               Welcome to Propreso
-//             </Text>
+            <Text style={paragraph} className="paragraph">
+              Hi {name},
+            </Text>
 
-//             <Hr style={hr} />
+            <Text style={paragraph} className="paragraph">
+              I'm {founderName}, founder of Vignettes, and I wanted to
+              personally welcome you to our platform! Your email has been
+              verified and your account is now active.
+            </Text>
 
-//             <Text style={paragraph} className="paragraph">
-//               We&apos;re excited to have you join our community of freelancers
-//               who are transforming how they win new clients.
-//             </Text>
+            <Text style={paragraph} className="paragraph">
+              I created Vignettes because I believe navigating visa applications
+              and immigration processes shouldn't be overwhelming. Whether
+              you're a student, professional, or family member looking to
+              migrate, we're here to simplify your journey every step of the
+              way.
+            </Text>
 
-//             <Text style={paragraph} className="paragraph">
-//               <strong>With Propreso, you can:</strong>
-//             </Text>
+            <Text style={paragraph} className="paragraph">
+              You now have access to our complete suite of migration tools,
+              expert guidance, and secure document management. Ready to get
+              started?
+            </Text>
 
-//             <Text style={listItem} className="list-item">
-//               • Generate customized proposals using AI technology
-//             </Text>
-//             <Text style={listItem} className="list-item">
-//               • Showcase your professional experience effectively
-//             </Text>
-//             <Text style={listItem} className="list-item">
-//               • Save hours on proposal writing and win more clients
-//             </Text>
-//             <Text style={listItem} className="list-item">
-//               • Manage all your client communications in one place
-//             </Text>
+            <Section style={buttonSection}>
+              <Link href={`${baseURL}/app`} style={buttonStyle}>
+                Visit Your Dashboard
+              </Link>
+            </Section>
 
-//             <Text style={paragraph} className="paragraph">
-//               <strong>Your first step</strong> is to create a freelancer profile
-//               that will help us generate tailored proposals specific to your
-//               skills and experience.
-//             </Text>
+            <Text style={paragraph} className="paragraph">
+              If you have any questions along the way, don't hesitate to reach
+              out. We're here to support you throughout your migration journey.
+            </Text>
 
-//             <Button
-//               style={button}
-//               href="https://propreso.com/profile/create"
-//               className="button"
-//             >
-//               Create Your Profile
-//             </Button>
+            <Text style={signature}>
+              Best regards,
+              <br />
+              {founderName}
+              <br />
+              <span style={founderTitle}>Founder, Vignettes</span>
+            </Text>
 
-//             <Hr style={hr} />
+            <Hr style={hr} />
 
-//             <Section style={founderBox} className="founder-box">
-//               <Img
-//                 src={`${baseURL}/static/christopher-okafor.jpg`}
-//                 width="120px"
-//                 height="120px"
-//                 alt="Christopher Okafor"
-//                 style={{ borderRadius: "200px", margin: "0 auto 15px" }}
-//               />
+            <Text style={footer}>© 2025 Vignettes. All rights reserved.</Text>
+            <Text style={footer}>
+              <Link href={`${baseURL}/privacy`} style={anchor}>
+                Privacy Policy
+              </Link>{" "}
+              •{" "}
+              <Link href={`${baseURL}/terms`} style={anchor}>
+                Terms of Service
+              </Link>
+            </Text>
+          </Section>
+        </Container>
+      </Body>
+    </Html>
+  );
+}
 
-//               <Text style={founderMessage} className="founder-message">
-//                 &ldquo;I created Propreso because I saw too many talented
-//                 freelancers losing opportunities due to poor proposals. Our
-//                 mission is to help you showcase your value and win the clients
-//                 you deserve. I&apos;m personally committed to making this
-//                 platform work for you.
-//               </Text>
+const main = {
+  backgroundColor: "#FFF8F4",
+  fontFamily:
+    "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+};
 
-//               <Text style={founderMessage} className="founder-message">
-//                 I&apos;d love to hear about your experience. Feel free to reach
-//                 out directly with any feedback or questions.&rdquo;
-//               </Text>
+const container = {
+  backgroundColor: "#ffffff",
+  margin: "0 auto",
+  padding: "40px 20px",
+  marginBottom: "64px",
+  borderRadius: "12px",
+  maxWidth: "600px",
+  boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
+};
 
-//               <Text style={founderSignature}>Christopher Okafor</Text>
-//               <Text style={founderTitle}>Founder, Propreso</Text>
-//             </Section>
+const box = {
+  padding: "0 32px",
+};
 
-//             <Hr style={hr} />
+const greeting = {
+  fontFamily: "'Inter', sans-serif",
+  color: "#1F2937",
+  fontSize: "28px",
+  fontWeight: "700",
+  textAlign: "center" as const,
+  margin: "32px 0 24px",
+  letterSpacing: "-0.025em",
+};
 
-//             <Text style={paragraph} className="paragraph">
-//               If you need any assistance, our support team is always here to
-//               help. Just reply to this email or visit our{" "}
-//               <SafeLink style={anchor} href="https://propreso.com/support">
-//                 support center
-//               </SafeLink>
-//               .
-//             </Text>
+const hr = {
+  borderColor: "#F3F4F6",
+  margin: "32px 0",
+  border: "none",
+  borderTop: "1px solid #F3F4F6",
+};
 
-//             <Text style={paragraph} className="paragraph">
-//               — The Propreso Team
-//             </Text>
+const paragraph = {
+  color: "#4B5563",
+  fontSize: "16px",
+  lineHeight: "1.6",
+  textAlign: "left" as const,
+  fontFamily: "'Inter', sans-serif",
+  margin: "16px 0",
+};
 
-//             <Hr style={hr} />
+const buttonSection = {
+  textAlign: "center" as const,
+  margin: "40px 0",
+};
 
-//             <Text style={footer}>© 2025 Propreso. All rights reserved.</Text>
-//             <Text style={footer}>
-//               You&apos;re receiving this email because you recently created an
-//               account on Propreso.
-//             </Text>
-//           </Section>
-//         </Container>
-//       </Body>
-//     </Html>
-//   );
-// }
+const buttonStyle = {
+  backgroundColor: "#EE3636",
+  borderRadius: "8px",
+  color: "#ffffff",
+  fontSize: "16px",
+  fontWeight: "600",
+  textDecoration: "none",
+  textAlign: "center" as const,
+  display: "inline-block",
+  padding: "16px 32px",
+  fontFamily: "'Inter', sans-serif",
+  border: "none",
+  cursor: "pointer",
+};
 
-// const main = {
-//   backgroundColor: "#F8E5DB",
-//   fontFamily:
-//     "'Lato', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-// };
+const signature = {
+  backgroundColor: "#FAFAFA",
+  padding: "32px",
+  borderRadius: "12px",
+  margin: "40px 0",
+  border: "1px solid #F3F4F6",
+};
 
-// const container = {
-//   backgroundColor: "#ffffff",
-//   margin: "0 auto",
-//   padding: "20px 0 48px",
-//   marginBottom: "64px",
-//   borderRadius: "8px",
-//   maxWidth: "600px",
-// };
+const founderTitle = {
+  color: "#6B7280",
+  fontSize: "14px",
+  textAlign: "center" as const,
+  fontFamily: "'Inter', sans-serif",
+  margin: "8px 0 0 0",
+  fontWeight: "500",
+};
 
-// const box = {
-//   padding: "0 48px",
-// };
+const footer = {
+  color: "#9CA3AF",
+  fontSize: "14px",
+  lineHeight: "1.5",
+  textAlign: "center" as const,
+  margin: "32px 0 16px 0",
+  fontFamily: "'Inter', sans-serif",
+};
 
-// const greeting = {
-//   fontFamily: "'Poppins', sans-serif",
-//   color: "#2C2C2C",
-//   fontSize: "24px",
-//   fontWeight: "600",
-//   textAlign: "center" as const,
-//   margin: "30px 0 16px", // Increased spacing between greeting and header
-//   letterSpacing: "-0.4px",
-// };
+const anchor = {
+  color: "#EE3636",
+  textDecoration: "underline",
+};
 
-// const header = {
-//   fontFamily: "'Poppins', sans-serif",
-//   color: "#2C2C2C",
-//   fontSize: "30px",
-//   fontWeight: "600",
-//   textAlign: "center" as const,
-//   margin: "0 0 30px", // No top margin since greeting has bottom margin
-//   letterSpacing: "-0.4px",
-//   lineHeight: "1.3", // Added line height for better readability
-// };
-
-// const hr = {
-//   borderColor: "#F8E5DB",
-//   margin: "20px 0",
-// };
-
-// const paragraph = {
-//   color: "#404040",
-//   fontSize: "16px",
-//   lineHeight: "24px",
-//   textAlign: "left" as const,
-//   fontFamily: "'Lato', sans-serif",
-//   margin: "16px 0",
-// };
-
-// const listItem = {
-//   color: "#404040",
-//   fontSize: "16px",
-//   lineHeight: "24px",
-//   textAlign: "left" as const,
-//   fontFamily: "'Lato', sans-serif",
-//   margin: "8px 0 8px 10px",
-// };
-
-// const anchor = {
-//   color: "#BF4008",
-//   textDecoration: "underline",
-// };
-
-// const button = {
-//   backgroundColor: "#BF4008",
-//   borderRadius: "5px",
-//   color: "#fff",
-//   fontSize: "16px",
-//   fontWeight: "bold",
-//   textDecoration: "none",
-//   textAlign: "center" as const,
-//   display: "block",
-//   padding: "12px",
-//   margin: "30px 0",
-//   fontFamily: "'Lato', sans-serif",
-// };
-
-// const founderBox = {
-//   backgroundColor: "#FDF9F6",
-//   padding: "24px",
-//   borderRadius: "8px",
-//   margin: "32px 0",
-// };
-
-// const founderMessage = {
-//   color: "#404040",
-//   fontSize: "16px",
-//   lineHeight: "26px",
-//   textAlign: "center" as const,
-//   fontFamily: "'Lato', sans-serif",
-//   fontStyle: "italic",
-//   margin: "8px 0",
-// };
-
-// const founderSignature = {
-//   color: "#2C2C2C",
-//   fontSize: "18px",
-//   fontWeight: "600",
-//   textAlign: "center" as const,
-//   fontFamily: "'Poppins', sans-serif",
-//   margin: "16px 0 4px",
-// };
-
-// const founderTitle = {
-//   color: "#404040",
-//   fontSize: "14px",
-//   textAlign: "center" as const,
-//   fontFamily: "'Lato', sans-serif",
-//   margin: "0",
-// };
-
-// const footer = {
-//   color: "#8898aa",
-//   fontSize: "12px",
-//   lineHeight: "16px",
-//   textAlign: "center" as const,
-//   margin: "8px 0",
-// };
-
-// // Logo component styles
-// const linkStyle = {
-//   textDecoration: "none",
-//   display: "inline-flex",
-//   alignItems: "center",
-// };
-
-// const logoContainerStyle = {
-//   display: "flex",
-//   alignItems: "center",
-//   justifyContent: "center",
-//   paddingRight: "12px",
-// };
-
-// const iconContainerStyle: React.CSSProperties = {
-//   backgroundColor: "#BF4008",
-//   borderRadius: "50%",
-//   width: "35px",
-//   height: "35px",
-//   display: "flex",
-//   alignItems: "center",
-//   justifyContent: "center",
-//   position: "relative",
-// };
-
-// const iconStyle: React.CSSProperties = {
-//   position: "absolute",
-//   top: "50%",
-//   left: "50%",
-//   transform: "translate(-50%, -50%)",
-// };
-
-// const textContainerStyle = {
-//   display: "flex",
-//   alignItems: "center",
-// };
-
-// const logoTextStyle = {
-//   color: "#000000",
-//   fontSize: "24px",
-//   fontWeight: "600",
-//   fontFamily: "'IBM Plex Mono', monospace",
-//   margin: "0",
-// };
+const linkStyle = {
+  textDecoration: "none",
+  display: "inline-flex",
+  alignItems: "center",
+};
