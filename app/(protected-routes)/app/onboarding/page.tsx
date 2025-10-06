@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import {
   Card,
   CardContent,
@@ -31,102 +31,54 @@ import {
 
 function OnboardingPage() {
   const {
-    state: { formData, isSubmitting, isSubmitted },
-    updateField,
+    state: { formData, isSubmitting, isSubmitted, errors },
     setSubmitting,
     setSubmitted,
     resetForm,
+    validateFormData,
+    clearFormDataFromStorage,
+    hasTouchedFields,
   } = useOnboarding();
-
-  // All form fields are now managed by context
-
-  // Error states
-  const [errors, setErrors] = useState<{ [key: string]: string }>({});
-
-  // Basic validation function
-  const validateForm = () => {
-    const newErrors: { [key: string]: string } = {};
-
-    if (!formData.fullLegalName.trim()) {
-      newErrors.fullLegalName = "Full legal name is required";
-    } else if (formData.fullLegalName.length < 2) {
-      newErrors.fullLegalName = "Full name must be at least 2 characters";
-    } else if (!/^[a-zA-Z\s'-]+$/.test(formData.fullLegalName)) {
-      newErrors.fullLegalName =
-        "Full name can only contain letters, spaces, hyphens, and apostrophes";
-    }
-
-    if (!formData.currentCountryOfResidence.trim()) {
-      newErrors.currentCountryOfResidence =
-        "Current country of residence is required";
-    }
-
-    if (!formData.nationality.trim()) {
-      newErrors.nationality = "Nationality is required";
-    }
-
-    if (!formData.dateOfBirth.trim()) {
-      newErrors.dateOfBirth = "Date of birth is required";
-    } else if (!/^\d{2}\/\d{2}\/\d{4}$/.test(formData.dateOfBirth)) {
-      newErrors.dateOfBirth = "Date must be in DD/MM/YYYY format";
-    }
-
-    if (!formData.phoneNumber.trim()) {
-      newErrors.phoneNumber = "Phone number is required";
-    } else if (!/^\+\d{1,4}\d{6,14}$/.test(formData.phoneNumber)) {
-      newErrors.phoneNumber =
-        "Phone number must include country code (e.g., +234 for Nigeria) and be valid";
-    }
-
-    if (!formData.passportNumber.trim()) {
-      newErrors.passportNumber = "Passport number is required";
-    } else if (!/^[A-Z0-9]+$/.test(formData.passportNumber)) {
-      newErrors.passportNumber =
-        "Passport number can only contain uppercase letters and numbers";
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
 
   // Submit function
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!validateForm()) {
+    // Use Zod validator from context
+    const validationResult = validateFormData();
+    if (!validationResult.success) {
+      console.log("Validation failed:", validationResult.errors);
       return;
     }
 
-    const submitData = {
-      fullLegalName: formData.fullLegalName,
-      currentCountryOfResidence: formData.currentCountryOfResidence,
-      nationality: formData.nationality,
-      dateOfBirth: formData.dateOfBirth,
-      phoneNumber: formData.phoneNumber,
-      passportNumber: formData.passportNumber,
-    };
-
-    console.log("Form submitted with data:", submitData);
+    console.log("Form submitted with data:", validationResult.data);
     setSubmitting(true);
 
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    try {
+      // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 2000));
 
-    setSubmitting(false);
-    setSubmitted(true);
+      setSubmitting(false);
+      setSubmitted(true);
 
-    // Simulate redirect after success
-    setTimeout(() => {
-      console.log("Redirecting to dashboard...");
-      // router.push("/app");
-    }, 3000);
+      // Clear stored form data after successful submission
+      clearFormDataFromStorage();
+
+      // Simulate redirect after success
+      setTimeout(() => {
+        console.log("Redirecting to dashboard...");
+        // router.push("/app");
+      }, 3000);
+    } catch (error) {
+      console.error("Submission failed:", error);
+      setSubmitting(false);
+    }
   };
 
   // Reset form function
   const handleEditProfile = () => {
     setSubmitted(false);
     resetForm();
-    setErrors({});
   };
 
   if (isSubmitted) {
@@ -361,17 +313,19 @@ function OnboardingPage() {
                 <div className="pt-6">
                   <Button
                     type="submit"
-                    disabled={isSubmitting}
+                    disabled={isSubmitting || !hasTouchedFields}
                     size="lg"
-                    className="w-full h-12 text-lg bg-gradient-to-r from-primary via-primary/90 to-primary/80 hover:shadow-lg hover:scale-[1.02] transition-all duration-200"
+                    className="w-full h-12 text-lg bg-gradient-to-r from-primary via-primary/90 to-primary/80 hover:shadow-lg hover:scale-[1.02] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {isSubmitting ? (
                       <>
                         <LoadingSpinner size="sm" className="mr-2" />
                         Processing...
                       </>
+                    ) : !hasTouchedFields ? (
+                      "Fill in your details to continue"
                     ) : (
-                      "Complete My Profile"
+                      "Create My Profile"
                     )}
                   </Button>
                 </div>

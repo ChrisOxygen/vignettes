@@ -8,7 +8,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/shared/components/ui/select";
-import { useOnboarding, CountryCode } from "../../context";
+import { useOnboarding } from "../../context";
+import type { CountryCode } from "../../types";
 
 interface CountrySelectProps {
   field: "currentCountryOfResidence" | "nationality";
