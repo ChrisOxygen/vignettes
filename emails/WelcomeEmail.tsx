@@ -27,7 +27,7 @@ const EmailLogo = () => {
       <Link href={baseURL} style={linkStyle}>
         <Row>
           <Img
-            src={`/static/I&V-no-bg.png`}
+            src={`${baseURL}/static/I&V-no-bg.png`}
             alt="Insights and Vignettes Logo"
             width={160}
           />
