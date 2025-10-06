@@ -1,39 +1,7 @@
 import { z } from "zod";
 import { COUNTRIES } from "../constants";
 import type { CountryCode, OnboardingFormData } from "../types";
-
-// Helper function to check if date string is in DD/MM/YYYY format
-const isValidDateFormat = (dateString: string): boolean => {
-  const dateRegex = /^\d{2}\/\d{2}\/\d{4}$/;
-  return dateRegex.test(dateString);
-};
-
-// Helper function to validate date is not in the future and user is at least 16 years old
-const isValidDateOfBirth = (dateString: string): boolean => {
-  if (!isValidDateFormat(dateString)) return false;
-
-  const [day, month, year] = dateString.split("/").map(Number);
-  const birthDate = new Date(year, month - 1, day);
-  const today = new Date();
-
-  // Check if date is valid
-  if (
-    birthDate.getDate() !== day ||
-    birthDate.getMonth() !== month - 1 ||
-    birthDate.getFullYear() !== year
-  ) {
-    return false;
-  }
-
-  // Check if date is not in the future
-  if (birthDate > today) return false;
-
-  // Check if user is at least 16 years old
-  const sixteenYearsAgo = new Date();
-  sixteenYearsAgo.setFullYear(today.getFullYear() - 16);
-
-  return birthDate <= sixteenYearsAgo;
-};
+import { isValidDateFormat, isValidDateOfBirth } from "../utils/dateUtils";
 
 // Extract valid country codes from COUNTRIES constant
 const validCountryCodes = COUNTRIES.map((country) => country.value) as [
