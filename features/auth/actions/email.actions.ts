@@ -1,41 +1,43 @@
 "use server";
 
 import VerifyEmail from "@/emails/VerifyEmail";
+import WelcomeEmail from "@/emails/WelcomeEmail";
 import { Resend } from "resend";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-// export async function sendWelcomeEmail(name: string, email: string) {
-//   try {
-//     // Parse the request body to get the user's name
+export async function sendWelcomeEmail(name: string, email: string) {
+  try {
+    // Parse the request body to get the user's name
 
-//     // Validate the required fields
-//     if (!name || !email) {
-//       throw new Error("Name and email are required");
-//     }
+    // Validate the required fields
+    if (!name || !email) {
+      throw new Error("Name and email are required");
+    }
 
-//     // Send the welcome email
-//     await resend.emails.send({
-//       from: "chris@propreso.com",
-//       to: email,
-//       subject: "Welcome to Propreso!",
-//       react: WelcomeEmail({
-//         name,
-//       }),
-//     });
+    // Send the welcome email
+    await resend.emails.send({
+      from: "rashford@insights4globaltalents.com",
+      to: email,
+      subject: "Welcome to Insights 4 Global Talents!",
+      react: WelcomeEmail({
+        name,
+        founderName: "Bennet Rashford",
+      }),
+    });
 
-//     return {
-//       ok: true,
-//       message: "Email sent successfully",
-//     };
-//   } catch (error) {
-//     console.error("Error sending welcome email:", error);
-//     return {
-//       ok: false,
-//       message: "Failed to send welcome email",
-//     };
-//   }
-// }
+    return {
+      ok: true,
+      message: "Email sent successfully",
+    };
+  } catch (error) {
+    console.error("Error sending welcome email:", error);
+    return {
+      ok: false,
+      message: "Failed to send welcome email",
+    };
+  }
+}
 
 export async function sendVerificationEmail(
   email: string,

@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { createClient } from "@/utils/supabase/server";
 import { createClient as createAdminClient } from "@supabase/supabase-js";
+import { sendWelcomeEmail } from "@/features/auth/actions/email.actions";
+import { email } from "zod";
 
 const prisma = new PrismaClient();
 
@@ -107,6 +109,11 @@ export async function GET(
         await tx.emailVerificationToken.delete({
           where: { token },
         });
+
+        await sendWelcomeEmail(
+          verificationToken.user.name,
+          verificationToken.user.email
+        );
 
         return {
           success: true,
