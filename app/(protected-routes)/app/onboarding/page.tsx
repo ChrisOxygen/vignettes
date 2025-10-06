@@ -28,20 +28,34 @@ import {
   DatePicker,
   TextInput,
 } from "@/features/onboarding/components";
+import { useCreateBasicApplicantData } from "@/features/onboarding/hooks";
+
+import { useRouter } from "next/navigation";
 
 function OnboardingPage() {
+  const router = useRouter();
   const {
-    state: { formData, isSubmitting, isSubmitted, errors },
-    setSubmitting,
-    setSubmitted,
+    state: { formData, errors },
     resetForm,
     validateFormData,
     clearFormDataFromStorage,
     hasTouchedFields,
   } = useOnboarding();
 
+  const { mutate: createProfile, isPending: isCreatingProfile } =
+    useCreateBasicApplicantData({
+      onSuccess: (data) => {
+        console.log("Profile created successfully:", data);
+        clearFormDataFromStorage();
+        router.push("/app?newUser=true");
+      },
+      onError: (error) => {
+        console.error("Error creating profile:", error);
+      },
+    });
+
   // Submit function
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
     // Use Zod validator from context
@@ -52,81 +66,13 @@ function OnboardingPage() {
     }
 
     console.log("Form submitted with data:", validationResult.data);
-    setSubmitting(true);
-
-    try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-
-      setSubmitting(false);
-      setSubmitted(true);
-
-      // Clear stored form data after successful submission
-      clearFormDataFromStorage();
-
-      // Simulate redirect after success
-      setTimeout(() => {
-        console.log("Redirecting to dashboard...");
-        // router.push("/app");
-      }, 3000);
-    } catch (error) {
-      console.error("Submission failed:", error);
-      setSubmitting(false);
-    }
+    createProfile(validationResult.data!);
   };
 
   // Reset form function
   const handleEditProfile = () => {
-    setSubmitted(false);
     resetForm();
   };
-
-  if (isSubmitted) {
-    return (
-      <main className="min-h-screen bg-gradient-to-b from-background to-muted/20 p-4 sm:p-6 md:p-8">
-        <div className="max-w-2xl mx-auto">
-          <Card className="border-green-200 bg-green-50/50 dark:border-green-800 dark:bg-green-900/20">
-            <CardContent className="pt-6">
-              <div className="text-center space-y-4">
-                <div className="w-16 h-16 bg-green-100 dark:bg-green-900/40 rounded-full flex items-center justify-center mx-auto">
-                  <CheckCircle className="w-8 h-8 text-green-600 dark:text-green-400" />
-                </div>
-
-                <div className="space-y-2">
-                  <h1 className="text-2xl md:text-3xl font-bold text-green-800 dark:text-green-200">
-                    ✓ Profile Created Successfully!
-                  </h1>
-                  <p className="text-green-700 dark:text-green-300 leading-relaxed">
-                    You're all set. You can now explore visa options and begin
-                    your application process. You can update these details
-                    anytime from your profile settings.
-                  </p>
-                </div>
-
-                <div className="flex flex-col sm:flex-row gap-3 justify-center pt-4">
-                  <Button
-                    onClick={() => console.log("Navigate to dashboard")}
-                    size="lg"
-                    className="bg-green-600 hover:bg-green-700 text-white"
-                  >
-                    Go to Dashboard
-                  </Button>
-                  <Button
-                    onClick={handleEditProfile}
-                    variant="outline"
-                    size="lg"
-                    className="border-green-300 text-green-700 hover:bg-green-50 dark:border-green-700 dark:text-green-300"
-                  >
-                    Edit Profile
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </main>
-    );
-  }
 
   return (
     <main className="h-screen  bg-gradient-to-b from-background to-muted/20">
@@ -313,14 +259,14 @@ function OnboardingPage() {
                 <div className="pt-6">
                   <Button
                     type="submit"
-                    disabled={isSubmitting || !hasTouchedFields}
+                    disabled={isCreatingProfile || !hasTouchedFields}
                     size="lg"
                     className="w-full h-12 text-lg bg-gradient-to-r from-primary via-primary/90 to-primary/80 hover:shadow-lg hover:scale-[1.02] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {isSubmitting ? (
+                    {isCreatingProfile ? (
                       <>
                         <LoadingSpinner size="sm" className="mr-2" />
-                        Processing...
+                        Creating Profile...
                       </>
                     ) : !hasTouchedFields ? (
                       "Fill in your details to continue"
