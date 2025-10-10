@@ -1,7 +1,8 @@
-import React from "react";
+import { redirect } from "next/navigation";
 
 function ApplicationForm() {
-  return <div>ApplicationForm</div>;
+  // Redirect to the first form type (Applicant Info)
+  redirect("/app/form/applicant-info");
 }
 
 export default ApplicationForm;

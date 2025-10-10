@@ -6,6 +6,7 @@ import { Command, LifeBuoy, Send, SquareTerminal } from "lucide-react";
 import { NavMain } from "@/shared/components/nav-main";
 import { NavSecondary } from "@/shared/components/nav-secondary";
 import { NavUser } from "@/shared/components/nav-user";
+import { FormTabNav } from "@/shared/components/form-tab-nav";
 import {
   Sidebar,
   SidebarContent,
@@ -60,6 +61,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />
+        <FormTabNav />
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>

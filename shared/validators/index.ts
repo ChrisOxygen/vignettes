@@ -226,7 +226,7 @@ export const applicantInfoSchema = z.object({
 });
 
 // Type inference for the schema
-export type ApplicantInfoFormData = z.infer<typeof applicantInfoSchema>;
+export type ZApplicantInfoFormData = z.infer<typeof applicantInfoSchema>;
 
 // Additional validation helper functions
 export const validateApplicantInfo = (data: unknown) => {
@@ -234,7 +234,7 @@ export const validateApplicantInfo = (data: unknown) => {
 };
 
 // Custom validation for conditional fields
-export const validateConditionalFields = (data: ApplicantInfoFormData) => {
+export const validateConditionalFields = (data: ZApplicantInfoFormData) => {
   const errors: string[] = [];
 
   // Validate marital status and date of marriage consistency

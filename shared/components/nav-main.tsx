@@ -41,8 +41,7 @@ export function NavMain({
     <SidebarGroup>
       <SidebarMenu>
         {items.map((item) => {
-          const isActive =
-            pathname === item.url || pathname.startsWith(item.url + "/");
+          const isActive = pathname === item.url;
 
           return (
             <SidebarMenuItem key={item.title}>
@@ -52,7 +51,7 @@ export function NavMain({
                 className={cn(
                   "text-base font-medium transition-all duration-200 hover:bg-primary/10",
                   isActive &&
-                    "bg-sidebar-accent text-sidebar-accent-foreground border-l-2 border-primary shadow-sm"
+                    "bg-primary/10 text-sidebar-accent-foreground border-l-2 border-primary shadow-sm"
                 )}
               >
                 <Link href={item.url}>
