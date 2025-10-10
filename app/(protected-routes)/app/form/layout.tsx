@@ -4,6 +4,8 @@ import { useCurrentUser } from "@/features/auth/hooks";
 import UserOnboardingPage from "@/features/onboarding/components/UserOnboardingPage";
 import { AppSidebar } from "@/shared/components/app-sidebar";
 import FullScreenLoader from "@/shared/components/FullScreenLoader";
+import { usePathname } from "next/navigation";
+import { FORM_NAV } from "@/features/user/form/constants";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -21,6 +23,13 @@ import {
 
 function FormLayout({ children }: { children: React.ReactNode }) {
   const { isLoading } = useCurrentUser();
+  const pathname = usePathname();
+
+  // Find the current form tab based on the pathname
+  const currentFormTab = FORM_NAV.find((item) => pathname === item.url);
+  const isFormTabActive =
+    pathname.startsWith("/app/form/") && pathname !== "/app/form";
+
   if (isLoading) {
     return <FullScreenLoader />;
   }
@@ -38,20 +47,29 @@ function FormLayout({ children }: { children: React.ReactNode }) {
             />
             <Breadcrumb>
               <BreadcrumbList>
-                <BreadcrumbItem className="hidden md:block">
-                  <BreadcrumbLink
-                    href="/app"
-                    className="text-muted-foreground hover:text-primary transition-colors"
-                  >
-                    Dashboard
-                  </BreadcrumbLink>
+                <BreadcrumbItem className="hidden md:block text-muted-foreground transition-colors">
+                  Form
                 </BreadcrumbItem>
-                <BreadcrumbSeparator className="hidden md:block" />
-                <BreadcrumbItem>
-                  <BreadcrumbPage className="text-foreground font-medium">
-                    Overview
-                  </BreadcrumbPage>
-                </BreadcrumbItem>
+                {isFormTabActive && currentFormTab && (
+                  <>
+                    <BreadcrumbSeparator className="hidden md:block" />
+                    <BreadcrumbItem>
+                      <BreadcrumbPage className="text-foreground font-medium">
+                        {currentFormTab.title}
+                      </BreadcrumbPage>
+                    </BreadcrumbItem>
+                  </>
+                )}
+                {!isFormTabActive && (
+                  <>
+                    <BreadcrumbSeparator className="hidden md:block" />
+                    <BreadcrumbItem>
+                      <BreadcrumbPage className="text-foreground font-medium">
+                        Overview
+                      </BreadcrumbPage>
+                    </BreadcrumbItem>
+                  </>
+                )}
               </BreadcrumbList>
             </Breadcrumb>
           </div>
