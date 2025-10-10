@@ -1,7 +1,6 @@
 "use client";
 
 import { useCurrentUser } from "@/features/auth/hooks";
-import UserOnboardingPage from "@/features/onboarding/components/UserOnboardingPage";
 import { AppSidebar } from "@/shared/components/app-sidebar";
 import FullScreenLoader from "@/shared/components/FullScreenLoader";
 import { usePathname } from "next/navigation";
@@ -20,6 +19,7 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/shared/components/ui/sidebar";
+import { ScrollArea } from "@/shared/components/ui/scroll-area";
 
 function FormLayout({ children }: { children: React.ReactNode }) {
   const { isLoading } = useCurrentUser();
@@ -74,7 +74,14 @@ function FormLayout({ children }: { children: React.ReactNode }) {
             </Breadcrumb>
           </div>
         </header>
-        <div className="grid gap-4 p-4 rounded-lg">{children}</div>
+        <div className="grid gap-4 p-4 grid-cols-[1fr_minmax(250px,350px)] rounded-lg">
+          <ScrollArea className="rounded-lg max-h-[85vh]">
+            <div className="">{children}</div>
+          </ScrollArea>
+          <ScrollArea className="rounded-lg  grid h-screen max-h-[85vh]">
+            <div className="bg-gray-50 h-full"> hello</div>
+          </ScrollArea>
+        </div>
       </SidebarInset>
     </SidebarProvider>
   );
