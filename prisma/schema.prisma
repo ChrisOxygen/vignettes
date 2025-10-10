@@ -13,7 +13,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
 enum UserRole {
   USER
   ADMIN
@@ -33,7 +32,7 @@ model EmailVerificationToken {
   expiresAt DateTime @db.Timestamptz
   createdAt DateTime @default(now()) @db.Timestamptz
 
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([expiresAt])
@@ -41,18 +40,18 @@ model EmailVerificationToken {
 }
 
 model BasicApplicantData {
-  id                   String   @id @default(uuid()) @db.Uuid
-  userId               String   @unique @db.Uuid
-  fullLegalName        String   @db.VarChar(200)
-  currentCountryOfResidence String @db.VarChar(100)
-  nationality          String   @db.VarChar(100)
-  dateOfBirth          DateTime @db.Date
-  phoneNumber          String   @db.VarChar(20)
-  passportNumber       String   @db.VarChar(50)
-  createdAt            DateTime @default(now()) @db.Timestamptz
-  updatedAt            DateTime @updatedAt @db.Timestamptz
+  id                        String   @id @default(uuid()) @db.Uuid
+  userId                    String   @unique @db.Uuid
+  fullLegalName             String   @db.VarChar(200)
+  currentCountryOfResidence String   @db.VarChar(100)
+  nationality               String   @db.VarChar(100)
+  dateOfBirth               DateTime @db.Date
+  phoneNumber               String   @db.VarChar(20)
+  passportNumber            String   @db.VarChar(50)
+  createdAt                 DateTime @default(now()) @db.Timestamptz
+  updatedAt                 DateTime @updatedAt @db.Timestamptz
 
-  user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([passportNumber])
@@ -60,11 +59,10 @@ model BasicApplicantData {
 }
 
 model User {
-  id        String   @id @default(uuid()) @db.Uuid
-  email     String   @unique @db.VarChar(255)
-  name      String  @db.VarChar(100)
-  accountStatus AccountStatus   @default(PENDING_VERIFICATION)
-  
+  id            String        @id @default(uuid()) @db.Uuid
+  email         String        @unique @db.VarChar(255)
+  name          String        @db.VarChar(100)
+  accountStatus AccountStatus @default(PENDING_VERIFICATION)
 
   role      UserRole @default(USER)
   createdAt DateTime @default(now()) @db.Timestamptz
@@ -72,8 +70,7 @@ model User {
 
   emailVerificationToken EmailVerificationToken?
   basicApplicantData     BasicApplicantData?
-
-  
+  formSubmissions        FormSubmission[]
 
   @@index([email])
   @@index([role])
@@ -82,14 +79,14 @@ model User {
 }
 
 model AdminInvitation {
-  id        String   @id @default(uuid()) @db.Uuid
-  code      String   @unique @db.VarChar(50)
-  email     String?  @db.VarChar(255)
-  
-  isUsed    Boolean  @default(false)
-  usedAt    DateTime?@db.Timestamptz
-  expiresAt DateTime @db.Timestamptz
-  
+  id    String  @id @default(uuid()) @db.Uuid
+  code  String  @unique @db.VarChar(50)
+  email String? @db.VarChar(255)
+
+  isUsed    Boolean   @default(false)
+  usedAt    DateTime? @db.Timestamptz
+  expiresAt DateTime  @db.Timestamptz
+
   createdBy String?  @db.Uuid
   createdAt DateTime @default(now()) @db.Timestamptz
   updatedAt DateTime @updatedAt @db.Timestamptz
@@ -98,4 +95,69 @@ model AdminInvitation {
   @@index([isUsed])
   @@index([expiresAt])
   @@map("admin_invitations")
+}
+
+// form data
+
+enum FormType {
+  APPLICANT_INFO
+  EX_SPOUSE_INFO
+  FAMILY_MEMBERS_INFO
+  RELATIVES_ABROAD_INFO
+  WORK_AND_BUSINESS_INFO
+  EDUCATION_INFO
+  VISA_AND_PERMITS_INFO
+  PREVIOUS_TRAVEL_INFO
+  SECURITY_AND_STATUTORY_QUESTIONS
+}
+
+model FormSubmission {
+  id          String     @id @default(uuid()) @db.Uuid
+  userId      String     @db.Uuid
+  formType    FormType
+  status      FormStatus
+  formData    Json
+  submittedAt DateTime   @default(now()) @db.Timestamptz
+  updatedAt   DateTime   @updatedAt @db.Timestamptz
+
+  user     User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  comments FieldComment[]
+
+  @@index([userId])
+  @@index([formType])
+  @@index([status])
+  @@index([submittedAt])
+  @@map("form_submissions")
+}
+
+enum FormStatus {
+  DRAFT
+  SUBMITTED
+  UNDER_REVIEW
+  CHANGES_REQUESTED
+  APPROVED
+  REJECTED
+}
+
+model FieldComment {
+  id              String   @id @default(uuid()) @db.Uuid
+  submissionId    String   @db.Uuid
+  fieldPath       String   @db.VarChar(255)
+  parentCommentId String?  @db.Uuid
+  authorId        String   @db.Uuid
+  authorRole      String   @db.VarChar(50)
+  content         String   @db.Text
+  isResolved      Boolean  @default(false)
+  createdAt       DateTime @default(now()) @db.Timestamptz
+  updatedAt       DateTime @updatedAt @db.Timestamptz
+
+  submission    FormSubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  parentComment FieldComment?  @relation("CommentReplies", fields: [parentCommentId], references: [id])
+  replies       FieldComment[] @relation("CommentReplies")
+
+  @@index([submissionId, fieldPath])
+  @@index([authorId])
+  @@index([isResolved])
+  @@index([createdAt])
+  @@map("field_comments")
 }
