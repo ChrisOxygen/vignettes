@@ -11,6 +11,7 @@ import {
   PreviousTravelInfoForm,
   SecurityAndStatutoryQuestionsForm,
 } from "@/features/user/form/components/forms";
+import { FormProvider } from "@/features/user/form/context";
 
 // Define valid form types
 const VALID_FORM_TYPES = [
@@ -28,9 +29,9 @@ const VALID_FORM_TYPES = [
 type FormType = (typeof VALID_FORM_TYPES)[number];
 
 interface FormPageProps {
-  params: {
+  params: Promise<{
     formType: string;
-  };
+  }>;
 }
 
 // Form component mapper
@@ -59,8 +60,8 @@ const getFormComponent = (formType: FormType) => {
   }
 };
 
-function FormPage({ params }: FormPageProps) {
-  const { formType } = params;
+async function FormPage({ params }: FormPageProps) {
+  const { formType } = await params;
 
   // Convert kebab-case to SCREAMING_SNAKE_CASE
   const normalizedFormType = formType.toUpperCase().replace(/-/g, "_");
@@ -83,7 +84,9 @@ function FormPage({ params }: FormPageProps) {
   }
 
   return (
-    <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">{FormComponent}</div>
+    <FormProvider>
+      <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">{FormComponent}</div>
+    </FormProvider>
   );
 }
 

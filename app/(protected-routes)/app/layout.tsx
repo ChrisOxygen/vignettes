@@ -9,9 +9,7 @@ function AppRoutesLayout({ children }: { children: React.ReactNode }) {
     return <FullScreenLoader />;
   }
 
-  return (
-    <div className="flex flex-1 flex-col gap-4 p-4 rounded-lg">{children}</div>
-  );
+  return <div className="grid gap-4rounded-lg">{children}</div>;
 }
 
 export default AppRoutesLayout;

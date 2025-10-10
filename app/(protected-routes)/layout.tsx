@@ -1,7 +1,7 @@
 import React from "react";
 
 function ProtectedRoutesLayout({ children }: { children: React.ReactNode }) {
-  return <main className="">{children}</main>;
+  return <main className="grid">{children}</main>;
 }
 
 export default ProtectedRoutesLayout;
