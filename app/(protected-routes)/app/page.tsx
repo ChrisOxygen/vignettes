@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
+import Link from "next/link";
 import { WelcomeDialog } from "@/features/onboarding/components";
 
 function UserDashboard() {
@@ -27,15 +28,21 @@ function UserDashboard() {
 
   return (
     <>
-      <main className="w-full h-full bg-muted/20 rounded-lg p-6">
-        <div className="max-w-4xl mx-auto">
-          <h1 className="text-3xl font-bold text-foreground mb-4">
-            Welcome to Your Dashboard
+      <main className="w-full h-full grid place-items-center rounded-lg p-6 bg-gray-50">
+        <div className="max-w-xl mx-auto rounded-lg bg-white border flex flex-col items-center p-8 text-center space-y-6">
+          <h1 className="text-3xl font-bold text-foreground">
+            No Applications Yet
           </h1>
-          <p className="text-muted-foreground text-lg">
-            Your migration journey starts here. Manage your applications, track
-            progress, and access resources to help with your visa applications.
+          <p className="text-muted-foreground text-lg leading-relaxed max-w-md">
+            Ready to start your visa journey? Create your first application and
+            let us guide you through the process step by step.
           </p>
+          <Link
+            href="/app/form"
+            className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
+          >
+            Create Your First Application
+          </Link>
         </div>
       </main>
 
