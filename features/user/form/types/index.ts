@@ -1,7 +1,4 @@
-import { FormType as SharedFormType } from "@/shared/constants";
-
-// Re-export FormType for easier imports
-export type FormType = SharedFormType;
+import { FormType } from "@prisma/client";
 
 // Form field value types
 export type FormFieldValue = string | number | boolean | Date | File | null;

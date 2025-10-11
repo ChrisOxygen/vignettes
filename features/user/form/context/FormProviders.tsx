@@ -16,22 +16,6 @@ export function FormProvider({ children }: FormProviderProps) {
   );
 }
 
-// Re-export individual providers for flexibility
-export { FormStateProvider } from "./FormStateContext";
-export { FormActionsProvider } from "./FormActionsContext";
-export { FormSelectorsProvider } from "./FormSelectorsContext";
-
-// Re-export hooks
-export { useFormState } from "./FormStateContext";
-export { useFormActions } from "./FormActionsContext";
-export { useFormSelectors } from "./FormSelectorsContext";
-
-// Re-export types
-export type {
-  FormType,
-  FormData,
-  FormFieldValue,
-  FormFieldErrors,
-  FormState,
-  FormAction,
-} from "../types";
+// Note: Individual providers and context hooks are not re-exported
+// as they are only used internally within the form system.
+// External consumers should use the application-level hooks instead.

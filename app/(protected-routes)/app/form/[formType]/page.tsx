@@ -12,21 +12,10 @@ import {
   SecurityAndStatutoryQuestionsForm,
 } from "@/features/user/form/components/forms";
 import { FormProvider } from "@/features/user/form/context";
+import { FormType } from "@prisma/client";
 
-// Define valid form types
-const VALID_FORM_TYPES = [
-  "APPLICANT_INFO",
-  "EX_SPOUSE_INFO",
-  "FAMILY_MEMBERS_INFO",
-  "RELATIVES_ABROAD_INFO",
-  "WORK_AND_BUSINESS_INFO",
-  "EDUCATION_INFO",
-  "VISA_AND_PERMITS_INFO",
-  "PREVIOUS_TRAVEL_INFO",
-  "SECURITY_AND_STATUTORY_QUESTIONS",
-] as const;
-
-type FormType = (typeof VALID_FORM_TYPES)[number];
+// Get valid form types from enum
+const VALID_FORM_TYPES = Object.values(FormType);
 
 interface FormPageProps {
   params: Promise<{
@@ -37,23 +26,23 @@ interface FormPageProps {
 // Form component mapper
 const getFormComponent = (formType: FormType) => {
   switch (formType) {
-    case "APPLICANT_INFO":
+    case FormType.APPLICANT_INFO:
       return <ApplicantInfoForm />;
-    case "EX_SPOUSE_INFO":
+    case FormType.EX_SPOUSE_INFO:
       return <ExSpouseInfoForm />;
-    case "FAMILY_MEMBERS_INFO":
+    case FormType.FAMILY_MEMBERS_INFO:
       return <FamilyMembersInfoForm />;
-    case "RELATIVES_ABROAD_INFO":
+    case FormType.RELATIVES_ABROAD_INFO:
       return <RelativesAbroadInfoForm />;
-    case "WORK_AND_BUSINESS_INFO":
+    case FormType.WORK_AND_BUSINESS_INFO:
       return <WorkAndBusinessInfoForm />;
-    case "EDUCATION_INFO":
+    case FormType.EDUCATION_INFO:
       return <EducationInfoForm />;
-    case "VISA_AND_PERMITS_INFO":
+    case FormType.VISA_AND_PERMITS_INFO:
       return <VisaAndPermitsInfoForm />;
-    case "PREVIOUS_TRAVEL_INFO":
+    case FormType.PREVIOUS_TRAVEL_INFO:
       return <PreviousTravelInfoForm />;
-    case "SECURITY_AND_STATUTORY_QUESTIONS":
+    case FormType.SECURITY_AND_STATUTORY_QUESTIONS:
       return <SecurityAndStatutoryQuestionsForm />;
     default:
       return null;

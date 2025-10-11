@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useForm, useFormField } from "@/features/user/form/context";
-import { FORM_CONSTANTS, FormType } from "@/shared/constants";
+import { FORM_CONSTANTS } from "@/shared/constants";
 import { Input } from "@/shared/components/ui/input";
 import { Textarea } from "@/shared/components/ui/textarea";
 import { Label } from "@/shared/components/ui/label";
@@ -31,6 +31,7 @@ import { AlertCircle, CalendarIcon, ChevronDownIcon } from "lucide-react";
 import { Alert, AlertDescription } from "@/shared/components/ui/alert";
 import { cn } from "@/shared/lib/utils";
 import { format } from "date-fns";
+import { FormType } from "@prisma/client";
 
 // Custom DatePicker component following onboarding pattern
 interface DatePickerProps {

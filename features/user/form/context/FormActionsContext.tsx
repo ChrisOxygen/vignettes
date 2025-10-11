@@ -3,13 +3,13 @@
 import React, { createContext, useContext, useCallback } from "react";
 import { useFormState } from "./FormStateContext";
 import type {
-  FormType,
   FormData,
   FormFieldValue,
   FormFieldErrors,
   FormActionsContextValue,
   FormActionsProviderProps,
 } from "../types";
+import { FormType } from "@prisma/client";
 
 // Create actions context
 const FormActionsContext = createContext<FormActionsContextValue | undefined>(

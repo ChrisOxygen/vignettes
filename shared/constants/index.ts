@@ -1,4 +1,14 @@
-﻿export const FORM_CONSTANTS = {
+﻿// Import FormType from Prisma-generated client
+import { FormType } from "@prisma/client";
+// Import form-related types
+import type {
+  FieldInputType,
+  FormField,
+  FormConfig,
+  CompleteFormConfig,
+} from "@/shared/types/form";
+
+export const FORM_CONSTANTS = {
   APPLICANT_INFO: {
     formTitle: "Applicant Personal Details",
     instructions: "Do not use ALL CAPS. Use N/A where field is not applicable.",
@@ -338,61 +348,8 @@
   },
 };
 
-// Type definitions for form fields
-export type FieldInputType =
-  | "text" // Regular text input
-  | "email" // Email input with validation
-  | "tel" // Phone number input
-  | "number" // Number input
-  | "date" // Date picker
-  | "textarea" // Multi-line text area
-  | "select" // Dropdown select
-  | "radio" // Radio button group
-  | "checkbox" // Checkbox
-  | "file" // File upload (images, documents)
-  | "password" // Password input
-  | "url" // URL input
-  | "search"; // Search input
-
-export interface FormField {
-  title: string;
-  description: string;
-  isRequired: boolean;
-  conditionalFields: boolean;
-  explanation: string;
-  fieldInputType: FieldInputType;
-  options?: string[]; // For select, radio, checkbox options
-  accept?: string; // For file inputs (e.g., "image/*", ".pdf,.doc")
-  placeholder?: string; // Input placeholder text
-  maxLength?: number; // Maximum character length
-  minLength?: number; // Minimum character length
-}
-
-export interface FormConfig {
-  formTitle?: string;
-  instructions?: string;
-  fields?: Record<string, FormField>;
-}
-
-// More specific type for the complete form constants
-export interface CompleteFormConfig {
-  formTitle: string;
-  instructions: string;
-  fields: Record<string, FormField>;
-}
-
-// Form type enum matching Prisma schema
-export enum FormType {
-  APPLICANT_INFO = "APPLICANT_INFO",
-  EX_SPOUSE_INFO = "EX_SPOUSE_INFO",
-  FAMILY_MEMBERS_INFO = "FAMILY_MEMBERS_INFO",
-  RELATIVES_ABROAD_INFO = "RELATIVES_ABROAD_INFO",
-  WORK_AND_BUSINESS_INFO = "WORK_AND_BUSINESS_INFO",
-  EDUCATION_INFO = "EDUCATION_INFO",
-  VISA_AND_PERMITS_INFO = "VISA_AND_PERMITS_INFO",
-  PREVIOUS_TRAVEL_INFO = "PREVIOUS_TRAVEL_INFO",
-  SECURITY_AND_STATUTORY_QUESTIONS = "SECURITY_AND_STATUTORY_QUESTIONS",
-}
+// Re-export form types for convenience
+export type { FieldInputType, FormField, FormConfig, CompleteFormConfig };
 
 // Helper functions for form field management
 export const getFieldInputType = (
