@@ -298,6 +298,8 @@ export function ApplicantInfoForm() {
     }));
   };
 
+  console.log("Form State:", state);
+
   return (
     <div className="space-y-6">
       {/* Header */}
