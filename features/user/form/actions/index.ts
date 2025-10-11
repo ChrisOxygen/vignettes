@@ -125,6 +125,7 @@ export async function _upsertFormSubmission(
   input: UpsertFormSubmissionInput
 ): Promise<ApiResponse<{ submissionId: string }>> {
   try {
+    console.log("Upsert form submission input:", input);
     const { formType, formData, isDraft = false, submissionId } = input;
 
     // Get authenticated user

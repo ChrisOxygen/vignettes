@@ -10,7 +10,6 @@ import {
   PreviousTravelInfoForm,
   SecurityAndStatutoryQuestionsForm,
 } from "@/features/user/form/components/forms";
-import { FormProvider } from "@/features/user/form/context";
 import { FormType } from "@prisma/client";
 import { NotFoundTemplate } from "@/shared/components";
 
@@ -94,9 +93,7 @@ async function FormPage({ params }: FormPageProps) {
   }
 
   return (
-    <FormProvider>
-      <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">{FormComponent}</div>
-    </FormProvider>
+    <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">{FormComponent}</div>
   );
 }
 

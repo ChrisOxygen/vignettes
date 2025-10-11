@@ -3,38 +3,22 @@
 import React from "react";
 import { Button } from "@/shared/components/ui/button";
 import { Save, Send, Info } from "lucide-react";
+import { useForm } from "../../hooks";
 
-interface FormActionButtonsProps {
-  onSaveToDraft?: () => void;
-  onSubmitForReview?: () => void;
-  isLoading?: boolean;
-  isDraftSaving?: boolean;
-  isSubmitting?: boolean;
-  documentStatus?: "unsaved" | "saved" | "saving";
-}
-
-export function FormActionButtons({
-  onSaveToDraft,
-  onSubmitForReview,
-  isLoading = false,
-  isDraftSaving = false,
-  isSubmitting = false,
-  documentStatus = "unsaved",
-}: FormActionButtonsProps) {
+export function FormActionButtons() {
+  const {
+    saveForm,
+    isSaving,
+    isDraftSaving,
+    isSubmittingForm,
+    documentStatus,
+  } = useForm();
   const handleSaveToDraft = () => {
-    // Empty function for now - will be implemented later
-    console.log("Save to Draft clicked");
-    if (onSaveToDraft) {
-      onSaveToDraft();
-    }
+    saveForm(true); // isDraft = true
   };
 
   const handleSubmitForReview = () => {
-    // Empty function for now - will be implemented later
-    console.log("Submit for Review clicked");
-    if (onSubmitForReview) {
-      onSubmitForReview();
-    }
+    saveForm(false); // isDraft = false
   };
 
   const getStatusColor = (status: typeof documentStatus) => {
@@ -80,7 +64,7 @@ export function FormActionButtons({
         variant="outline"
         size="sm"
         onClick={handleSaveToDraft}
-        disabled={isLoading || isDraftSaving}
+        disabled={isSaving}
         className="h-9 min-w-[160px] cursor-pointer"
       >
         {isDraftSaving ? (
@@ -100,10 +84,10 @@ export function FormActionButtons({
       <Button
         size="sm"
         onClick={handleSubmitForReview}
-        disabled={isLoading || isSubmitting}
+        disabled={isSaving}
         className="h-9 min-w-[160px] cursor-pointer"
       >
-        {isSubmitting ? (
+        {isSubmittingForm ? (
           <>
             <div className="mr-2 h-3 w-3 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
             Submitting...
