@@ -5,6 +5,7 @@ import { AppSidebar } from "@/shared/components/app-sidebar";
 import FullScreenLoader from "@/shared/components/FullScreenLoader";
 import { usePathname } from "next/navigation";
 import { FORM_NAV } from "@/features/user/form/constants";
+import { FormComments } from "@/features/user/form/components/comments";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -27,8 +28,7 @@ function FormLayout({ children }: { children: React.ReactNode }) {
 
   // Find the current form tab based on the pathname
   const currentFormTab = FORM_NAV.find((item) => pathname === item.url);
-  const isFormTabActive =
-    pathname.startsWith("/app/form/") && pathname !== "/app/form";
+  const isFormTabActive = !!currentFormTab; // Only true if it's a valid form route
 
   if (isLoading) {
     return <FullScreenLoader />;
@@ -74,14 +74,19 @@ function FormLayout({ children }: { children: React.ReactNode }) {
             </Breadcrumb>
           </div>
         </header>
-        <div className="grid gap-4 p-4 grid-cols-[1fr_minmax(250px,350px)] rounded-lg">
-          <ScrollArea className="rounded-lg max-h-[85vh]">
-            <div className="">{children}</div>
+        <div
+          className={`grid gap-4 p-4 rounded-lg ${isFormTabActive ? "grid-cols-[1fr_minmax(300px,400px)]" : "grid-cols-1"}`}
+        >
+          <ScrollArea className="rounded-lg h-[85vh] grid  ">
+            <div className=" min-h-[85vh] grid">{children}</div>
           </ScrollArea>
 
-          <ScrollArea className="rounded-lg  grid h-screen max-h-[85vh]">
-            <div className="bg-gray-50 h-full"> hello</div>
-          </ScrollArea>
+          {/* Comments Panel - Only visible on form routes */}
+          {isFormTabActive && (
+            <div className="h-[85vh]">
+              <FormComments />
+            </div>
+          )}
         </div>
       </SidebarInset>
     </SidebarProvider>
