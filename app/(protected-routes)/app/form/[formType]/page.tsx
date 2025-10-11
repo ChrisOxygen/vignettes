@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   ApplicantInfoForm,
   ExSpouseInfoForm,
@@ -12,6 +12,7 @@ import {
 } from "@/features/user/form/components/forms";
 import { FormType } from "@prisma/client";
 import { NotFoundTemplate } from "@/shared/components";
+import { Loader2 } from "lucide-react";
 
 // Get valid form types from enum
 const VALID_FORM_TYPES = Object.values(FormType);
@@ -93,7 +94,21 @@ async function FormPage({ params }: FormPageProps) {
   }
 
   return (
-    <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">{FormComponent}</div>
+    <div className="relative flex-1 space-y-4 p-4 md:p-8 pt-6">
+      {FormComponent}
+
+      {/* Loading Overlay */}
+      {/* {isLoading && (
+        <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="flex flex-col items-center gap-3">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <p className="text-sm text-muted-foreground font-medium">
+              Saving your form...
+            </p>
+          </div>
+        </div>
+      )} */}
+    </div>
   );
 }
 

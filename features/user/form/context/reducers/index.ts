@@ -27,15 +27,17 @@ export function formReducer(state: FormState, action: FormAction): FormState {
         [action.payload.fieldName]: action.payload.value,
       };
 
+      // Clear field error when value changes - including nested paths for conditional fields
+      const clearedErrors = { ...state.errors };
+      delete clearedErrors[action.payload.fieldName]; // Clear direct error
+      delete clearedErrors[`${action.payload.fieldName}.value`]; // Clear .value error
+      delete clearedErrors[`${action.payload.fieldName}.explanation`]; // Clear .explanation error
+
       return {
         ...state,
         formData: newFormData,
         isDirty: true,
-        // Clear field error when value changes
-        errors: {
-          ...state.errors,
-          [action.payload.fieldName]: undefined,
-        },
+        errors: clearedErrors,
       };
 
     case "SET_FIELD_ERROR":

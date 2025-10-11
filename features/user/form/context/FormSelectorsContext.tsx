@@ -26,7 +26,24 @@ export function FormSelectorsProvider({
     };
 
     const getFieldError = (fieldName: string) => {
-      return state.errors[fieldName];
+      // First check for direct error on the field
+      if (state.errors[fieldName]) {
+        return state.errors[fieldName];
+      }
+
+      // For conditional fields, check for nested .value error
+      const valueError = state.errors[`${fieldName}.value`];
+      if (valueError) {
+        return valueError;
+      }
+
+      // Also check for explanation errors if needed
+      const explanationError = state.errors[`${fieldName}.explanation`];
+      if (explanationError) {
+        return explanationError;
+      }
+
+      return undefined;
     };
 
     const isFieldTouched = (fieldName: string) => {

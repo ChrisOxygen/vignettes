@@ -71,7 +71,7 @@ function DatePicker({
         <Button
           variant="outline"
           className={cn(
-            "h-12 text-base w-full justify-between text-left font-normal border-border/40 bg-background hover:border-border/60 focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all duration-200",
+            "h-12 text-base w-full justify-between text-left font-normal border-border/40 bg-background hover:border-border/70 focus:border-border/80 focus-visible:border-border/80 focus-visible:ring-0 focus-visible:ring-offset-0 transition-all duration-200",
             !selectedDate && "text-muted-foreground",
             error && "border-destructive",
             className
@@ -113,6 +113,7 @@ interface FormFieldProps {
   fieldConfig: any;
   showExplanation?: boolean;
   onRadioSelect?: (value: string) => void;
+  disabled?: boolean;
 }
 
 function FormField({
@@ -120,12 +121,35 @@ function FormField({
   fieldConfig,
   showExplanation,
   onRadioSelect,
+  disabled = false,
 }: FormFieldProps) {
   const { value, error, touched, setValue, setTouched } =
     useFormField(fieldKey);
 
+  // Get explanation value and error if this is a conditional field
+  const explanationValue =
+    typeof value === "object" && value !== null && "explanation" in value
+      ? (value as any).explanation
+      : "";
+
+  const { error: explanationError } = useFormField(`${fieldKey}.explanation`);
+
   const handleInputChange = (newValue: string) => {
     setValue(newValue);
+    setTouched(true);
+  };
+
+  const handleExplanationChange = (explanationText: string) => {
+    // Update the field value with both the radio value and explanation
+    const currentValue =
+      typeof value === "object" && value !== null && "value" in value
+        ? (value as any).value
+        : value;
+
+    setValue({
+      value: currentValue,
+      explanation: explanationText,
+    });
     setTouched(true);
   };
 
@@ -142,9 +166,11 @@ function FormField({
             onBlur={() => setTouched(true)}
             placeholder={fieldConfig.placeholder}
             maxLength={fieldConfig.maxLength}
+            disabled={disabled}
             className={cn(
-              "h-12 text-base border-border/40 bg-background hover:border-border/60 focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all duration-200",
-              error && touched && "border-destructive"
+              "h-12 text-base border-border/40 bg-background hover:border-border/70 focus:border-border/80 focus-visible:border-border/80 focus-visible:ring-0 focus-visible:ring-offset-0 transition-all duration-200",
+              error && "border-destructive",
+              disabled && "opacity-60 cursor-not-allowed"
             )}
           />
         );
@@ -158,9 +184,11 @@ function FormField({
             placeholder={fieldConfig.placeholder}
             maxLength={fieldConfig.maxLength}
             rows={4}
+            disabled={disabled}
             className={cn(
-              "text-base border-border/40 bg-background hover:border-border/60 focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all duration-200 resize-none",
-              error && touched && "border-destructive"
+              "text-base border-border/40 bg-background hover:border-border/70 focus:border-border/80 focus-visible:border-border/80 focus-visible:ring-0 focus-visible:ring-offset-0 transition-all duration-200 resize-none",
+              error && "border-destructive",
+              disabled && "opacity-60 cursor-not-allowed"
             )}
           />
         );
@@ -181,11 +209,13 @@ function FormField({
           <Select
             value={(value as string) || ""}
             onValueChange={handleInputChange}
+            disabled={disabled}
           >
             <SelectTrigger
               className={cn(
-                "h-12 text-base border-border/40 bg-background hover:border-border/60 focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all duration-200",
-                error && touched && "border-destructive"
+                "h-12 text-base border-border/40 bg-background hover:border-border/70 focus:border-border/80 focus-visible:border-border/80 focus-visible:ring-0 focus-visible:ring-offset-0 transition-all duration-200",
+                error && "border-destructive",
+                disabled && "opacity-60 cursor-not-allowed"
               )}
             >
               <SelectValue placeholder="Select an option" />
@@ -209,15 +239,17 @@ function FormField({
                   type="button"
                   variant={value === option ? "default" : "outline"}
                   size="sm"
+                  disabled={disabled}
                   onClick={() => {
                     handleInputChange(option);
                     onRadioSelect?.(option);
                   }}
                   className={cn(
-                    "h-10 px-4 text-base border-border/40 hover:border-border/60 transition-all duration-200",
+                    "h-10 px-4 text-base border-border/40 hover:border-border/70 focus-visible:border-border/80 focus-visible:ring-0 focus-visible:ring-offset-0 transition-all duration-200",
                     value === option
                       ? "bg-primary text-primary-foreground"
-                      : "bg-background hover:bg-accent"
+                      : "bg-background hover:bg-accent",
+                    disabled && "opacity-60 cursor-not-allowed"
                   )}
                 >
                   {option}
@@ -235,7 +267,11 @@ function FormField({
             onChange={(e) => handleInputChange(e.target.value)}
             onBlur={() => setTouched(true)}
             placeholder={fieldConfig.placeholder}
-            className={cn(error && touched && "border-destructive")}
+            disabled={disabled}
+            className={cn(
+              error && "border-destructive",
+              disabled && "opacity-60 cursor-not-allowed"
+            )}
           />
         );
     }
@@ -254,11 +290,12 @@ function FormField({
 
       {renderFieldInput()}
 
-      {error && touched && (
-        <Alert variant="destructive">
+      {/* Error display */}
+      {error && (
+        <span className="text-sm font-medium text-destructive flex items-center gap-2">
           <AlertCircle className="h-4 w-4" />
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
+          {error}
+        </span>
       )}
 
       {/* Explanation field for conditional fields */}
@@ -269,9 +306,31 @@ function FormField({
             <span className="text-destructive ml-1">*</span>
           </Label>
           <Textarea
+            value={
+              typeof value === "object" && value !== null
+                ? (value as any).explanation || ""
+                : ""
+            }
+            onChange={(e) => {
+              // Update the explanation while preserving the value
+              const currentValue =
+                typeof value === "object" && value !== null
+                  ? (value as any).value
+                  : "";
+              setValue({
+                value: currentValue,
+                explanation: e.target.value,
+              });
+              setTouched(true);
+            }}
+            onBlur={() => setTouched(true)}
             placeholder="Provide additional details..."
             rows={3}
-            className="w-full h-12 text-base border-border/40 bg-background hover:border-border/60 focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all duration-200"
+            disabled={disabled}
+            className={cn(
+              "w-full h-12 text-base border-border/40 bg-background hover:border-border/70 focus:border-border/80 focus-visible:border-border/80 focus-visible:ring-0 focus-visible:ring-offset-0 transition-all duration-200",
+              disabled && "opacity-60 cursor-not-allowed"
+            )}
           />
         </div>
       )}
@@ -280,7 +339,7 @@ function FormField({
 }
 
 export function ApplicantInfoForm() {
-  const { initializeForm, state } = useForm();
+  const { initializeForm, state, isSaving } = useForm();
   const [conditionalStates, setConditionalStates] = useState<
     Record<string, string>
   >({});
@@ -300,6 +359,7 @@ export function ApplicantInfoForm() {
   };
 
   console.log("Form State:", state);
+  console.log("Is Saving:", isSaving);
 
   return (
     <div className="space-y-6">
@@ -336,25 +396,11 @@ export function ApplicantInfoForm() {
                   fieldConfig={fieldConfig}
                   showExplanation={showExplanation}
                   onRadioSelect={(value) => handleRadioSelect(fieldKey, value)}
+                  disabled={isSaving}
                 />
               );
             }
           )}
-        </CardContent>
-      </Card>
-
-      {/* Debug info */}
-      <Card className="bg-muted/50 border-0 shadow-none">
-        <CardContent className="pt-6 px-0">
-          <div className="text-xs text-muted-foreground space-y-1">
-            <div>Form Type: {state.formType}</div>
-            <div>Fields: {Object.keys(state.formData).length}</div>
-            <div>Dirty: {state.isDirty ? "Yes" : "No"}</div>
-            <div>Valid: {state.isValid ? "Yes" : "No"}</div>
-            <div>
-              Conditional States: {JSON.stringify(conditionalStates, null, 2)}
-            </div>
-          </div>
         </CardContent>
       </Card>
     </div>

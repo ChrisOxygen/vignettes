@@ -20,14 +20,89 @@ import { z } from "zod";
  * }
  */
 
+/**
+ * Utility function to convert Zod errors into user-friendly error messages
+ * @param error - ZodError from validation
+ * @returns Object with field paths as keys and user-friendly messages as values
+ */
+export function formatZodErrors(error: z.ZodError): Record<string, string> {
+  const formattedErrors: Record<string, string> = {};
+
+  error.issues.forEach((issue) => {
+    const path = issue.path.join(".");
+    let message = issue.message;
+
+    // Transform generic Zod messages into user-friendly ones
+    if (
+      message.includes("Invalid input: expected string, received undefined")
+    ) {
+      message = "This field is required";
+    } else if (message.includes("Invalid input: expected string")) {
+      message = "Please enter a valid value";
+    } else if (
+      message.includes("Invalid input: expected object, received undefined")
+    ) {
+      message = "Please select an option";
+    } else if (message.includes("Invalid option: expected one of")) {
+      message = "Please select a valid option";
+    } else if (message === "Invalid input") {
+      message = "Please provide a valid value";
+    } else if (message.includes("Invalid enum value")) {
+      message = "Please select a valid option";
+    }
+
+    formattedErrors[path] = message;
+  });
+
+  return formattedErrors;
+}
+
+// Helper to create string fields with better error messages
+const requiredString = (fieldName: string) =>
+  z.string({
+    message: `${fieldName} is required`,
+  });
+
+const optionalString = () =>
+  z
+    .string({
+      message: "Please enter a valid text value",
+    })
+    .optional();
+
 // Helper schema for conditional Yes/No fields with explanations
 const conditionalYesNoSchema = z
-  .object({
-    value: z.enum(["Yes", "No"]).refine((val) => val !== undefined, {
-      message: "Please select Yes or No",
-    }),
-    explanation: z.string().optional(),
+  .unknown()
+  .transform((data) => {
+    // Handle undefined or null inputs gracefully
+    if (data === undefined || data === null) {
+      return { value: undefined, explanation: undefined };
+    }
+
+    // Handle string inputs (if someone passes just "Yes" or "No")
+    if (typeof data === "string") {
+      return { value: data, explanation: undefined };
+    }
+
+    // Handle object inputs
+    if (typeof data === "object" && data !== null) {
+      return data;
+    }
+
+    // Default case
+    return { value: undefined, explanation: undefined };
   })
+  .pipe(
+    z.object({
+      value: z
+        .union([z.enum(["Yes", "No"]), z.undefined()])
+        .refine((val) => val === "Yes" || val === "No", {
+          message: "Please select either Yes or No",
+        })
+        .transform((val) => val as "Yes" | "No"),
+      explanation: z.string().optional(),
+    })
+  )
   .refine(
     (data) => {
       // If value is "Yes", explanation must be provided and non-empty
@@ -45,8 +120,7 @@ const conditionalYesNoSchema = z
 // Zod schema for APPLICANT_INFO form validation
 export const applicantInfoSchema = z.object({
   // Basic Personal Information
-  firstName: z
-    .string()
+  firstName: requiredString("First name")
     .min(1, "First name is required")
     .max(50, "First name must be less than 50 characters")
     .regex(
@@ -61,21 +135,20 @@ export const applicantInfoSchema = z.object({
       }
     ),
 
-  middleName: z
-    .string()
-    .max(50, "Middle name must be less than 50 characters")
-    .regex(
-      /^[a-zA-Z\s'-]*$/,
-      "Middle name can only contain letters, spaces, hyphens, and apostrophes"
-    )
+  middleName: optionalString()
+    .refine((val) => !val || val.length <= 50, {
+      message: "Middle name must be less than 50 characters",
+    })
+    .refine((val) => !val || /^[a-zA-Z\s'-]*$/.test(val), {
+      message:
+        "Middle name can only contain letters, spaces, hyphens, and apostrophes",
+    })
     .refine((val) => !val || val.toLowerCase() !== val.toUpperCase(), {
       message: "Do not use ALL CAPS",
     })
-    .optional()
     .or(z.literal("N/A")),
 
-  lastName: z
-    .string()
+  lastName: requiredString("Last name")
     .min(1, "Last name is required")
     .max(50, "Last name must be less than 50 characters")
     .regex(
@@ -90,36 +163,31 @@ export const applicantInfoSchema = z.object({
       }
     ),
 
-  otherNames: z
-    .string()
-    .max(255, "Other names must be less than 255 characters")
-    .optional()
+  otherNames: optionalString()
+    .refine((val) => !val || val.length <= 255, {
+      message: "Other names must be less than 255 characters",
+    })
     .or(z.literal("N/A")),
 
   // Contact Information
-  cellNumber: z
-    .string()
+  cellNumber: requiredString("Cell number")
     .min(1, "Cell number is required")
     .regex(/^[\+]?[1-9][\d]{0,15}$/, "Please enter a valid cell number"),
 
-  phoneNumber: z
-    .string()
+  phoneNumber: requiredString("Phone number")
     .min(1, "Phone number is required")
     .regex(/^[\+]?[1-9][\d]{0,15}$/, "Please enter a valid phone number"),
 
-  emailAddress: z
-    .string()
+  emailAddress: requiredString("Email address")
     .min(1, "Email address is required")
     .email("Please enter a valid email address"),
 
-  residentialAddress: z
-    .string()
+  residentialAddress: requiredString("Residential address")
     .min(10, "Please provide a complete address")
     .max(500, "Address must be less than 500 characters"),
 
   // Physical Characteristics
-  height: z
-    .string()
+  height: requiredString("Height")
     .min(1, "Height is required")
     .regex(
       /^(\d{1,3}(\.\d{1,2})?\s*(cm|CM|centimeters?|Centimeters?)|[4-7]'([0-9]|1[01])"?|\d{1}\.\d{1,2}\s*(ft|FT|feet?|Feet?))$/,
@@ -127,15 +195,16 @@ export const applicantInfoSchema = z.object({
     ),
 
   eyeColour: z
-    .enum(["Black", "Blue", "Brown", "Green", "Hazel", "Grey", "Other"])
-    .or(z.string().min(1, "Eye colour is required")),
+    .enum(["Black", "Blue", "Brown", "Green", "Hazel", "Grey", "Other"], {
+      message: "Please select your eye colour",
+    })
+    .or(requiredString("Eye colour").min(1, "Eye colour is required")),
 
   // Identity Document
   hasNationalId: conditionalYesNoSchema,
 
   // Birth Information
-  dateOfBirth: z
-    .string()
+  dateOfBirth: requiredString("Date of birth")
     .min(1, "Date of birth is required")
     .regex(
       /^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[0-2])\/\d{4}$/,
@@ -149,64 +218,64 @@ export const applicantInfoSchema = z.object({
       return age >= 0 && age <= 120;
     }, "Please enter a valid date of birth"),
 
-  cityOfBirth: z
-    .string()
+  cityOfBirth: requiredString("City of birth")
     .min(1, "City of birth is required")
     .max(100, "City name must be less than 100 characters"),
 
-  townOfBirth: z
-    .string()
+  townOfBirth: requiredString("Town of birth")
     .min(1, "Town of birth is required")
     .max(100, "Town name must be less than 100 characters"),
 
-  countryOfBirth: z
-    .string()
+  countryOfBirth: requiredString("Country of birth")
     .min(1, "Country of birth is required")
     .max(100, "Country name must be less than 100 characters"),
 
   // Citizenship and Residence
-  countryOfCitizenship: z
-    .string()
+  countryOfCitizenship: requiredString("Country of citizenship")
     .min(1, "Country of citizenship is required")
     .max(255, "Country of citizenship must be less than 255 characters"),
 
-  countryOfResidence: z
-    .string()
+  countryOfResidence: requiredString("Country of residence")
     .min(1, "Country of residence is required")
     .max(100, "Country name must be less than 100 characters"),
 
-  previousCountryOfResidence: z
-    .string()
-    .max(100, "Country name must be less than 100 characters")
-    .optional()
+  previousCountryOfResidence: optionalString()
+    .refine((val) => !val || val.length <= 100, {
+      message: "Country name must be less than 100 characters",
+    })
     .or(z.literal("N/A")),
 
-  nativeLanguage: z
-    .string()
+  nativeLanguage: requiredString("Native language")
     .min(1, "Native language is required")
     .max(50, "Language name must be less than 50 characters"),
 
   // Marital Status
   maritalStatus: z
-    .enum([
-      "Never Married/Single",
-      "Married",
-      "Annulled Marriage",
-      "Divorced",
-      "Legally Separated",
-      "Widowed",
-    ])
+    .enum(
+      [
+        "Never Married/Single",
+        "Married",
+        "Annulled Marriage",
+        "Divorced",
+        "Legally Separated",
+        "Widowed",
+      ],
+      {
+        message: "Please select your marital status",
+      }
+    )
     .refine((val) => val !== undefined, {
       message: "Please select your marital status",
     }),
 
-  dateOfMarriage: z
-    .string()
-    .regex(
-      /^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[0-2])\/\d{4}$/,
-      "Date must be in DD/MM/YYYY format"
+  dateOfMarriage: optionalString()
+    .refine(
+      (val) =>
+        !val || /^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[0-2])\/\d{4}$/.test(val),
+      {
+        message: "Date must be in DD/MM/YYYY format",
+      }
     )
-    .optional()
     .or(z.literal("N/A")),
 
   // Conditional Yes/No Questions

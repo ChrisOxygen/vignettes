@@ -7,6 +7,7 @@ import { FORM_CONSTANTS } from "@/shared/constants";
 import {
   FORM_SCHEMAS,
   validateFormData as zodValidateFormData,
+  formatZodErrors,
 } from "../validators";
 import type {
   FormData,
@@ -152,13 +153,8 @@ export function FormActionsProvider({ children }: FormActionsProviderProps) {
       const validation = validateFormData(state.formData as any, isDraft);
 
       if (!validation.success) {
-        // Set validation errors in context - convert Zod errors to our format
-
-        const flatErrors: FormFieldErrors = {};
-        validation.error.issues.forEach((issue) => {
-          const fieldPath = issue.path.join(".");
-          flatErrors[fieldPath] = issue.message;
-        });
+        // Set validation errors in context - convert Zod errors to user-friendly format
+        const flatErrors = formatZodErrors(validation.error);
         dispatch({ type: "SET_MULTIPLE_ERRORS", payload: flatErrors });
 
         setDocumentStatus("unsaved");
