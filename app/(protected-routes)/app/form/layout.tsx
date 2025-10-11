@@ -78,6 +78,7 @@ function FormLayout({ children }: { children: React.ReactNode }) {
           <ScrollArea className="rounded-lg max-h-[85vh]">
             <div className="">{children}</div>
           </ScrollArea>
+
           <ScrollArea className="rounded-lg  grid h-screen max-h-[85vh]">
             <div className="bg-gray-50 h-full"> hello</div>
           </ScrollArea>
