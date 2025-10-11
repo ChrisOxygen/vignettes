@@ -21,7 +21,8 @@ export function FormSelectorsProvider({
   // Memoized selectors to prevent unnecessary re-renders
   const selectors = useMemo(() => {
     const getFieldValue = (fieldName: string) => {
-      return state.formData[fieldName];
+      // Safe access to form data with type assertion for flexibility
+      return (state.formData as Record<string, any>)[fieldName];
     };
 
     const getFieldError = (fieldName: string) => {

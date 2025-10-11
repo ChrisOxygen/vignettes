@@ -2,7 +2,8 @@
 
 import { useEffect } from "react";
 import { useForm } from "@/features/user/form/context";
-import { FORM_CONSTANTS, FormType } from "@/shared/constants";
+import { FORM_CONSTANTS } from "@/shared/constants";
+import { FormType } from "@prisma/client";
 
 export function ExSpouseInfoForm() {
   const { initializeForm, state } = useForm();

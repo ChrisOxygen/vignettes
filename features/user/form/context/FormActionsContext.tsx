@@ -1,7 +1,13 @@
 "use client";
 
-import React, { createContext, useContext, useCallback } from "react";
+import React, { createContext, useContext, useCallback, useState } from "react";
 import { useFormState } from "./FormStateContext";
+import { useCreateOrUpdateFormSubmission } from "../hooks";
+import { FORM_CONSTANTS } from "@/shared/constants";
+import {
+  FORM_SCHEMAS,
+  validateFormData as zodValidateFormData,
+} from "../validators";
 import type {
   FormData,
   FormFieldValue,
@@ -17,12 +23,45 @@ const FormActionsContext = createContext<FormActionsContextValue | undefined>(
 );
 
 export function FormActionsProvider({ children }: FormActionsProviderProps) {
-  const { dispatch } = useFormState();
+  const { state, dispatch } = useFormState();
+
+  // Save-related state
+  const [submissionId, setSubmissionId] = useState<string | undefined>();
+  const [documentStatus, setDocumentStatus] = useState<
+    "unsaved" | "saved" | "saving"
+  >("unsaved");
+  const [currentSaveMode, setCurrentSaveMode] = useState<
+    "draft" | "submit" | null
+  >(null);
+
+  // Hook for API calls
+  const { mutate: upsertSubmission, isPending } =
+    useCreateOrUpdateFormSubmission({
+      onSuccess: (response) => {
+        if (response.success && response.data?.submissionId) {
+          setSubmissionId(response.data.submissionId);
+          setDocumentStatus("saved");
+        } else {
+          setDocumentStatus("unsaved");
+        }
+        setCurrentSaveMode(null);
+      },
+      onError: () => {
+        setDocumentStatus("unsaved");
+        setCurrentSaveMode(null);
+      },
+    });
 
   // Memoized action creators to prevent re-renders
   const initializeForm = useCallback(
     (formType: FormType, data?: FormData) => {
-      dispatch({ type: "INITIALIZE_FORM", payload: { formType, data } });
+      dispatch({
+        type: "INITIALIZE_FORM",
+        payload: {
+          formType: formType as keyof typeof FORM_SCHEMAS,
+          data: data as any,
+        },
+      });
     },
     [dispatch]
   );
@@ -84,9 +123,79 @@ export function FormActionsProvider({ children }: FormActionsProviderProps) {
     [dispatch]
   );
 
+  // Use the centralized Zod validation function
+  const validateFormData = useCallback(
+    (formData: FormData, isDraft: boolean = false) => {
+      if (!state.formType) {
+        throw new Error("Form type not initialized");
+      }
+
+      // Use the centralized validation function from validators
+      return zodValidateFormData(state.formType, formData, isDraft);
+    },
+    [state.formType]
+  );
+
+  // Save form action
+  const saveForm = useCallback(
+    (isDraft: boolean): void => {
+      if (!state.formType) {
+        console.error("Form type not initialized");
+        return;
+      }
+
+      // Set current save mode and status
+      setCurrentSaveMode(isDraft ? "draft" : "submit");
+      setDocumentStatus("saving");
+
+      // Validate form data
+      const validation = validateFormData(state.formData as any, isDraft);
+
+      if (!validation.success) {
+        // Set validation errors in context - convert Zod errors to our format
+        const flatErrors: FormFieldErrors = {};
+        validation.error.issues.forEach((issue) => {
+          const fieldPath = issue.path.join(".");
+          flatErrors[fieldPath] = issue.message;
+        });
+        dispatch({ type: "SET_MULTIPLE_ERRORS", payload: flatErrors });
+
+        setDocumentStatus("unsaved");
+        setCurrentSaveMode(null);
+        return;
+      }
+
+      // Clear any existing errors
+      dispatch({ type: "CLEAR_ERRORS" });
+
+      // Call API using mutate - result will be handled by hook callbacks
+      // Let Zod handle serialization/deserialization
+      upsertSubmission({
+        formType: state.formType,
+        formData: state.formData,
+        isDraft,
+        submissionId,
+      });
+    },
+    [
+      state.formType,
+      state.formData,
+      submissionId,
+      validateFormData,
+      upsertSubmission,
+      dispatch,
+    ]
+  );
+
+  // Computed states based on isPending and currentSaveMode
+  const isSaving = isPending;
+  const isDraftSaving = isPending && currentSaveMode === "draft";
+  const isSubmittingForm = isPending && currentSaveMode === "submit";
+
   // Memoize context value
   const contextValue = React.useMemo(
     () => ({
+      // Core actions
       initializeForm,
       setFieldValue,
       setFieldError,
@@ -97,6 +206,13 @@ export function FormActionsProvider({ children }: FormActionsProviderProps) {
       validateForm,
       resetForm,
       loadSavedData,
+      // Save actions and state
+      saveForm,
+      isSaving,
+      isDraftSaving,
+      isSubmittingForm,
+      submissionId,
+      documentStatus,
     }),
     [
       initializeForm,
@@ -109,6 +225,12 @@ export function FormActionsProvider({ children }: FormActionsProviderProps) {
       validateForm,
       resetForm,
       loadSavedData,
+      saveForm,
+      isSaving,
+      isDraftSaving,
+      isSubmittingForm,
+      submissionId,
+      documentStatus,
     ]
   );
 

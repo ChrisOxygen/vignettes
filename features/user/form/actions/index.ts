@@ -15,16 +15,11 @@ export interface FormSubmissionData {
   status: FormStatus;
 }
 
-export interface CreateFormSubmissionInput {
+export interface UpsertFormSubmissionInput {
   formType: FormType;
   formData: Record<string, any>;
   isDraft?: boolean;
-}
-
-export interface UpdateFormSubmissionInput {
-  submissionId: string;
-  formData: Record<string, any>;
-  isDraft?: boolean;
+  submissionId?: string; // Optional - if provided, update existing; if not, create new
 }
 
 // Utility function to get authenticated user
@@ -125,12 +120,12 @@ function validateFormData(
   }
 }
 
-// Create a new form submission
-export async function createFormSubmission(
-  input: CreateFormSubmissionInput
+// Upsert form submission (create or update)
+export async function _upsertFormSubmission(
+  input: UpsertFormSubmissionInput
 ): Promise<ApiResponse<{ submissionId: string }>> {
   try {
-    const { formType, formData, isDraft = false } = input;
+    const { formType, formData, isDraft = false, submissionId } = input;
 
     // Get authenticated user
     const user = await getAuthenticatedUser();
@@ -145,144 +140,111 @@ export async function createFormSubmission(
 
     // Use transaction to ensure data consistency
     const result = await prisma.$transaction(async (tx) => {
-      // Check if user already has a submission for this form type
-      const existingSubmission = await tx.formSubmission.findFirst({
-        where: {
-          userId: user.id,
-          formType: formType,
-        },
-      });
+      let existingSubmission = null;
 
-      if (existingSubmission && !isDraft) {
-        throw new Error(
-          "A submission already exists for this form type. Use update instead."
-        );
-      }
-
-      // If existing draft and creating new submission, delete the draft
-      if (
-        existingSubmission &&
-        existingSubmission.status === FormStatus.DRAFT &&
-        !isDraft
-      ) {
-        await tx.formSubmission.delete({
-          where: { id: existingSubmission.id },
+      // If submissionId is provided, try to find and update existing submission
+      if (submissionId) {
+        existingSubmission = await tx.formSubmission.findUnique({
+          where: { id: submissionId },
         });
+
+        if (!existingSubmission) {
+          throw new Error("Form submission not found");
+        }
+
+        // Check if user owns this submission
+        if (existingSubmission.userId !== user.id) {
+          throw new Error(
+            "Unauthorized: You can only update your own submissions"
+          );
+        }
+
+        // Check if submission can be updated
+        if (existingSubmission.status === FormStatus.SUBMITTED && !isDraft) {
+          throw new Error(
+            "Cannot update a submitted form. Create a new submission instead."
+          );
+        }
+
+        // Update existing submission
+        const updatedSubmission = await tx.formSubmission.update({
+          where: { id: submissionId },
+          data: {
+            formData: formData,
+            status: status,
+            updatedAt: new Date(),
+          },
+        });
+
+        return updatedSubmission;
+      } else {
+        // Creating new submission - check if user already has one for this form type
+        existingSubmission = await tx.formSubmission.findFirst({
+          where: {
+            userId: user.id,
+            formType: formType,
+          },
+        });
+
+        if (existingSubmission && !isDraft) {
+          throw new Error(
+            "A submission already exists for this form type. Please provide submissionId to update."
+          );
+        }
+
+        // If existing draft and creating new submission, delete the draft
+        if (
+          existingSubmission &&
+          existingSubmission.status === FormStatus.DRAFT &&
+          !isDraft
+        ) {
+          await tx.formSubmission.delete({
+            where: { id: existingSubmission.id },
+          });
+        }
+
+        // Create new form submission
+        const newSubmission = await tx.formSubmission.create({
+          data: {
+            userId: user.id,
+            formType: formType,
+            status: status,
+            formData: formData,
+          },
+        });
+
+        return newSubmission;
       }
-
-      // Create new form submission
-      const newSubmission = await tx.formSubmission.create({
-        data: {
-          userId: user.id,
-          formType: formType,
-          status: status,
-          formData: formData,
-        },
-      });
-
-      return newSubmission;
     });
 
+    const isUpdate = !!submissionId;
     return {
       success: true,
       message: isDraft
-        ? "Form saved as draft successfully"
-        : "Form submitted successfully",
+        ? isUpdate
+          ? "Form draft updated successfully"
+          : "Form saved as draft successfully"
+        : isUpdate
+          ? "Form submission updated successfully"
+          : "Form submitted successfully",
       data: { submissionId: result.id },
     };
   } catch (error) {
-    console.error("Error creating form submission:", error);
+    console.error("Error upserting form submission:", error);
 
     return {
       success: false,
       message:
         error instanceof Error
           ? error.message
-          : "Failed to create form submission",
-      error: ApiErrorCode.INTERNAL_ERROR,
-    };
-  }
-}
-
-// Update an existing form submission
-export async function updateFormSubmission(
-  input: UpdateFormSubmissionInput
-): Promise<ApiResponse<{ submissionId: string }>> {
-  try {
-    const { submissionId, formData, isDraft = false } = input;
-
-    // Get authenticated user
-    const user = await getAuthenticatedUser();
-
-    // Use transaction to ensure data consistency
-    const result = await prisma.$transaction(async (tx) => {
-      // Get existing submission
-      const existingSubmission = await tx.formSubmission.findUnique({
-        where: { id: submissionId },
-      });
-
-      if (!existingSubmission) {
-        throw new Error("Form submission not found");
-      }
-
-      // Check if user owns this submission
-      if (existingSubmission.userId !== user.id) {
-        throw new Error(
-          "Unauthorized: You can only update your own submissions"
-        );
-      }
-
-      // Check if submission can be updated
-      if (existingSubmission.status === FormStatus.SUBMITTED && !isDraft) {
-        throw new Error(
-          "Cannot update a submitted form. Create a new submission instead."
-        );
-      }
-
-      // Validate form data
-      validateFormData(existingSubmission.formType, formData, isDraft);
-
-      // Determine new status
-      const newStatus: FormStatus = isDraft
-        ? FormStatus.DRAFT
-        : FormStatus.SUBMITTED;
-
-      // Update form submission
-      const updatedSubmission = await tx.formSubmission.update({
-        where: { id: submissionId },
-        data: {
-          formData: formData,
-          status: newStatus,
-          updatedAt: new Date(),
-        },
-      });
-
-      return updatedSubmission;
-    });
-
-    return {
-      success: true,
-      message: isDraft
-        ? "Form draft updated successfully"
-        : "Form submission updated successfully",
-      data: { submissionId: result.id },
-    };
-  } catch (error) {
-    console.error("Error updating form submission:", error);
-
-    return {
-      success: false,
-      message:
-        error instanceof Error
-          ? error.message
-          : "Failed to update form submission",
+          : "Failed to save form submission",
       error: ApiErrorCode.INTERNAL_ERROR,
     };
   }
 }
 
 // Get form submissions for the authenticated user
-export async function getUserFormSubmissions(
+export async function _getUserFormSubmissions(
   formType?: FormType
 ): Promise<ApiResponse<any[]>> {
   try {
@@ -332,7 +294,7 @@ export async function getUserFormSubmissions(
 }
 
 // Get a specific form submission
-export async function getFormSubmission(
+export async function _getFormSubmission(
   submissionId: string
 ): Promise<ApiResponse<any>> {
   try {
@@ -387,7 +349,7 @@ export async function getFormSubmission(
 }
 
 // Delete a form submission (only drafts can be deleted)
-export async function deleteFormSubmission(
+export async function _deleteFormSubmission(
   submissionId: string
 ): Promise<ApiResponse> {
   try {

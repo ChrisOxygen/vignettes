@@ -225,10 +225,64 @@ export const applicantInfoSchema = z.object({
   lawfulPROfAnotherCountry: conditionalYesNoSchema,
 });
 
-// Type inference for the schema
+// =============================================================================
+// SCHEMA REGISTRY & TYPE DEFINITIONS
+// =============================================================================
+
+// Type inference for all schemas
 export type ZApplicantInfoFormData = z.infer<typeof applicantInfoSchema>;
 
-// Additional validation helper functions
+// Schema registry mapping FormType to Zod schemas
+export const FORM_SCHEMAS = {
+  APPLICANT_INFO: applicantInfoSchema,
+  // TODO: Add more schemas as they are created
+  // EX_SPOUSE_INFO: exSpouseInfoSchema,
+  // FAMILY_MEMBERS_INFO: familyMembersInfoSchema,
+  // RELATIVES_ABROAD_INFO: relativesAbroadInfoSchema,
+  // WORK_AND_BUSINESS_INFO: workAndBusinessInfoSchema,
+  // EDUCATION_INFO: educationInfoSchema,
+  // VISA_AND_PERMITS_INFO: visaAndPermitsInfoSchema,
+  // PREVIOUS_TRAVEL_INFO: previousTravelInfoSchema,
+  // SECURITY_AND_STATUTORY_QUESTIONS: securityAndStatutoryQuestionsSchema,
+} as const;
+
+// Union type for all form data types
+export type FormDataTypes = {
+  APPLICANT_INFO: ZApplicantInfoFormData;
+  // TODO: Add more types as schemas are created
+  // EX_SPOUSE_INFO: ZExSpouseInfoFormData;
+  // FAMILY_MEMBERS_INFO: ZFamilyMembersInfoFormData;
+  // RELATIVES_ABROAD_INFO: ZRelativesAbroadInfoFormData;
+  // WORK_AND_BUSINESS_INFO: ZWorkAndBusinessInfoFormData;
+  // EDUCATION_INFO: ZEducationInfoFormData;
+  // VISA_AND_PERMITS_INFO: ZVisaAndPermitsInfoFormData;
+  // PREVIOUS_TRAVEL_INFO: ZPreviousTravelInfoFormData;
+  // SECURITY_AND_STATUTORY_QUESTIONS: ZSecurityAndStatutoryQuestionsFormData;
+};
+
+// Helper type to get form data type by FormType
+export type GetFormDataType<T extends keyof FormDataTypes> = FormDataTypes[T];
+
+// =============================================================================
+// VALIDATION FUNCTIONS
+// =============================================================================
+
+// Generic validation function that works with any form type
+export function validateFormData<T extends keyof typeof FORM_SCHEMAS>(
+  formType: T,
+  data: unknown,
+  isDraft: boolean = false
+) {
+  const schema = FORM_SCHEMAS[formType];
+  if (!schema) {
+    throw new Error(`No schema found for form type: ${formType}`);
+  }
+
+  const validationSchema = isDraft ? schema.partial() : schema;
+  return validationSchema.safeParse(data);
+}
+
+// Legacy function for backwards compatibility
 export const validateApplicantInfo = (data: unknown) => {
   return applicantInfoSchema.safeParse(data);
 };
