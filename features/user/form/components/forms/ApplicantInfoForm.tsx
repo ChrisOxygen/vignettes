@@ -1,408 +1,254 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useForm, useFormField } from "@/features/user/form/context";
-import { FORM_CONSTANTS } from "@/shared/constants";
-import { Input } from "@/shared/components/ui/input";
-import { Textarea } from "@/shared/components/ui/textarea";
-import { Label } from "@/shared/components/ui/label";
+import * as React from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Controller, useForm } from "react-hook-form";
+import { toast } from "sonner";
+import * as z from "zod";
+
 import { Button } from "@/shared/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/shared/components/ui/select";
 import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/shared/components/ui/card";
-import { Calendar } from "@/shared/components/ui/calendar";
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/shared/components/ui/popover";
-import { AlertCircle, CalendarIcon, ChevronDownIcon } from "lucide-react";
-import { Alert, AlertDescription } from "@/shared/components/ui/alert";
-import { cn } from "@/shared/lib/utils";
-import { format } from "date-fns";
-import { FormType } from "@prisma/client";
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@/shared/components/ui/field";
+import { FIELD_CONFIGS, YES_NO_FIELD_CONFIGS } from "../../constants";
+import { generateFormSchema } from "../../utils/schema-generator";
+import { generateDefaultValues } from "../../utils/default-values";
+import { FormField } from "../FormField";
+import { YesNoField } from "../YesNoField";
 
-// Custom DatePicker component following onboarding pattern
-interface DatePickerProps {
-  value: string;
-  onChange: (value: string) => void;
-  onBlur: () => void;
-  placeholder?: string;
-  className?: string;
-  error?: boolean;
-}
+const formSchema = generateFormSchema();
 
-function DatePicker({
-  value,
-  onChange,
-  onBlur,
-  placeholder = "Pick a date",
-  className = "",
-  error = false,
-}: DatePickerProps) {
-  const [open, setOpen] = useState(false);
-  const selectedDate = value ? new Date(value) : undefined;
+// Type inference from schema
+type FormData = z.infer<typeof formSchema>;
 
-  const handleDateSelect = (date: Date | undefined) => {
-    if (date) {
-      // Format as DD/MM/YYYY to match the field requirements
-      const formattedDate = format(date, "dd/MM/yyyy");
-      onChange(formattedDate);
-      setOpen(false);
-    } else {
-      onChange("");
-    }
-  };
+const defaultValues = generateDefaultValues();
 
-  return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          variant="outline"
-          className={cn(
-            "h-12 text-base w-full justify-between text-left font-normal border-border/40 bg-background hover:border-border/70 focus:border-border/80 focus-visible:border-border/80 focus-visible:ring-0 focus-visible:ring-offset-0 transition-all duration-200",
-            !selectedDate && "text-muted-foreground",
-            error && "border-destructive",
-            className
-          )}
-          onBlur={onBlur}
-        >
-          <div className="flex items-center">
-            <CalendarIcon className="mr-2 h-4 w-4" />
-            {selectedDate ? format(selectedDate, "dd/MM/yyyy") : placeholder}
-          </div>
-          <ChevronDownIcon className="h-4 w-4 opacity-50" />
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent
-        className="w-auto p-0 border-border/40 bg-background/95 backdrop-blur-sm shadow-lg overflow-hidden"
-        align="start"
-      >
-        <Calendar
-          mode="single"
-          selected={selectedDate}
-          captionLayout="dropdown"
-          onSelect={handleDateSelect}
-          disabled={(date) =>
-            date > new Date() || date < new Date("1900-01-01")
-          }
-          autoFocus
-          className="rounded-md"
-          fromYear={1900}
-          toYear={new Date().getFullYear()}
-        />
-      </PopoverContent>
-    </Popover>
-  );
-}
-
-// FormField component for reusable field rendering
-interface FormFieldProps {
-  fieldKey: string;
-  fieldConfig: any;
-  showExplanation?: boolean;
-  onRadioSelect?: (value: string) => void;
-  disabled?: boolean;
-}
-
-function FormField({
-  fieldKey,
-  fieldConfig,
-  showExplanation,
-  onRadioSelect,
-  disabled = false,
-}: FormFieldProps) {
-  const { value, error, touched, setValue, setTouched } =
-    useFormField(fieldKey);
-
-  // Get explanation value and error if this is a conditional field
-  const explanationValue =
-    typeof value === "object" && value !== null && "explanation" in value
-      ? (value as any).explanation
-      : "";
-
-  const { error: explanationError } = useFormField(`${fieldKey}.explanation`);
-
-  const handleInputChange = (newValue: string) => {
-    setValue(newValue);
-    setTouched(true);
-  };
-
-  const handleExplanationChange = (explanationText: string) => {
-    // Update the field value with both the radio value and explanation
-    const currentValue =
-      typeof value === "object" && value !== null && "value" in value
-        ? (value as any).value
-        : value;
-
-    setValue({
-      value: currentValue,
-      explanation: explanationText,
-    });
-    setTouched(true);
-  };
-
-  const renderFieldInput = () => {
-    switch (fieldConfig.fieldInputType) {
-      case "text":
-      case "email":
-      case "tel":
-        return (
-          <Input
-            type={fieldConfig.fieldInputType}
-            value={(value as string) || ""}
-            onChange={(e) => handleInputChange(e.target.value)}
-            onBlur={() => setTouched(true)}
-            placeholder={fieldConfig.placeholder}
-            maxLength={fieldConfig.maxLength}
-            disabled={disabled}
-            className={cn(
-              "h-12 text-base border-border/40 bg-background hover:border-border/70 focus:border-border/80 focus-visible:border-border/80 focus-visible:ring-0 focus-visible:ring-offset-0 transition-all duration-200",
-              error && "border-destructive",
-              disabled && "opacity-60 cursor-not-allowed"
-            )}
-          />
-        );
-
-      case "textarea":
-        return (
-          <Textarea
-            value={(value as string) || ""}
-            onChange={(e) => handleInputChange(e.target.value)}
-            onBlur={() => setTouched(true)}
-            placeholder={fieldConfig.placeholder}
-            maxLength={fieldConfig.maxLength}
-            rows={4}
-            disabled={disabled}
-            className={cn(
-              "text-base border-border/40 bg-background hover:border-border/70 focus:border-border/80 focus-visible:border-border/80 focus-visible:ring-0 focus-visible:ring-offset-0 transition-all duration-200 resize-none",
-              error && "border-destructive",
-              disabled && "opacity-60 cursor-not-allowed"
-            )}
-          />
-        );
-
-      case "date":
-        return (
-          <DatePicker
-            value={(value as string) || ""}
-            onChange={handleInputChange}
-            onBlur={() => setTouched(true)}
-            placeholder={fieldConfig.placeholder}
-            error={!!(error && touched)}
-          />
-        );
-
-      case "select":
-        return (
-          <Select
-            value={(value as string) || ""}
-            onValueChange={handleInputChange}
-            disabled={disabled}
-          >
-            <SelectTrigger
-              className={cn(
-                "h-12 text-base border-border/40 bg-background hover:border-border/70 focus:border-border/80 focus-visible:border-border/80 focus-visible:ring-0 focus-visible:ring-offset-0 transition-all duration-200",
-                error && "border-destructive",
-                disabled && "opacity-60 cursor-not-allowed"
-              )}
-            >
-              <SelectValue placeholder="Select an option" />
-            </SelectTrigger>
-            <SelectContent>
-              {fieldConfig.options?.map((option: string) => (
-                <SelectItem key={option} value={option}>
-                  {option}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        );
-
-      case "radio":
-        return (
-          <div className="flex gap-4">
-            {fieldConfig.options?.map((option: string) => (
-              <div key={option} className="flex items-center space-x-2">
-                <Button
-                  type="button"
-                  variant={value === option ? "default" : "outline"}
-                  size="sm"
-                  disabled={disabled}
-                  onClick={() => {
-                    handleInputChange(option);
-                    onRadioSelect?.(option);
-                  }}
-                  className={cn(
-                    "h-10 px-4 text-base border-border/40 hover:border-border/70 focus-visible:border-border/80 focus-visible:ring-0 focus-visible:ring-offset-0 transition-all duration-200",
-                    value === option
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-background hover:bg-accent",
-                    disabled && "opacity-60 cursor-not-allowed"
-                  )}
-                >
-                  {option}
-                </Button>
-              </div>
-            ))}
-          </div>
-        );
-
-      default:
-        return (
-          <Input
-            type="text"
-            value={(value as string) || ""}
-            onChange={(e) => handleInputChange(e.target.value)}
-            onBlur={() => setTouched(true)}
-            placeholder={fieldConfig.placeholder}
-            disabled={disabled}
-            className={cn(
-              error && "border-destructive",
-              disabled && "opacity-60 cursor-not-allowed"
-            )}
-          />
-        );
-    }
-  };
-
-  return (
-    <div className="space-y-3 pb-6 border-b-4 border-double border-border/50 last:border-b-0">
-      <Label htmlFor={fieldKey} className="text-sm font-medium">
-        {fieldConfig.title}
-        {fieldConfig.isRequired && (
-          <span className="text-destructive ml-1">*</span>
-        )}
-      </Label>
-
-      <p className="text-sm text-muted-foreground">{fieldConfig.description}</p>
-
-      {renderFieldInput()}
-
-      {/* Error display */}
-      {error && (
-        <span className="text-sm font-medium text-destructive flex items-center gap-2">
-          <AlertCircle className="h-4 w-4" />
-          {error}
-        </span>
-      )}
-
-      {/* Explanation field for conditional fields */}
-      {showExplanation && (
-        <div className="space-y-2 pt-5">
-          <Label className="text-sm font-medium">
-            Please explain your answer:
-            <span className="text-destructive ml-1">*</span>
-          </Label>
-          <Textarea
-            value={
-              typeof value === "object" && value !== null
-                ? (value as any).explanation || ""
-                : ""
-            }
-            onChange={(e) => {
-              // Update the explanation while preserving the value
-              const currentValue =
-                typeof value === "object" && value !== null
-                  ? (value as any).value
-                  : "";
-              setValue({
-                value: currentValue,
-                explanation: e.target.value,
-              });
-              setTouched(true);
-            }}
-            onBlur={() => setTouched(true)}
-            placeholder="Provide additional details..."
-            rows={3}
-            disabled={disabled}
-            className={cn(
-              "w-full h-12 text-base border-border/40 bg-background hover:border-border/70 focus:border-border/80 focus-visible:border-border/80 focus-visible:ring-0 focus-visible:ring-offset-0 transition-all duration-200",
-              disabled && "opacity-60 cursor-not-allowed"
-            )}
-          />
-        </div>
-      )}
-    </div>
-  );
-}
-
+// Main component
 export function ApplicantInfoForm() {
-  const { initializeForm, state, isSaving } = useForm();
-  const [conditionalStates, setConditionalStates] = useState<
-    Record<string, string>
-  >({});
+  const form = useForm<FormData>({
+    resolver: zodResolver(formSchema),
+    defaultValues,
+  });
 
-  useEffect(() => {
-    initializeForm(FormType.APPLICANT_INFO);
-  }, [initializeForm]);
+  function onSubmit(data: FormData) {
+    toast("Form submitted successfully!", {
+      description: (
+        <pre className="bg-code text-code-foreground mt-2 w-[320px] overflow-x-auto rounded-md p-4">
+          <code>{JSON.stringify(data, null, 2)}</code>
+        </pre>
+      ),
+      position: "bottom-right",
+      classNames: {
+        content: "flex flex-col gap-2",
+      },
+      style: {
+        "--border-radius": "calc(var(--radius) + 4px)",
+      } as React.CSSProperties,
+    });
+  }
 
-  const formConfig = FORM_CONSTANTS.APPLICANT_INFO as any;
-  const fields = formConfig?.fields || {};
-
-  const handleRadioSelect = (fieldKey: string, value: string) => {
-    setConditionalStates((prev) => ({
-      ...prev,
-      [fieldKey]: value,
-    }));
-  };
-
-  console.log("Form State:", state);
-  console.log("Is Saving:", isSaving);
+  function saveDraft(data: FormData) {
+    toast("Draft saved successfully!", {
+      description: "Your progress has been saved and you can continue later.",
+      position: "bottom-right",
+    });
+  }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <Card className="border-0 shadow-none bg-transparent">
-        <CardHeader className="px-0 pb-4">
-          <CardTitle className="text-2xl font-bold tracking-tight">
-            Applicant Personal Details
-          </CardTitle>
-          <CardDescription>
-            Enter your personal information and basic details. Fields marked
-            with * are required.
-          </CardDescription>
-        </CardHeader>
-      </Card>
+    <Card className="w-full border-0">
+      <CardHeader>
+        <CardTitle>Applicant Information Form</CardTitle>
+        <CardDescription>
+          Please fill out all required fields with accurate information. Fields
+          marked with * are required.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form id="applicant-info-form" onSubmit={form.handleSubmit(onSubmit)}>
+          <FieldGroup className="space-y-6">
+            {/* Personal Information Section */}
+            <div className="space-y-6">
+              <h3 className="text-lg font-semibold">Personal Information</h3>
+              <FormField
+                config={FIELD_CONFIGS.firstName}
+                control={form.control}
+              />
+              <FormField
+                config={FIELD_CONFIGS.middleName}
+                control={form.control}
+              />
+              <FormField
+                config={FIELD_CONFIGS.lastName}
+                control={form.control}
+              />
+              <FormField
+                config={FIELD_CONFIGS.otherNames}
+                control={form.control}
+              />
+            </div>
 
-      {/* Form Fields */}
-      <Card className="border-0 shadow-none bg-transparent">
-        <CardHeader className="px-0 pb-4">
-          <CardTitle>Personal Information</CardTitle>
-          <CardDescription>Complete all required fields below</CardDescription>
-        </CardHeader>
-        <CardContent className=" flex flex-col gap-6 px-0">
-          {Object.entries(fields).map(
-            ([fieldKey, fieldConfig]: [string, any]) => {
-              const showExplanation =
-                fieldConfig.conditionalFields &&
-                conditionalStates[fieldKey] === "Yes";
+            {/* Contact Information Section */}
+            <div className="space-y-6">
+              <h3 className="text-lg font-semibold">Contact Information</h3>
+              <FormField
+                config={FIELD_CONFIGS.cellNumber}
+                control={form.control}
+              />
+              <FormField
+                config={FIELD_CONFIGS.phoneNumber}
+                control={form.control}
+              />
+              <FormField
+                config={FIELD_CONFIGS.emailAddress}
+                control={form.control}
+              />
+              <FormField
+                config={FIELD_CONFIGS.residentialAddress}
+                control={form.control}
+              />
+            </div>
 
-              return (
-                <FormField
-                  key={fieldKey}
-                  fieldKey={fieldKey}
-                  fieldConfig={fieldConfig}
-                  showExplanation={showExplanation}
-                  onRadioSelect={(value) => handleRadioSelect(fieldKey, value)}
-                  disabled={isSaving}
-                />
-              );
-            }
-          )}
-        </CardContent>
-      </Card>
-    </div>
+            {/* Physical Information Section */}
+            <div className="space-y-6">
+              <h3 className="text-lg font-semibold">Physical Information</h3>
+              <FormField config={FIELD_CONFIGS.height} control={form.control} />
+              <FormField
+                config={FIELD_CONFIGS.eyeColour}
+                control={form.control}
+              />
+            </div>
+
+            {/* Birth Information Section */}
+            <div className="space-y-6">
+              <h3 className="text-lg font-semibold">Birth Information</h3>
+              <FormField
+                config={FIELD_CONFIGS.dateOfBirth}
+                control={form.control}
+              />
+              <FormField
+                config={FIELD_CONFIGS.cityOfBirth}
+                control={form.control}
+              />
+              <FormField
+                config={FIELD_CONFIGS.townOfBirth}
+                control={form.control}
+              />
+              <FormField
+                config={FIELD_CONFIGS.countryOfBirth}
+                control={form.control}
+              />
+            </div>
+
+            {/* Citizenship and Residence Section */}
+            <div className="space-y-6">
+              <h3 className="text-lg font-semibold">
+                Citizenship and Residence
+              </h3>
+              <FormField
+                config={FIELD_CONFIGS.countryOfCitizenship}
+                control={form.control}
+              />
+              <FormField
+                config={FIELD_CONFIGS.countryOfResidence}
+                control={form.control}
+              />
+              <FormField
+                config={FIELD_CONFIGS.previousCountryOfResidence}
+                control={form.control}
+              />
+              <FormField
+                config={FIELD_CONFIGS.nativeLanguage}
+                control={form.control}
+              />
+            </div>
+
+            {/* Marital Status Section */}
+            <div className="space-y-6">
+              <h3 className="text-lg font-semibold">Marital Status</h3>
+              <FormField
+                config={FIELD_CONFIGS.maritalStatus}
+                control={form.control}
+              />
+              <FormField
+                config={FIELD_CONFIGS.dateOfMarriage}
+                control={form.control}
+              />
+            </div>
+
+            {/* Additional Information Section */}
+            <div className="space-y-6">
+              <h3 className="text-lg font-semibold">Additional Information</h3>
+              <YesNoField
+                config={YES_NO_FIELD_CONFIGS.previouslyMarried}
+                control={form.control}
+              />
+              <YesNoField
+                config={YES_NO_FIELD_CONFIGS.hasNationalId}
+                control={form.control}
+              />
+              <YesNoField
+                config={YES_NO_FIELD_CONFIGS.hasJobInCurrentCountry}
+                control={form.control}
+              />
+              <YesNoField
+                config={YES_NO_FIELD_CONFIGS.ownsBusinessInCurrentCountry}
+                control={form.control}
+              />
+              <YesNoField
+                config={YES_NO_FIELD_CONFIGS.travelledLast10Years}
+                control={form.control}
+              />
+              <YesNoField
+                config={YES_NO_FIELD_CONFIGS.medicalExamLast6Months}
+                control={form.control}
+              />
+              <YesNoField
+                config={YES_NO_FIELD_CONFIGS.biometricsLast10Years}
+                control={form.control}
+              />
+              <YesNoField
+                config={YES_NO_FIELD_CONFIGS.lawfulPROfAnotherCountry}
+                control={form.control}
+              />
+            </div>
+          </FieldGroup>
+        </form>
+      </CardContent>
+      <CardFooter>
+        <Field orientation="horizontal" className="w-full">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => form.reset()}
+            className="flex-1"
+          >
+            Reset Form
+          </Button>
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={() => saveDraft(form.getValues())}
+            className="flex-1"
+          >
+            Save Draft
+          </Button>
+          <Button type="submit" form="applicant-info-form" className="flex-1">
+            Submit Application
+          </Button>
+        </Field>
+      </CardFooter>
+    </Card>
   );
 }

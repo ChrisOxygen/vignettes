@@ -22,7 +22,6 @@ interface FormLayoutContentProps {
 
 export function FormLayoutContent({ children }: FormLayoutContentProps) {
   const pathname = usePathname();
-  const { isSaving } = useForm();
 
   // Find the current form tab based on the pathname
   const currentFormTab = FORM_NAV.find((item) => pathname === item.url);
@@ -67,7 +66,7 @@ export function FormLayoutContent({ children }: FormLayoutContentProps) {
             </Breadcrumb>
           </div>
           {/* Only show action buttons on valid form routes */}
-          {isFormTabActive && <FormActionButtons />}
+          {/* {isFormTabActive && <FormActionButtons />} */}
         </div>
       </header>
 
@@ -76,7 +75,7 @@ export function FormLayoutContent({ children }: FormLayoutContentProps) {
       >
         <ScrollArea className="rounded-lg h-[85vh] grid relative  ">
           <div className=" min-h-[85vh] grid">{children}</div>
-          <FormLoadingOverlay isVisible={isSaving} message="Please wait ..." />
+          <FormLoadingOverlay isVisible={false} message="Please wait ..." />
         </ScrollArea>
 
         {/* Comments Panel - Only visible on form routes */}
