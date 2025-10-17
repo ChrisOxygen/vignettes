@@ -1,19 +1,9 @@
 "use client";
 
-import React from "react";
-import { FormStateProvider } from "./FormStateContext";
-import { FormActionsProvider } from "./FormActionsContext";
-import { FormSelectorsProvider } from "./FormSelectorsContext";
-import type { FormProviderProps } from "../types";
+import { ReactNode } from "react";
 
-export function FormProvider({ children }: FormProviderProps) {
-  return (
-    <FormStateProvider>
-      <FormActionsProvider>
-        <FormSelectorsProvider>{children}</FormSelectorsProvider>
-      </FormActionsProvider>
-    </FormStateProvider>
-  );
+export function FormProvider({ children }: { children: ReactNode }) {
+  return <div className="">{children}</div>;
 }
 
 // Note: Individual providers and context hooks are not re-exported

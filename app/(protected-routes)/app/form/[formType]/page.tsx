@@ -1,18 +1,7 @@
 import React, { useState } from "react";
-import {
-  ApplicantInfoForm,
-  ExSpouseInfoForm,
-  FamilyMembersInfoForm,
-  RelativesAbroadInfoForm,
-  WorkAndBusinessInfoForm,
-  EducationInfoForm,
-  VisaAndPermitsInfoForm,
-  PreviousTravelInfoForm,
-  SecurityAndStatutoryQuestionsForm,
-} from "@/features/user/form/components/forms";
+import { ApplicantInfoForm } from "@/features/user/form/components/forms";
 import { FormType } from "@prisma/client";
 import { NotFoundTemplate } from "@/shared/components";
-import { Loader2 } from "lucide-react";
 
 // Get valid form types from enum
 const VALID_FORM_TYPES = Object.values(FormType);
@@ -28,22 +17,7 @@ const getFormComponent = (formType: FormType) => {
   switch (formType) {
     case FormType.APPLICANT_INFO:
       return <ApplicantInfoForm />;
-    case FormType.EX_SPOUSE_INFO:
-      return <ExSpouseInfoForm />;
-    case FormType.FAMILY_MEMBERS_INFO:
-      return <FamilyMembersInfoForm />;
-    case FormType.RELATIVES_ABROAD_INFO:
-      return <RelativesAbroadInfoForm />;
-    case FormType.WORK_AND_BUSINESS_INFO:
-      return <WorkAndBusinessInfoForm />;
-    case FormType.EDUCATION_INFO:
-      return <EducationInfoForm />;
-    case FormType.VISA_AND_PERMITS_INFO:
-      return <VisaAndPermitsInfoForm />;
-    case FormType.PREVIOUS_TRAVEL_INFO:
-      return <PreviousTravelInfoForm />;
-    case FormType.SECURITY_AND_STATUTORY_QUESTIONS:
-      return <SecurityAndStatutoryQuestionsForm />;
+
     default:
       return null;
   }

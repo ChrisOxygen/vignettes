@@ -1,16 +1,15 @@
-import { AppSidebar } from "@/shared/components/app-sidebar";
 import { FormLayoutContent } from "@/features/user/form/components/forms";
+import { AppSidebar } from "@/shared/components/app-sidebar";
 import { SidebarInset, SidebarProvider } from "@/shared/components/ui/sidebar";
-import { FormProvider } from "@/features/user/form/context";
 
 function FormLayout({ children }: { children: React.ReactNode }) {
   return (
     <SidebarProvider>
       <AppSidebar />
       <SidebarInset>
-        <FormProvider>
+        <div className="">
           <FormLayoutContent>{children}</FormLayoutContent>
-        </FormProvider>
+        </div>
       </SidebarInset>
     </SidebarProvider>
   );
