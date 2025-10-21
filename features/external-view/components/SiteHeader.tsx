@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Button } from "@/shared/components/ui/button";
 import { PAGES } from "../constants";
 import { useEffect, useState } from "react";
+import MobileMenu from "./MobileMenu";
 
 function SiteHeader() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -55,13 +56,13 @@ function SiteHeader() {
           ))}
         </nav>
 
-        {/* CTA Buttons Section */}
-        <div className="flex items-center gap-3">
+        {/* CTA Buttons Section - Desktop Only */}
+        <div className="hidden ml-auto sm:flex items-center gap-3">
           <Button
             variant="ghost"
             size="sm"
             asChild
-            className={`hidden sm:flex border transition-colors duration-200 ${
+            className={`border transition-colors duration-200 ${
               isScrolled
                 ? "text-white hover:bg-gray-100 border-gray-200/40 hover:border-gray-300"
                 : "text-white hover:bg-white/20 hover:text-white border-white/20 hover:border-white/40"
@@ -73,6 +74,9 @@ function SiteHeader() {
             <Link href="/sign-up">Get Started</Link>
           </Button>
         </div>
+
+        {/* Mobile Menu */}
+        <MobileMenu isScrolled={isScrolled} />
       </div>
     </header>
   );
