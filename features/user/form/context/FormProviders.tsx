@@ -179,7 +179,8 @@ export const FormProvider: React.FC<FormProviderProps> = ({ children }) => {
     (existingSubmission?.status as FormStatus) || FormStatus.DRAFT;
   const isFormLocked =
     submissionStatus === FormStatus.UNDER_REVIEW ||
-    submissionStatus === FormStatus.APPROVED;
+    submissionStatus === FormStatus.APPROVED ||
+    submissionStatus === FormStatus.SUBMITTED;
 
   const value: FormContextType = {
     form,

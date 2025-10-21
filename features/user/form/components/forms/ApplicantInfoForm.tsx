@@ -194,29 +194,6 @@ export function ApplicantInfoForm() {
           </FieldGroup>
         </form>
       </CardContent>
-      <CardFooter>
-        <Field orientation="horizontal" className="w-full">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => resetForm()}
-            className="flex-1"
-          >
-            Reset Form
-          </Button>
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={() => saveDraft(form.getValues())}
-            className="flex-1"
-          >
-            Save Draft
-          </Button>
-          <Button type="submit" form="applicant-info-form" className="flex-1">
-            Submit Application
-          </Button>
-        </Field>
-      </CardFooter>
     </Card>
   );
 }
