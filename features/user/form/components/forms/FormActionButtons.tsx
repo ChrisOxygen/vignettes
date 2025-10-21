@@ -3,25 +3,33 @@
 import React from "react";
 import { Button } from "@/shared/components/ui/button";
 import { Save, Send, Info } from "lucide-react";
-import { useForm } from "../../hooks";
+import { useFormProvider } from "../../context/FormProviders";
 
 export function FormActionButtons() {
-  const {
-    saveForm,
-    isSaving,
-    isDraftSaving,
-    isSubmittingForm,
-    documentStatus,
-  } = useForm();
+  const { form, onSubmit, saveDraft, isLoading, submissionStatus } =
+    useFormProvider();
+
   const handleSaveToDraft = () => {
-    saveForm(true); // isDraft = true
+    const formData = form.getValues();
+    saveDraft(formData);
   };
 
   const handleSubmitForReview = () => {
-    saveForm(false); // isDraft = false
+    const formData = form.getValues();
+    onSubmit(formData);
   };
 
-  const getStatusColor = (status: typeof documentStatus) => {
+  // Map FormStatus to display status
+  const getDisplayStatus = () => {
+    if (isLoading) return "saving";
+    if (submissionStatus === "SUBMITTED") return "saved";
+    if (submissionStatus === "DRAFT") return "saved";
+    return "unsaved";
+  };
+
+  const displayStatus = getDisplayStatus();
+
+  const getStatusColor = (status: string) => {
     switch (status) {
       case "saved":
         return "text-green-600";
@@ -33,7 +41,7 @@ export function FormActionButtons() {
     }
   };
 
-  const getStatusText = (status: typeof documentStatus) => {
+  const getStatusText = (status: string) => {
     switch (status) {
       case "saved":
         return "Saved";
@@ -51,11 +59,11 @@ export function FormActionButtons() {
       <div className="flex items-center gap-2">
         <Info className="h-4 w-4 text-muted-foreground" />
         <span
-          className={`text-sm font-medium ${getStatusColor(documentStatus)}`}
+          className={`text-sm font-medium ${getStatusColor(displayStatus)}`}
         >
-          {getStatusText(documentStatus)}
+          {getStatusText(displayStatus)}
         </span>
-        {documentStatus === "saving" && (
+        {displayStatus === "saving" && (
           <div className="h-3 w-3 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
         )}
       </div>
@@ -64,10 +72,10 @@ export function FormActionButtons() {
         variant="outline"
         size="sm"
         onClick={handleSaveToDraft}
-        disabled={isSaving}
+        disabled={isLoading}
         className="h-9 min-w-[160px] cursor-pointer"
       >
-        {isDraftSaving ? (
+        {isLoading ? (
           <>
             <div className="mr-2 h-3 w-3 animate-spin rounded-full border-2 border-muted-foreground border-t-transparent" />
             Saving...
@@ -84,10 +92,10 @@ export function FormActionButtons() {
       <Button
         size="sm"
         onClick={handleSubmitForReview}
-        disabled={isSaving}
+        disabled={isLoading}
         className="h-9 min-w-[160px] cursor-pointer"
       >
-        {isSubmittingForm ? (
+        {isLoading ? (
           <>
             <div className="mr-2 h-3 w-3 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
             Submitting...

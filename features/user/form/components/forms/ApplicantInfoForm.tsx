@@ -1,11 +1,6 @@
 "use client";
 
-import * as React from "react";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Controller, useForm } from "react-hook-form";
-import { toast } from "sonner";
-import * as z from "zod";
-
+import { useFormProvider } from "../../context/FormProviders";
 import { Button } from "@/shared/components/ui/button";
 import {
   Card,
@@ -15,56 +10,29 @@ import {
   CardHeader,
   CardTitle,
 } from "@/shared/components/ui/card";
-import {
-  Field,
-  FieldDescription,
-  FieldError,
-  FieldGroup,
-  FieldLabel,
-} from "@/shared/components/ui/field";
+import { Field, FieldGroup } from "@/shared/components/ui/field";
 import { FIELD_CONFIGS, YES_NO_FIELD_CONFIGS } from "../../constants";
-import { generateFormSchema } from "../../utils/schema-generator";
-import { generateDefaultValues } from "../../utils/default-values";
 import { FormField } from "../FormField";
 import { YesNoField } from "../YesNoField";
-
-const formSchema = generateFormSchema();
-
-// Type inference from schema
-type FormData = z.infer<typeof formSchema>;
-
-const defaultValues = generateDefaultValues();
+import { useEffect } from "react";
 
 // Main component
 export function ApplicantInfoForm() {
-  const form = useForm<FormData>({
-    resolver: zodResolver(formSchema),
-    defaultValues,
-  });
+  const {
+    form,
+    onSubmit,
+    saveDraft,
+    resetForm,
+    initializeForm,
+    isInitialized,
+  } = useFormProvider();
 
-  function onSubmit(data: FormData) {
-    toast("Form submitted successfully!", {
-      description: (
-        <pre className="bg-code text-code-foreground mt-2 w-[320px] overflow-x-auto rounded-md p-4">
-          <code>{JSON.stringify(data, null, 2)}</code>
-        </pre>
-      ),
-      position: "bottom-right",
-      classNames: {
-        content: "flex flex-col gap-2",
-      },
-      style: {
-        "--border-radius": "calc(var(--radius) + 4px)",
-      } as React.CSSProperties,
-    });
-  }
-
-  function saveDraft(data: FormData) {
-    toast("Draft saved successfully!", {
-      description: "Your progress has been saved and you can continue later.",
-      position: "bottom-right",
-    });
-  }
+  // Initialize form on component mount
+  useEffect(() => {
+    if (!isInitialized) {
+      initializeForm();
+    }
+  }, [isInitialized, initializeForm]);
 
   return (
     <Card className="w-full border-0">
@@ -231,7 +199,7 @@ export function ApplicantInfoForm() {
           <Button
             type="button"
             variant="outline"
-            onClick={() => form.reset()}
+            onClick={() => resetForm()}
             className="flex-1"
           >
             Reset Form

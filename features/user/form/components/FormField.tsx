@@ -20,7 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/shared/components/ui/select";
-import type { FieldConfig, SelectFieldConfig } from "../../types";
+import type { FieldConfig, SelectFieldConfig } from "../types";
 
 interface FormFieldProps {
   config: FieldConfig;

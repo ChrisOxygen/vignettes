@@ -349,6 +349,59 @@ export async function _getFormSubmission(
   }
 }
 
+// Get current user's form submission for a specific form type
+export async function _getCurrentUserFormSubmission(
+  formType: FormType
+): Promise<ApiResponse<any>> {
+  try {
+    // Get authenticated user
+    const user = await getAuthenticatedUser();
+
+    // Get the most recent form submission for this user and form type
+    const submission = await prisma.formSubmission.findFirst({
+      where: {
+        userId: user.id,
+        formType: formType,
+      },
+      orderBy: { updatedAt: "desc" },
+      select: {
+        id: true,
+        formType: true,
+        status: true,
+        submittedAt: true,
+        updatedAt: true,
+        createdAt: true,
+        formData: true,
+      },
+    });
+
+    if (!submission) {
+      return {
+        success: false,
+        message: `No form submission found for form type: ${formType}`,
+        error: ApiErrorCode.RESOURCE_NOT_FOUND,
+      };
+    }
+
+    return {
+      success: true,
+      message: "Form submission retrieved successfully",
+      data: submission,
+    };
+  } catch (error) {
+    console.error("Error getting current user form submission:", error);
+
+    return {
+      success: false,
+      message:
+        error instanceof Error
+          ? error.message
+          : "Failed to get form submission",
+      error: ApiErrorCode.INTERNAL_ERROR,
+    };
+  }
+}
+
 // Delete a form submission (only drafts can be deleted)
 export async function _deleteFormSubmission(
   submissionId: string
