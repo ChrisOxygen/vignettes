@@ -6,10 +6,10 @@ interface FormLoadingOverlayProps {
 }
 
 export function FormLoadingOverlay({
-  message = "Please wait...",
+  message = "Loading form data...",
 }: FormLoadingOverlayProps) {
-  const { isLoading } = useFormProvider();
-  if (!isLoading) return null;
+  const { isInitializing } = useFormProvider();
+  if (!isInitializing) return null;
 
   return (
     <div className="absolute max-h-[85vh] inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center z-50">

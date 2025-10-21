@@ -67,7 +67,7 @@ export function FormLayoutContent({ children }: FormLayoutContentProps) {
               </Breadcrumb>
             </div>
             {/* Only show action buttons on valid form routes */}
-            {isFormTabActive && <FormActionButtons />}
+            <FormActionButtons />
           </div>
         </header>
 

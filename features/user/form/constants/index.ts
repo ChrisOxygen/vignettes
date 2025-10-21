@@ -87,6 +87,7 @@ export const FIELD_CONFIGS: Record<string, FieldConfig> = {
     description: "Enter your middle name if applicable",
     type: "text",
     placeholder: "Enter your middle name (optional)",
+    required: false,
     maxLength: 50,
   },
   lastName: {
@@ -105,6 +106,7 @@ export const FIELD_CONFIGS: Record<string, FieldConfig> = {
     description: "List any other names, nicknames, or aliases you have used",
     type: "textarea",
     placeholder: "List any other names, nicknames, or aliases",
+    required: false,
     maxLength: 255,
     rows: 3,
   },
@@ -228,6 +230,7 @@ export const FIELD_CONFIGS: Record<string, FieldConfig> = {
       "Enter your previous country of residence if different from current (leave blank if not applicable)",
     type: "text",
     placeholder: "Enter your previous country of residence (if applicable)",
+    required: false,
     maxLength: 100,
   },
   nativeLanguage: {
@@ -259,9 +262,14 @@ export const FIELD_CONFIGS: Record<string, FieldConfig> = {
     name: "dateOfMarriage",
     label: "Date of Marriage",
     description:
-      "Enter your marriage date if you are married (DD/MM/YYYY format)",
+      "Required if you are Married or Common-law. Enter your marriage date in DD/MM/YYYY format",
     type: "date",
-    placeholder: "DD/MM/YYYY (if applicable)",
+    placeholder: "DD/MM/YYYY (required for Married/Common-law)",
+    required: false,
+    conditionallyRequired: {
+      dependsOn: "maritalStatus",
+      values: ["Married", "Common-law"],
+    },
   },
 };
 

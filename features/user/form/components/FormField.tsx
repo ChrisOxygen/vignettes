@@ -1,5 +1,6 @@
 import * as React from "react";
 import { Controller } from "react-hook-form";
+import { toast } from "sonner";
 import {
   Field,
   FieldDescription,
@@ -21,6 +22,7 @@ import {
   SelectValue,
 } from "@/shared/components/ui/select";
 import type { FieldConfig, SelectFieldConfig } from "../types";
+import { useFormProvider } from "../context/FormProviders";
 
 interface FormFieldProps {
   config: FieldConfig;
@@ -28,13 +30,31 @@ interface FormFieldProps {
 }
 
 export const FormField: React.FC<FormFieldProps> = ({ config, control }) => {
+  const { isFormLocked, submissionStatus } = useFormProvider();
+
+  const handleLockedFieldClick = () => {
+    if (isFormLocked) {
+      toast.warning("Form is locked", {
+        description:
+          submissionStatus === "APPROVED"
+            ? "This form has been approved and cannot be modified."
+            : "This form is under review by the admin and cannot be changed.",
+      });
+    }
+  };
+
   return (
     <Controller
       name={config.name}
       control={control}
       render={({ field, fieldState }) => (
         <Field data-invalid={fieldState.invalid}>
-          <FieldLabel htmlFor={config.name}>{config.label}</FieldLabel>
+          <FieldLabel
+            htmlFor={config.name}
+            className={isFormLocked ? "text-muted-foreground" : ""}
+          >
+            {config.label}
+          </FieldLabel>
 
           {config.type === "textarea" ? (
             <InputGroup>
@@ -45,6 +65,8 @@ export const FormField: React.FC<FormFieldProps> = ({ config, control }) => {
                 rows={config.rows || 3}
                 className="min-h-20 resize-none"
                 aria-invalid={fieldState.invalid}
+                disabled={isFormLocked}
+                onClick={handleLockedFieldClick}
               />
               {config.maxLength && (
                 <InputGroupAddon align="block-end">
@@ -55,8 +77,12 @@ export const FormField: React.FC<FormFieldProps> = ({ config, control }) => {
               )}
             </InputGroup>
           ) : config.type === "select" ? (
-            <Select value={field.value} onValueChange={field.onChange}>
-              <SelectTrigger>
+            <Select
+              value={field.value}
+              onValueChange={field.onChange}
+              disabled={isFormLocked}
+            >
+              <SelectTrigger onClick={handleLockedFieldClick}>
                 <SelectValue
                   placeholder={
                     config.placeholder || `Select ${config.label.toLowerCase()}`
@@ -78,6 +104,8 @@ export const FormField: React.FC<FormFieldProps> = ({ config, control }) => {
               type={config.type === "date" ? "text" : config.type}
               placeholder={config.placeholder}
               aria-invalid={fieldState.invalid}
+              disabled={isFormLocked}
+              onClick={handleLockedFieldClick}
             />
           )}
 

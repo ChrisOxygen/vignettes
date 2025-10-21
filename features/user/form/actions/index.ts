@@ -4,7 +4,8 @@ import { createClient } from "@/utils/supabase/server";
 import { PrismaClient, FormType, FormStatus } from "@prisma/client";
 import { ApiResponse } from "@/features/shared/types/api";
 import { ApiErrorCode } from "@/features/shared/types/error";
-import { FORM_CONSTANTS } from "@/shared/constants";
+import { generateFormSchema } from "../utils/schema-generator";
+import { ZodError } from "zod";
 
 const prisma = new PrismaClient();
 
@@ -51,72 +52,34 @@ async function getAuthenticatedUser() {
   }
 }
 
-// Validation function for form data
+// Validation function for form data using Zod schema
 function validateFormData(
   formType: FormType,
   formData: Record<string, any>,
   isDraft: boolean = false
 ) {
-  const formConfig = FORM_CONSTANTS[formType] as any;
-
-  if (!formConfig) {
-    throw new Error(`Form configuration not found for type: ${formType}`);
-  }
-
-  // If form fields are not yet configured, skip validation for now
-  if (!formConfig.fields || Object.keys(formConfig.fields).length === 0) {
-    console.warn(
-      `Form fields not yet configured for ${formType}. Skipping validation.`
-    );
+  // Skip validation for drafts - users can save incomplete data
+  if (isDraft) {
     return;
   }
 
-  const errors: string[] = [];
-  const fields = formConfig.fields;
+  // Use the same Zod schema that validates on the client side
+  // This ensures consistent validation rules between client and server
+  const formSchema = generateFormSchema();
 
-  // For full submission, validate all required fields
-  if (!isDraft) {
-    Object.entries(fields).forEach(([fieldKey, fieldConfig]: [string, any]) => {
-      if (fieldConfig.isRequired) {
-        const value = formData[fieldKey];
-
-        if (!value || (typeof value === "string" && value.trim() === "")) {
-          errors.push(`${fieldConfig.title} is required`);
-        }
-
-        // Additional validation based on field type
-        if (value && fieldConfig.fieldInputType === "email") {
-          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-          if (!emailRegex.test(value)) {
-            errors.push(`${fieldConfig.title} must be a valid email address`);
-          }
-        }
-
-        if (
-          value &&
-          fieldConfig.minLength &&
-          value.length < fieldConfig.minLength
-        ) {
-          errors.push(
-            `${fieldConfig.title} must be at least ${fieldConfig.minLength} characters`
-          );
-        }
-
-        if (
-          value &&
-          fieldConfig.maxLength &&
-          value.length > fieldConfig.maxLength
-        ) {
-          errors.push(
-            `${fieldConfig.title} must be no more than ${fieldConfig.maxLength} characters`
-          );
-        }
-      }
-    });
-  }
-
-  if (errors.length > 0) {
-    throw new Error(`Validation failed: ${errors.join(", ")}`);
+  try {
+    // Validate form data against the schema
+    formSchema.parse(formData);
+  } catch (error) {
+    if (error instanceof ZodError) {
+      // Format Zod errors into a readable message
+      const errorMessages = error.issues.map((err) => {
+        const field = err.path.join(".");
+        return `${field}: ${err.message}`;
+      });
+      throw new Error(`Validation failed: ${errorMessages.join(", ")}`);
+    }
+    throw error;
   }
 }
 

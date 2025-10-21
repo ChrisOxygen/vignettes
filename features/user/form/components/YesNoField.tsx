@@ -1,5 +1,6 @@
 import * as React from "react";
 import { Controller } from "react-hook-form";
+import { toast } from "sonner";
 import {
   Field,
   FieldDescription,
@@ -13,6 +14,7 @@ import {
 import { RadioGroup, RadioGroupItem } from "@/shared/components/ui/radio-group";
 import { Label } from "@/shared/components/ui/label";
 import type { RadioFieldConfig } from "../types";
+import { useFormProvider } from "../context/FormProviders";
 
 interface YesNoFieldProps {
   config: RadioFieldConfig;
@@ -20,13 +22,28 @@ interface YesNoFieldProps {
 }
 
 export const YesNoField: React.FC<YesNoFieldProps> = ({ config, control }) => {
+  const { isFormLocked, submissionStatus } = useFormProvider();
+
+  const handleLockedFieldClick = () => {
+    if (isFormLocked) {
+      toast.warning("Form is locked", {
+        description:
+          submissionStatus === "APPROVED"
+            ? "This form has been approved and cannot be modified."
+            : "This form is under review by the admin and cannot be changed.",
+      });
+    }
+  };
+
   return (
     <Controller
       name={config.name}
       control={control}
       render={({ field, fieldState }) => (
         <Field data-invalid={fieldState.invalid}>
-          <FieldLabel>{config.label}</FieldLabel>
+          <FieldLabel className={isFormLocked ? "text-muted-foreground" : ""}>
+            {config.label}
+          </FieldLabel>
 
           <RadioGroup
             value={field.value.value}
@@ -37,14 +54,20 @@ export const YesNoField: React.FC<YesNoFieldProps> = ({ config, control }) => {
               })
             }
             className="flex gap-6"
+            disabled={isFormLocked}
+            onClick={handleLockedFieldClick}
           >
             {config.options.map((option) => (
               <div key={option} className="flex items-center space-x-2">
                 <RadioGroupItem
                   value={option}
                   id={`${config.name}-${option.toLowerCase()}`}
+                  disabled={isFormLocked}
                 />
-                <Label htmlFor={`${config.name}-${option.toLowerCase()}`}>
+                <Label
+                  htmlFor={`${config.name}-${option.toLowerCase()}`}
+                  className={isFormLocked ? "text-muted-foreground" : ""}
+                >
                   {option}
                 </Label>
               </div>
@@ -80,6 +103,8 @@ export const YesNoField: React.FC<YesNoFieldProps> = ({ config, control }) => {
                       config.conditionalExplanation.errorMessage.toLowerCase()
                     )
                   }
+                  disabled={isFormLocked}
+                  onClick={handleLockedFieldClick}
                 />
               </InputGroup>
             )}

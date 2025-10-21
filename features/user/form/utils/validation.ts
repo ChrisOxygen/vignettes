@@ -27,11 +27,39 @@ export const createYesNoValidation = (errorMessage: string) =>
  * Creates validation schema based on field configuration
  */
 export const createFieldValidation = (config: FieldConfig) => {
-  let validation = z.string();
+  // Build validation based on field requirements
+  if (!config.required) {
+    // Optional field - allow empty string or undefined
+    let optionalValidation = z.string().optional().or(z.literal(""));
 
-  if (config.required) {
-    validation = validation.min(1, `${config.label} is required`);
+    // Add format validations only if value is provided
+    if (config.type === "date") {
+      optionalValidation = z
+        .string()
+        .refine(
+          (val) => !val || /^\d{2}\/\d{2}\/\d{4}$/.test(val),
+          "Please enter date in DD/MM/YYYY format"
+        )
+        .optional()
+        .or(z.literal(""));
+    }
+
+    if (config.maxLength) {
+      optionalValidation = z
+        .string()
+        .max(
+          config.maxLength,
+          `${config.label} must be at most ${config.maxLength} characters`
+        )
+        .optional()
+        .or(z.literal(""));
+    }
+
+    return optionalValidation;
   }
+
+  // Required field validation
+  let validation = z.string().min(1, `${config.label} is required`);
 
   if (config.minLength) {
     validation = validation.min(

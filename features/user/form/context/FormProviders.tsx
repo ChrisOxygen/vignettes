@@ -31,9 +31,11 @@ const VALID_FORM_TYPES = Object.values(FormType);
 interface FormContextType {
   form: UseFormReturn<FormData>;
   formType: FormType | null;
-  isLoading: boolean;
+  isInitializing: boolean;
+  isSubmitting: boolean;
   submissionId: string | null;
   submissionStatus: FormStatus;
+  isFormLocked: boolean;
   onSubmit: (data: FormData) => void;
   saveDraft: (data: FormData) => void;
   resetForm: () => void;
@@ -72,7 +74,7 @@ export const FormProvider: React.FC<FormProviderProps> = ({ children }) => {
   });
 
   // Mutation for creating/updating submissions
-  const { mutate: upsertSubmission, isPending: isSubmitting } =
+  const { mutate: upsertSubmission, isPending: isMutationPending } =
     useCreateOrUpdateFormSubmission({
       onSuccess: (response) => {
         if (response.success) {
@@ -170,17 +172,23 @@ export const FormProvider: React.FC<FormProviderProps> = ({ children }) => {
     });
   };
 
-  const isLoading = isLoadingSubmission || isSubmitting;
+  const isInitializing = isLoadingSubmission;
+  const isSubmitting = isMutationPending;
   const submissionId = existingSubmission?.id || null;
   const submissionStatus =
     (existingSubmission?.status as FormStatus) || FormStatus.DRAFT;
+  const isFormLocked =
+    submissionStatus === FormStatus.UNDER_REVIEW ||
+    submissionStatus === FormStatus.APPROVED;
 
   const value: FormContextType = {
     form,
     formType,
-    isLoading,
+    isInitializing,
+    isSubmitting,
     submissionId,
     submissionStatus,
+    isFormLocked,
     onSubmit,
     saveDraft,
     resetForm,

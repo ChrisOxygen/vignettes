@@ -8,6 +8,11 @@ export type FieldType =
   | "date"
   | "radio";
 
+export interface ConditionalRequirement {
+  dependsOn: string; // field name that this field depends on
+  values: string[]; // values that make this field required
+}
+
 export interface BaseFieldConfig {
   name: string;
   label: string;
@@ -18,6 +23,7 @@ export interface BaseFieldConfig {
   maxLength?: number;
   minLength?: number;
   rows?: number;
+  conditionallyRequired?: ConditionalRequirement;
 }
 
 export interface SelectFieldConfig extends BaseFieldConfig {
