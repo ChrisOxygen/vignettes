@@ -19,7 +19,7 @@ function SectionTitle({
 
   return (
     <div
-      className={`flex flex-col max-w-4xl gap-3 ${alignmentClasses[alignment]} ${className}`}
+      className={`flex flex-col gap-3 ${alignmentClasses[alignment]} ${className}`}
     >
       {subtitle && (
         <span className="text-sm font-medium text-primary uppercase tracking-wide">

@@ -5,11 +5,12 @@ import { SERVICES_SNIPPET } from "../constants";
 
 function ServicesSection() {
   return (
-    <section className=" flex w-full flex-col gap-6 items-center px-4 sm:px-6">
+    <section className=" flex w-full flex-col gap-6 items-center px-4 sm:px-6 bg-[url('/assets/imgi_41_pattern-8.webp')] bg-no-repeat bg-top bg-cover">
       <div className="mx-auto py-16 sm:py-20 lg:py-26 max-w-7xl flex flex-col items-center gap-10 w-full">
         <SectionTitle
           subtitle="Services We Provide"
           title="Explore Our Visa Citizenship & Immigration Services"
+          className="max-w-4xl"
         />
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 w-full">
