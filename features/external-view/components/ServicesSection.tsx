@@ -5,7 +5,7 @@ import { SERVICES_SNIPPET } from "../constants";
 
 function ServicesSection() {
   return (
-    <section className=" flex w-full flex-col gap-6 items-center px-4 sm:px-6 bg-[url('/assets/imgi_41_pattern-8.webp')] bg-no-repeat bg-top bg-cover">
+    <section className=" flex w-full flex-col gap-6 items-center px-4 sm:px-6 ">
       <div className="mx-auto py-16 sm:py-20 lg:py-26 max-w-7xl flex flex-col items-center gap-10 w-full">
         <SectionTitle
           subtitle="Services We Provide"

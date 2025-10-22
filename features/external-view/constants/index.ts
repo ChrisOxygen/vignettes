@@ -100,3 +100,36 @@ export const TESTIMONIALS = [
       "Vignettes simplified the complex visa process. Professional team with exceptional attention to detail throughout.",
   },
 ];
+
+export const VISA_TYPES = [
+  {
+    country: "United States",
+    visaTypes:
+      "Tourist visa, Work visa, Student visa, Business visa, Transit visa",
+  },
+  {
+    country: "Canada",
+    visaTypes:
+      "Work visa, Student visa, Visitor visa, Family visa, Business visa",
+  },
+  {
+    country: "Scotland",
+    visaTypes:
+      "Student visa, Tourist visa, Family visa, Work visa, Transit visa",
+  },
+  {
+    country: "France",
+    visaTypes:
+      "Business visa, Tourist visa, Investment visa, Student visa, Work visa",
+  },
+  {
+    country: "Turkey",
+    visaTypes:
+      "Tourist visa, Business visa, Work visa, Transit visa, Student visa",
+  },
+  {
+    country: "Australia",
+    visaTypes:
+      "Work visa, Tourist visa, Student visa, Business visa, Investor visa",
+  },
+];
