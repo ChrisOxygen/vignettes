@@ -1,4 +1,5 @@
 import AboutSection from "@/features/external-view/components/AboutSection";
+import CTASection from "@/features/external-view/components/CTASection";
 import HeroSection from "@/features/external-view/components/HeroSection";
 import ServicesSection from "@/features/external-view/components/ServicesSection";
 import SupportedCountriesSection from "@/features/external-view/components/SupportedCountriesSection";
@@ -13,6 +14,7 @@ export default function Home() {
       <AboutSection />
       <ServicesSection />
       <WhyChooseUsSection />
+      <CTASection />
       <TestimonialSection />
     </main>
   );

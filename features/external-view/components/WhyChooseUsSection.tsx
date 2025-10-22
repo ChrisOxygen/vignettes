@@ -5,7 +5,7 @@ function WhyChooseUsSection() {
     <section className="flex w-full flex-col gap-6 items-center px-4 sm:px-6 relative overflow-hidden">
       <div className="absolute inset-0 -z-10 bg-[url('/assets/imgi_5_hero-3.webp')] bg-no-repeat bg-center bg-cover bg-fixed filter brightness-[30%] saturate-[139%] contrast-[118%]"></div>
       <div className="absolute inset-0 -z-10 bg-black/50"></div>
-      <div className="mx-auto py-16 sm:py-20 lg:py-26 max-w-7xl flex flex-col items-center gap-10 w-full">
+      <div className="mx-auto pt-16 pb-32 sm:pt-20 sm:pb-40 lg:pt-26 lg:pb-72 max-w-7xl flex flex-col items-center gap-10 w-full">
         <div className="flex flex-col lg:flex-row items-start lg:items-end w-full justify-between gap-6">
           <div className={`flex flex-col gap-3`}>
             <span className="text-sm font-medium text-primary uppercase tracking-wide">
