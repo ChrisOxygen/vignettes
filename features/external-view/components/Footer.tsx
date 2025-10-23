@@ -65,7 +65,7 @@ function Footer() {
           {PAGES.map((page) => (
             <Link
               key={page}
-              href={`${page.toLowerCase().replace(/\s+/g, "-")}`}
+              href={`/${page.toLowerCase().replace(/\s+/g, "-")}`}
               className="text-white/70 hover:text-primary transition-colors duration-200 text-sm"
             >
               {page}

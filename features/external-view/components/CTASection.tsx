@@ -1,3 +1,4 @@
+import Link from "next/link";
 import React from "react";
 
 function CTASection() {
@@ -16,12 +17,18 @@ function CTASection() {
             through every step of your immigration process.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 mt-4">
-            <button className="px-8 py-4 bg-white text-primary font-bold text-lg rounded-lg hover:bg-gray-100 hover:scale-105 transition-all duration-300 shadow-xl">
+            <Link
+              href="/sign-up"
+              className="px-8 py-4 bg-white text-primary font-bold text-lg rounded-lg hover:bg-gray-100 hover:scale-105 transition-all duration-300 shadow-xl"
+            >
               Get Started Now
-            </button>
-            <button className="px-8 py-4 bg-transparent border-2 border-white text-white font-bold text-lg rounded-lg hover:bg-white hover:text-primary transition-all duration-300">
+            </Link>
+            <Link
+              href="/contact-us"
+              className="px-8 py-4 bg-transparent border-2 border-white text-white font-bold text-lg rounded-lg hover:bg-white hover:text-primary transition-all duration-300 text-center"
+            >
               Schedule a Consultation
-            </button>
+            </Link>
           </div>
         </div>
       </div>

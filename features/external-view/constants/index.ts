@@ -1,10 +1,9 @@
 // Pages Array
 export const PAGES = [
-  "Home",
   "About Us",
   "Services",
-  "Partner Institution",
-  "Enquiry Form",
+  "Partner Institutions",
+  "Assessments",
   "Contact Us",
 ];
 
@@ -180,9 +179,9 @@ const NAVIGATION = {
       ],
     },
     {
-      text: "Partner Institution",
-      href: "/partner-institution",
-      link: "/partner-institution",
+      text: "Partner Institutions",
+      href: "/partner-institutions",
+      link: "/partner-institutions",
     },
 
     {

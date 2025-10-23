@@ -45,8 +45,9 @@ function HeroSection() {
               variant="outline"
               size="lg"
               className="border-white/40 bg-white/20 text-white hover:bg-white hover:border-white hover:text-primary"
+              asChild
             >
-              Explore Requirements
+              <Link href="/services">Explore Requirements</Link>
             </Button>
           </div>
 
