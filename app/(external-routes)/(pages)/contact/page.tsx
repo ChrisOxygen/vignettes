@@ -253,7 +253,7 @@ function ContactPage() {
                     <Button
                       type="submit"
                       size="lg"
-                      className="px-8 gap-2 w-full md:w-1/2"
+                      className="px-8 gap-2 w-full md:w-1/2 cursor-pointer"
                       disabled={isPending}
                     >
                       <Send className="w-5 h-5" />

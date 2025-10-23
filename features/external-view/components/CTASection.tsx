@@ -24,7 +24,7 @@ function CTASection() {
               Get Started Now
             </Link>
             <Link
-              href="/contact-us"
+              href="/contact"
               className="px-8 py-4 bg-transparent border-2 border-white text-white font-bold text-lg rounded-lg hover:bg-white hover:text-primary transition-all duration-300 text-center"
             >
               Schedule a Consultation

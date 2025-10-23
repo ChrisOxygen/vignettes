@@ -18,7 +18,7 @@ function Eb2niwPage() {
             <p className="text-sm text-gray-600 text-center">
               Experiencing difficulties with the form?{" "}
               <Link
-                href="/contact-us"
+                href="/contact"
                 className="text-primary font-semibold hover:underline"
               >
                 Reach out to us

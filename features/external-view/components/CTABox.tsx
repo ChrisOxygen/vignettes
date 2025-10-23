@@ -10,7 +10,7 @@ interface CTABoxProps {
 function CTABox({
   text,
   buttonText = "Contact Us Today",
-  href = "/contact-us",
+  href = "/contact",
 }: CTABoxProps) {
   return (
     <div className="flex flex-col bg-primary/5 rounded-2xl py-8 px-8 sm:flex-row items-start sm:items-center justify-between gap-4 mt-4">

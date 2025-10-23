@@ -33,7 +33,7 @@ function ComingSoon({ title, description }: ComingSoonProps) {
           </Button>
 
           <Button variant="outline" size="lg" asChild>
-            <Link href="/contact-us">Contact Us</Link>
+            <Link href="/contact">Contact Us</Link>
           </Button>
         </div>
       </div>

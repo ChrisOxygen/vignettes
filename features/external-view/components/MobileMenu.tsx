@@ -46,6 +46,9 @@ function MobileMenu({ isScrolled }: MobileMenuProps) {
         side="right"
         className="w-[300px] p-5 flex flex-col h-full sm:w-[400px] overflow-y-auto"
       >
+        <SheetHeader>
+          <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
+        </SheetHeader>
         <div className="grid grid-rows-[1fr_auto] h-full gap-6 mt-8">
           {/* Navigation Links */}
           <nav className="flex flex-col gap-2">
