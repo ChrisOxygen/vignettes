@@ -11,10 +11,12 @@ import {
 } from "@react-email/components";
 import { EmailLogo } from "./components/EmailLogo";
 import { UsEb1aEmailTemplate } from "./templates/UsEb1aEmailTemplate";
+import { Eb2NiwEmailTemplate } from "./templates/Eb2NiwEmailTemplate";
 import {
   AssessmentType,
   AssessmentData,
   UsEb1aData,
+  Eb2NiwData,
 } from "./types/assessmentTypes";
 import {
   main,
@@ -71,12 +73,7 @@ export default function AssessmentSubmissionEmail({
         return <UsEb1aEmailTemplate {...(formData as UsEb1aData)} />;
 
       case AssessmentType.EB2NIW:
-        // TODO: Create Eb2NiwEmailTemplate
-        return (
-          <Section>
-            <Text style={paragraph}>EB-2 NIW template coming soon...</Text>
-          </Section>
-        );
+        return <Eb2NiwEmailTemplate {...(formData as Eb2NiwData)} />;
 
       case AssessmentType.UK_GLOBAL_TALENT:
         // TODO: Create UkGlobalTalentEmailTemplate
