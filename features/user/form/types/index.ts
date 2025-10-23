@@ -38,6 +38,7 @@ export interface RadioFieldConfig extends BaseFieldConfig {
     triggerValue: string;
     placeholder: string;
     errorMessage: string;
+    maxLength?: number;
   };
 }
 

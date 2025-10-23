@@ -133,3 +133,91 @@ export const VISA_TYPES = [
       "Work visa, Tourist visa, Student visa, Business visa, Investor visa",
   },
 ];
+
+const navigation = {
+  menuItems: [
+    {
+      text: "Home",
+      href: "/home",
+      link: "/home",
+    },
+    {
+      text: "About Us",
+      href: "/about-us",
+      link: "/about-us",
+    },
+    {
+      text: "Partner Institution",
+      href: "/partner-institution",
+      link: "/partner-institution",
+    },
+    {
+      text: "Enquiry Form",
+      href: "/enquiry-form",
+      link: "/enquiry-form",
+    },
+    {
+      text: "Contact Us",
+      href: "/contact-us",
+      link: "/contact-us",
+    },
+    {
+      text: "Services",
+      href: "/services",
+      link: "/services",
+      hasDropdown: true,
+      children: [
+        {
+          text: "Canada Visa",
+          href: "/services",
+          link: "/services",
+        },
+        {
+          text: "UK Visa",
+          href: "/services",
+          link: "/services",
+        },
+        {
+          text: "Germany Visa",
+          href: "/services",
+          link: "/services",
+        },
+        {
+          text: "Scotland Visa",
+          href: "/services",
+          link: "/services",
+        },
+        {
+          text: "Japan Visa",
+          href: "/services",
+          link: "/services",
+        },
+      ],
+    },
+    {
+      text: "Assessments",
+      href: "/assessments",
+      link: "/assessments",
+      hasDropdown: true,
+      children: [
+        {
+          text: "UK Global Talent Visa",
+          href: "/assessments/uk-global-talent",
+          link: "/assessments/uk-global-talent",
+        },
+        {
+          text: "EB-2 NIW",
+          href: "/assessments/eb2-niw",
+          link: "/assessments/eb2-niw",
+        },
+        {
+          text: "EB-1A",
+          href: "/assessments/eb1a",
+          link: "/assessments/eb1a",
+        },
+      ],
+    },
+  ],
+
+  // Footer navigation sections
+};

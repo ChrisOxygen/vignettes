@@ -4,7 +4,7 @@ import React from "react";
 
 function layout({ children }: { children: React.ReactNode }) {
   return (
-    <main className="w-full h-full min-h-screen relative">
+    <main className="w-full h-full relative">
       <SiteHeader />
       {children}
 
