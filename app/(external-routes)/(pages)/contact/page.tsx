@@ -17,25 +17,12 @@ import {
 } from "@/shared/components/ui/card";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-
-// Contact form validation schema
-const contactFormSchema = z.object({
-  name: z.string().min(1, "Name is required").max(100, "Name is too long"),
-  email: z.string().min(1, "Email is required").email("Invalid email address"),
-  subject: z
-    .string()
-    .min(1, "Subject is required")
-    .max(200, "Subject is too long"),
-  message: z
-    .string()
-    .min(10, "Message must be at least 10 characters")
-    .max(1000, "Message is too long"),
-});
-
-type ContactFormData = z.infer<typeof contactFormSchema>;
+import { contactFormSchema, type ContactFormData } from "@/features/external-view/validators/contact.validator";
+import { useSendContactForm } from "@/features/external-view/hooks";
 
 function ContactPage() {
+  const [successMessage, setSuccessMessage] = React.useState<string | null>(null);
+
   const form = useForm<ContactFormData>({
     resolver: zodResolver(contactFormSchema),
     defaultValues: {
@@ -46,31 +33,43 @@ function ContactPage() {
     },
   });
 
-  const onSubmit = async (data: ContactFormData) => {
-    // TODO: Implement contact form submission
-    console.log("Form submitted:", data);
-    setTimeout(() => {
+  const { mutate: sendContactForm, isPending } = useSendContactForm({
+    onSuccess: (data) => {
+      setSuccessMessage(data.message || "Message sent successfully!");
       form.reset();
-    }, 1000);
+      // Clear success message after 5 seconds
+      setTimeout(() => setSuccessMessage(null), 5000);
+    },
+    onError: (error) => {
+      console.error("Contact form error:", error);
+      // You can add toast notification here if you have a toast system
+    },
+  });
+
+  const onSubmit = async (data: ContactFormData) => {
+    sendContactForm(data);
   };
 
   const contactInfo = [
     {
       icon: Phone,
       title: "Call Us Anytime",
-      content: "+236 (456) 896 22",
-      href: "tel:+23645689622",
+      content: ["+234 703 959 4474", "+234 903 465 5589"],
+      href: "tel:+2347039594474",
     },
     {
       icon: Mail,
       title: "Email Our Team",
-      content: "info@example.com",
-      href: "mailto:info@example.com",
+      content: [
+        "info@insights4globaltalents.com",
+        "myvisa@insights4globaltalents.com",
+      ],
+      href: "mailto:info@insights4globaltalents.com",
     },
     {
       icon: MapPin,
       title: "Visit Our Office",
-      content: "TheBunker, 279 Hebert Marcaulay Way, Yaba",
+      content: ["TheBunker, 279 Hebert Marcaulay Way, Yaba"],
       href: "https://maps.google.com/?q=TheBunker,279+Hebert+Marcaulay+Way,Alagomeji,Yaba",
     },
   ];
@@ -96,7 +95,7 @@ function ContactPage() {
           </div>
 
           {/* Contact Info Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 border-b gap-6 w-full">
+          <div className="grid grid-cols-1 md:grid-cols-3 border-b pb-6 gap-6 w-full">
             {contactInfo.map((info, index) => {
               const Icon = info.icon;
               return (
@@ -111,16 +110,31 @@ function ContactPage() {
                     <CardTitle className="text-xl">{info.title}</CardTitle>
                   </CardHeader>
                   <CardContent className="text-left">
-                    <a
-                      href={info.href}
-                      target={info.icon === MapPin ? "_blank" : undefined}
-                      rel={
-                        info.icon === MapPin ? "noopener noreferrer" : undefined
-                      }
-                      className="text-muted-foreground hover:text-primary transition-colors"
-                    >
-                      {info.content}
-                    </a>
+                    <div className="flex flex-col gap-1">
+                      {info.content.map((line, i) => (
+                        <a
+                          key={i}
+                          href={
+                            i === 0
+                              ? info.href
+                              : info.icon === Phone
+                                ? `tel:${line.replace(/\s/g, "")}`
+                                : info.icon === Mail
+                                  ? `mailto:${line}`
+                                  : info.href
+                          }
+                          target={info.icon === MapPin ? "_blank" : undefined}
+                          rel={
+                            info.icon === MapPin
+                              ? "noopener noreferrer"
+                              : undefined
+                          }
+                          className="text-muted-foreground hover:text-primary transition-colors"
+                        >
+                          {line}
+                        </a>
+                      ))}
+                    </div>
                   </CardContent>
                 </Card>
               );
@@ -134,6 +148,11 @@ function ContactPage() {
                 <CardTitle className="text-2xl sm:text-3xl">
                   Or fill out the form below
                 </CardTitle>
+                {successMessage && (
+                  <div className="mt-4 p-4 bg-green-50 border-2 border-green-200 rounded-lg">
+                    <p className="text-green-800 font-medium">{successMessage}</p>
+                  </div>
+                )}
               </CardHeader>
               <CardContent>
                 <form
@@ -228,12 +247,10 @@ function ContactPage() {
                       type="submit"
                       size="lg"
                       className="px-8 gap-2 w-full md:w-1/2"
-                      disabled={form.formState.isSubmitting}
+                      disabled={isPending}
                     >
                       <Send className="w-5 h-5" />
-                      {form.formState.isSubmitting
-                        ? "Sending Message..."
-                        : "Send Message"}
+                      {isPending ? "Sending Message..." : "Send Message"}
                     </Button>
                   </div>
                 </form>

@@ -1,7 +1,9 @@
 "use server";
 
 import AssessmentSubmissionEmail from "@/emails/AssessmentSubmissionEmail";
+import ContactEmail from "@/emails/ContactEmail";
 import { AssessmentType, AssessmentData } from "@/emails/types/assessmentTypes";
+import { contactFormSchema, type ContactFormData } from "@/features/external-view/validators/contact.validator";
 import { Resend } from "resend";
 import { z } from "zod";
 
@@ -89,6 +91,45 @@ export async function sendAssessmentSubmissionEmail(
     return {
       ok: false,
       message: "Failed to send assessment submission email",
+      error: error instanceof Error ? error.message : "Unknown error",
+    };
+  }
+}
+
+// Server action to send contact form submission
+export async function sendContactFormEmail(formData: ContactFormData) {
+  try {
+    // Validate input data with Zod
+    const validatedData = contactFormSchema.parse(formData);
+
+    // Send the contact form email to admin
+    const { data, error } = await resend.emails.send({
+      from: "contactform@insights4globaltalents.com",
+      to: "info@insights4globaltalents.com",
+      replyTo: validatedData.email,
+      subject: `New Contact Form: ${validatedData.subject}`,
+      react: ContactEmail({
+        name: validatedData.name,
+        email: validatedData.email,
+        subject: validatedData.subject,
+        message: validatedData.message,
+      }),
+    });
+
+    if (error) {
+      throw new Error(`Resend error: ${error.message}`);
+    }
+
+    return {
+      ok: true,
+      message: "Contact form submitted successfully. We'll get back to you soon!",
+      data,
+    };
+  } catch (error) {
+    console.error("Error sending contact form email:", error);
+    return {
+      ok: false,
+      message: "Failed to send contact form. Please try again.",
       error: error instanceof Error ? error.message : "Unknown error",
     };
   }

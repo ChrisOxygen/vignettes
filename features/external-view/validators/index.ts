@@ -8,3 +8,6 @@ export {
   validateEB2NIWField,
   type EB2NIWQuestionnaireFormData,
 } from "./eb2niw.validator";
+
+// Export contact validator
+export * from "./contact.validator";
