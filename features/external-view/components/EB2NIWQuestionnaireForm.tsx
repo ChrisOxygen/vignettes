@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -14,6 +14,8 @@ import {
   EB2NIW_SECTIONS,
   EB2NIW_FIELD_ORDER,
 } from "@/features/external-view/constants/eb2niw";
+import { useSendAssessmentEmail } from "@/features/external-view/hooks";
+import { AssessmentType } from "@/emails/types/assessmentTypes";
 import { Button } from "@/shared/components/ui/button";
 import {
   Card,
@@ -26,18 +28,90 @@ import { Input } from "@/shared/components/ui/input";
 import { Textarea } from "@/shared/components/ui/textarea";
 import { Label } from "@/shared/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/shared/components/ui/radio-group";
+import { CheckCircle2 } from "lucide-react";
 
 export function EB2NIWQuestionnaireForm() {
+  const [isSubmitted, setIsSubmitted] = useState(false);
+
   const form = useForm<EB2NIWQuestionnaireFormData>({
     resolver: zodResolver(eb2niwQuestionnaireSchema),
     defaultValues: getEB2NIWDefaultValues(),
     mode: "onBlur",
   });
 
+  const { mutate: sendAssessmentEmail, isPending } = useSendAssessmentEmail({
+    onSuccess: () => {
+      setIsSubmitted(true);
+      form.reset();
+    },
+    onError: (error) => {
+      console.error("Form submission error:", error);
+      alert("There was an error submitting your form. Please try again.");
+    },
+  });
+
   const onSubmit = (data: EB2NIWQuestionnaireFormData) => {
-    console.log("Form submitted:", data);
-    // TODO: Implement server action for form submission
+    sendAssessmentEmail({
+      assessmentType: AssessmentType.EB2NIW,
+      formData: data,
+    });
   };
+
+  // Show success message if form is submitted
+  if (isSubmitted) {
+    return (
+      <Card className="w-full border-0 shadow-none">
+        <CardContent className="px-0 py-12">
+          <div className="flex flex-col items-center justify-center text-center space-y-6 max-w-2xl mx-auto">
+            <div className="rounded-full bg-green-100 p-6">
+              <CheckCircle2 className="w-16 h-16 text-green-600" />
+            </div>
+
+            <div className="space-y-3">
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">
+                Application Submitted Successfully!
+              </h2>
+              <p className="text-base sm:text-lg text-gray-600 leading-relaxed">
+                Thank you for submitting your EB-2 NIW qualification assessment.
+              </p>
+            </div>
+
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 w-full">
+              <p className="text-sm sm:text-base text-blue-900 leading-relaxed">
+                <strong>What happens next?</strong>
+                <br />
+                Our team will carefully review your application and assess your
+                eligibility for the EB-2 NIW visa category. You will receive a
+                response from our administrators within{" "}
+                <strong>48 hours</strong>.
+              </p>
+            </div>
+
+            <div className="space-y-2 text-sm text-gray-600">
+              <p>
+                If your profile is viable, we will schedule you for a
+                complimentary consultation call to discuss your immigration
+                options in detail.
+              </p>
+              <p className="text-xs text-gray-500">
+                Please check your email (including spam folder) for our
+                response.
+              </p>
+            </div>
+
+            <Button
+              onClick={() => setIsSubmitted(false)}
+              variant="outline"
+              size="lg"
+              className="mt-4"
+            >
+              Submit Another Assessment
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   // Watch yes/no fields to show/hide explanations
   const watchFields = Object.keys(EB2NIW_YES_NO_FIELD_CONFIGS).reduce(
@@ -301,11 +375,9 @@ export function EB2NIWQuestionnaireForm() {
               type="submit"
               size="lg"
               className="px-8"
-              disabled={form.formState.isSubmitting}
+              disabled={isPending}
             >
-              {form.formState.isSubmitting
-                ? "Submitting..."
-                : "Submit Application"}
+              {isPending ? "Submitting..." : "Submit Application"}
             </Button>
           </div>
         </form>

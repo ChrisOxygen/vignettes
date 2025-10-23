@@ -3,6 +3,7 @@
 import React from "react";
 import SectionTitle from "./SectionTitle";
 import Image from "next/image";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { IoCheckmarkCircleOutline } from "react-icons/io5";
@@ -76,9 +77,12 @@ function AboutSection() {
               Ready to start your immigration journey? Our expert team is here
               to guide you through every step of the process.
             </p>
-            <button className="px-8 py-3 bg-primary text-white font-bold rounded-lg hover:bg-primary/90 hover:scale-105 transition-all duration-300 shadow-lg whitespace-nowrap">
+            <Link
+              href="/contact-us"
+              className="px-8 py-3 bg-primary cursor-pointer text-white font-bold rounded-lg hover:bg-primary/90 hover:scale-105 transition-all duration-300 shadow-lg whitespace-nowrap"
+            >
               Contact Us Today
-            </button>
+            </Link>
           </div>
         </div>
       </div>

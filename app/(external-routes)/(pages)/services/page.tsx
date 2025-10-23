@@ -11,23 +11,26 @@ import React from "react";
 function ServicesPage() {
   return (
     <main className="flex flex-col w-full">
-      <PagesHeader />
-      <section className=" flex w-full flex-col gap-6 items-center px-4 sm:px-6 ">
+      <PagesHeader
+        title="Our Visa & Immigration Services"
+        backgroundImage="/assets/imgi_4_hero-2.webp"
+      />
+      <section className="flex w-full flex-col gap-6 items-center px-4 sm:px-6">
         <div className="mx-auto py-16 sm:py-20 lg:py-26 max-w-7xl flex flex-col items-center gap-10 w-full">
-          <div className="flex items-end gap-10">
+          <div className="flex flex-col lg:flex-row lg:items-end gap-6 lg:gap-10 w-full">
             <SectionTitle
               subtitle="Visa Categories"
               title="Insights and Vignettes Outstanding Immigration Visa Services"
-              className=""
+              className="flex-1"
               alignment="left"
             />
-            <p className=" max-w-xl">
+            <p className="text-base sm:text-lg max-w-full lg:max-w-xl text-gray-600 leading-relaxed">
               We offer study abroad application and processing services to help
               students who want to Study Abroad. We assist and support our
               clients to secure admission into institutions abroad including the
               United Kingdom (UK), United States of America (USA), Canada,
               Australia, Ireland, United Arab Emirate (UAE), Ukraine, Germany,
-              Cyprus, Spain,
+              Cyprus, Spain.
             </p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 w-full">

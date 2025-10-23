@@ -4,6 +4,7 @@ import React from "react";
 import SectionTitle from "./SectionTitle";
 import { VISA_TYPES } from "../constants";
 import Image from "next/image";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 function SupportedCountriesSection() {
@@ -46,9 +47,12 @@ function SupportedCountriesSection() {
               Looking for partner institutions in your destination country?
               Explore our network of trusted educational partners worldwide.
             </p>
-            <button className="px-8 py-3 bg-primary text-white font-bold rounded-lg hover:bg-primary/90 hover:scale-105 transition-all duration-300 shadow-lg">
+            <Link
+              href="/partner-institutions"
+              className="px-8 py-3 bg-primary cursor-pointer text-white font-bold rounded-lg hover:bg-primary/90 hover:scale-105 transition-all duration-300 shadow-lg"
+            >
               See Our Partner Institutions
-            </button>
+            </Link>
           </div>
         )}
       </div>
