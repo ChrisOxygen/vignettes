@@ -31,7 +31,7 @@ export const ContactEmail = ({
       <Body style={main}>
         <Container style={container}>
           <Heading style={h1}>New Contact Form Submission</Heading>
-          
+
           <Text style={text}>
             You have received a new message from your website contact form.
           </Text>
@@ -67,7 +67,8 @@ export const ContactEmail = ({
           <Hr style={hr} />
 
           <Text style={footer}>
-            This email was sent from the contact form on insights4globaltalents.com
+            This email was sent from the contact form on
+            insights4globaltalents.com
           </Text>
         </Container>
       </Body>

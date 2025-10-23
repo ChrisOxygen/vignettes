@@ -3,7 +3,10 @@
 import AssessmentSubmissionEmail from "@/emails/AssessmentSubmissionEmail";
 import ContactEmail from "@/emails/ContactEmail";
 import { AssessmentType, AssessmentData } from "@/emails/types/assessmentTypes";
-import { contactFormSchema, type ContactFormData } from "@/features/external-view/validators/contact.validator";
+import {
+  contactFormSchema,
+  type ContactFormData,
+} from "@/features/external-view/validators/contact.validator";
 import { Resend } from "resend";
 import { z } from "zod";
 
@@ -122,7 +125,8 @@ export async function sendContactFormEmail(formData: ContactFormData) {
 
     return {
       ok: true,
-      message: "Contact form submitted successfully. We'll get back to you soon!",
+      message:
+        "Contact form submitted successfully. We'll get back to you soon!",
       data,
     };
   } catch (error) {

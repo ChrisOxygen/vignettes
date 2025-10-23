@@ -11,11 +11,11 @@ export const useSendContactForm = (options?: UseSendContactFormOptions) => {
   return useMutation({
     mutationFn: async (formData: ContactFormData) => {
       const result = await sendContactFormEmail(formData);
-      
+
       if (!result.ok) {
         throw new Error(result.message || "Failed to send contact form");
       }
-      
+
       return result;
     },
     onSuccess: options?.onSuccess,

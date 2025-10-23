@@ -17,11 +17,16 @@ import {
 } from "@/shared/components/ui/card";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { contactFormSchema, type ContactFormData } from "@/features/external-view/validators/contact.validator";
+import {
+  contactFormSchema,
+  type ContactFormData,
+} from "@/features/external-view/validators/contact.validator";
 import { useSendContactForm } from "@/features/external-view/hooks";
 
 function ContactPage() {
-  const [successMessage, setSuccessMessage] = React.useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = React.useState<string | null>(
+    null
+  );
 
   const form = useForm<ContactFormData>({
     resolver: zodResolver(contactFormSchema),
@@ -150,7 +155,9 @@ function ContactPage() {
                 </CardTitle>
                 {successMessage && (
                   <div className="mt-4 p-4 bg-green-50 border-2 border-green-200 rounded-lg">
-                    <p className="text-green-800 font-medium">{successMessage}</p>
+                    <p className="text-green-800 font-medium">
+                      {successMessage}
+                    </p>
                   </div>
                 )}
               </CardHeader>
