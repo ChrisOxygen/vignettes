@@ -179,15 +179,26 @@ function protectRoute(
 
   // Handle authenticated users on auth routes
   if (routeType === "auth") {
-    // Only redirect if user has a valid role and is verified
-    if (
-      isValidUserRole(userRole) &&
-      (!userStatus || userStatus === AccountStatus.ACTIVE)
-    ) {
-      const redirectUrl = ROUTE_CONFIG.redirects[userRole];
-      return createRedirectWithCookies(redirectUrl, request, supabaseResponse);
+    // Authenticated users should never access auth routes
+    // Redirect them to appropriate dashboard based on role
+    if (isValidUserRole(userRole)) {
+      if (userStatus === AccountStatus.ACTIVE || !userStatus) {
+        const redirectUrl = ROUTE_CONFIG.redirects[userRole];
+        return createRedirectWithCookies(
+          redirectUrl,
+          request,
+          supabaseResponse
+        );
+      } else if (userStatus === AccountStatus.PENDING_VERIFICATION) {
+        // If pending verification, redirect to verification page
+        return createRedirectWithCookies(
+          "/welcome-and-verify",
+          request,
+          supabaseResponse
+        );
+      }
     } else {
-      // User exists but has invalid role or pending verification - force logout
+      // User exists but has invalid role - force logout
       return createLogoutRedirect(request, supabaseResponse, "invalid_role");
     }
   }
