@@ -7,9 +7,13 @@ import { FiChevronRight } from "react-icons/fi";
 
 interface PagesHeaderProps {
   title?: string;
+  backgroundImage?: string;
 }
 
-function PagesHeader({ title }: PagesHeaderProps) {
+function PagesHeader({
+  title,
+  backgroundImage = "/assets/imgi_5_hero-3.webp",
+}: PagesHeaderProps) {
   const pathname = usePathname();
 
   // Generate breadcrumbs from pathname
@@ -37,7 +41,10 @@ function PagesHeader({ title }: PagesHeaderProps) {
 
   return (
     <header className="w-full grid grid-rows-[100px_1fr] overflow-hidden relative">
-      <div className="absolute inset-0 -z-10 bg-[url('/assets/imgi_5_hero-3.webp')] bg-no-repeat bg-center bg-cover filter brightness-[49%] saturate-[139%] contrast-[118%]"></div>
+      <div
+        className="absolute inset-0 -z-10 bg-no-repeat bg-center bg-cover filter brightness-[49%] saturate-[139%] contrast-[118%]"
+        style={{ backgroundImage: `url('${backgroundImage}')` }}
+      ></div>
       <div className="absolute inset-0 -z-10 bg-black/40"></div>
       <div className="row-start-2 relative p-4 sm:p-6 md:p-8">
         <div className="mx-auto py-10 max-w-7xl flex flex-col gap-2 w-full">

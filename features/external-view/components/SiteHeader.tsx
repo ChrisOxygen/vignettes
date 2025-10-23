@@ -3,12 +3,21 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/shared/components/ui/button";
-import { PAGES } from "../constants";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/shared/components/ui/dropdown-menu";
+import { NAVIGATION } from "../constants";
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import MobileMenu from "./MobileMenu";
+import { ChevronDown } from "lucide-react";
 
 function SiteHeader() {
   const [isScrolled, setIsScrolled] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -42,18 +51,72 @@ function SiteHeader() {
         </Link>
 
         {/* Nav Section */}
-        <nav className="hidden lg:flex items-center justify-center gap-8">
-          {PAGES.map((page) => (
-            <Link
-              key={page}
-              href={`/${page.toLowerCase().replace(/\s+/g, "-")}`}
-              className={`text-sm font-semibold tracking-wide hover:text-primary transition-colors duration-200 ${
-                isScrolled ? "text-foreground" : "text-white"
-              }`}
-            >
-              {page}
-            </Link>
-          ))}
+        <nav className="hidden lg:flex items-center justify-center gap-6">
+          {NAVIGATION.menuItems.map((item) => {
+            const isActive = pathname === item.link || 
+                           (item.hasDropdown && item.children?.some(child => pathname === child.link));
+            
+            return (
+              <div key={item.text}>
+                {item.hasDropdown && item.children ? (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger
+                      className={`flex items-center gap-1 text-sm font-semibold tracking-wide transition-colors duration-200 outline-none ${
+                        isActive
+                          ? "text-primary"
+                          : isScrolled 
+                            ? "text-foreground hover:text-primary" 
+                            : "text-white hover:text-primary"
+                      }`}
+                    >
+                      {item.text}
+                      <ChevronDown className="h-4 w-4" />
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="start" className="w-56">
+                      {/* Add "All [Category]" link if parent has a link */}
+                      {item.link && (
+                        <DropdownMenuItem asChild>
+                          <Link
+                            href={item.link}
+                            className={`font-semibold cursor-pointer ${
+                              pathname === item.link ? "bg-accent text-primary" : ""
+                            }`}
+                          >
+                            All {item.text}
+                          </Link>
+                        </DropdownMenuItem>
+                      )}
+                      {item.children.map((child) => (
+                        <DropdownMenuItem key={child.text} asChild>
+                          <Link 
+                            href={child.link} 
+                            className={`cursor-pointer ${
+                              pathname === child.link ? "bg-accent text-primary" : ""
+                            }`}
+                          >
+                            {child.text}
+                          </Link>
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                ) : (
+                  <Link
+                    href={item.link}
+                    className={`text-sm font-semibold tracking-wide transition-colors duration-200 ${
+                      pathname === item.link
+                        ? "text-primary"
+                        : isScrolled 
+                          ? "text-foreground hover:text-primary" 
+                          : "text-white hover:text-primary"
+                    }`}
+                  >
+                    {item.text}
+                  </Link>
+                )}
+              </div>
+            );
+          })}
         </nav>
 
         {/* CTA Buttons Section - Desktop Only */}

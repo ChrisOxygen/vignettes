@@ -134,32 +134,17 @@ export const VISA_TYPES = [
   },
 ];
 
-const navigation = {
+const NAVIGATION = {
   menuItems: [
     {
       text: "Home",
-      href: "/home",
-      link: "/home",
+      href: "/",
+      link: "/",
     },
     {
       text: "About Us",
       href: "/about-us",
       link: "/about-us",
-    },
-    {
-      text: "Partner Institution",
-      href: "/partner-institution",
-      link: "/partner-institution",
-    },
-    {
-      text: "Enquiry Form",
-      href: "/enquiry-form",
-      link: "/enquiry-form",
-    },
-    {
-      text: "Contact Us",
-      href: "/contact-us",
-      link: "/contact-us",
     },
     {
       text: "Services",
@@ -195,6 +180,12 @@ const navigation = {
       ],
     },
     {
+      text: "Partner Institution",
+      href: "/partner-institution",
+      link: "/partner-institution",
+    },
+
+    {
       text: "Assessments",
       href: "/assessments",
       link: "/assessments",
@@ -217,7 +208,14 @@ const navigation = {
         },
       ],
     },
+    {
+      text: "Contact Us",
+      href: "/contact-us",
+      link: "/contact-us",
+    },
   ],
 
   // Footer navigation sections
 };
+
+export { NAVIGATION };

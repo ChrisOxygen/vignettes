@@ -1,22 +1,30 @@
+"use client";
+
 import React from "react";
 import SectionTitle from "./SectionTitle";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 
 import { IoCheckmarkCircleOutline } from "react-icons/io5";
 import { FaPassport, FaUserGraduate, FaGlobeAmericas } from "react-icons/fa";
 import { Separator } from "@/shared/components/ui/separator";
 
 function AboutSection() {
+  const pathname = usePathname();
+  const isAboutUsPage = pathname === "/about-us";
+
   return (
     <section className="flex w-full flex-col gap-6 items-center px-4 sm:px-6 bg-gradient-to-b from-transparent to-gray-100/40">
       <div className="mx-auto pb-16 sm:pb-20 lg:pb-26 max-w-7xl flex flex-col items-center gap-10 w-full">
-        <Image
-          src={`/assets/imgi_5_hero-3.webp`}
-          alt="about-us"
-          width={1500}
-          height={1500}
-          className="rounded-2xl w-full object-cover object-center h-[300px] sm:h-[500px] lg:h-[700px] overflow-hidden flex-shrink-0"
-        />
+        {!isAboutUsPage && (
+          <Image
+            src={`/assets/imgi_5_hero-3.webp`}
+            alt="about-us"
+            width={1500}
+            height={1500}
+            className="rounded-2xl w-full object-cover object-center h-[300px] sm:h-[500px] lg:h-[700px] overflow-hidden flex-shrink-0"
+          />
+        )}
         <div className=" sm:px-8 w-full flex flex-col gap-5">
           <SectionTitle
             title="Insights and Vignettes Limited (IVL)"
