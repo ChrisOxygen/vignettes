@@ -209,8 +209,8 @@ const NAVIGATION = {
     },
     {
       text: "Contact Us",
-      href: "/contact-us",
-      link: "/contact-us",
+      href: "/contact",
+      link: "/contact",
     },
   ],
 

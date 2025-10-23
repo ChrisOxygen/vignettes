@@ -3,7 +3,7 @@
 import React from "react";
 import SectionTitle from "./SectionTitle";
 import Image from "next/image";
-import Link from "next/link";
+import CTABox from "./CTABox";
 import { usePathname } from "next/navigation";
 
 import { IoCheckmarkCircleOutline } from "react-icons/io5";
@@ -72,18 +72,7 @@ function AboutSection() {
               </span>
             </div>
           </div>
-          <div className="flex flex-col bg-primary/5 rounded-2xl py-8 px-8 sm:flex-row items-start sm:items-center justify-between gap-4 mt-4">
-            <p className="text-gray-600 max-w-xl">
-              Ready to start your immigration journey? Our expert team is here
-              to guide you through every step of the process.
-            </p>
-            <Link
-              href="/contact-us"
-              className="px-8 py-3 bg-primary cursor-pointer text-white font-bold rounded-lg hover:bg-primary/90 hover:scale-105 transition-all duration-300 shadow-lg whitespace-nowrap"
-            >
-              Contact Us Today
-            </Link>
-          </div>
+          <CTABox text="Ready to start your immigration journey? Our expert team is here to guide you through every step of the process." />
         </div>
       </div>
     </section>
