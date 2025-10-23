@@ -50,18 +50,20 @@ function MobileMenu({ isScrolled }: MobileMenuProps) {
           {/* Navigation Links */}
           <nav className="flex flex-col gap-2">
             {NAVIGATION.menuItems.map((item) => {
-              const isActive = pathname === item.link || 
-                             (item.hasDropdown && item.children?.some(child => pathname === child.link));
-              
+              const isActive =
+                pathname === item.link ||
+                (item.hasDropdown &&
+                  item.children?.some((child) => pathname === child.link));
+
               return (
                 <div key={item.text}>
                   {item.hasDropdown && item.children ? (
                     <Accordion type="single" collapsible className="w-full">
                       <AccordionItem value={item.text} className="border-none">
-                        <AccordionTrigger 
+                        <AccordionTrigger
                           className={`text-base font-semibold transition-colors duration-200 py-3 hover:no-underline ${
-                            isActive 
-                              ? "text-primary" 
+                            isActive
+                              ? "text-primary"
                               : "text-foreground hover:text-primary"
                           }`}
                         >
@@ -73,8 +75,8 @@ function MobileMenu({ isScrolled }: MobileMenuProps) {
                             <Link
                               href={item.link}
                               className={`text-sm font-semibold transition-colors duration-200 py-2 ${
-                                pathname === item.link 
-                                  ? "text-primary" 
+                                pathname === item.link
+                                  ? "text-primary"
                                   : "text-foreground hover:text-primary"
                               }`}
                               onClick={() => setOpen(false)}
@@ -87,8 +89,8 @@ function MobileMenu({ isScrolled }: MobileMenuProps) {
                               key={child.text}
                               href={child.link}
                               className={`text-sm transition-colors duration-200 py-2 ${
-                                pathname === child.link 
-                                  ? "text-primary font-semibold" 
+                                pathname === child.link
+                                  ? "text-primary font-semibold"
                                   : "text-muted-foreground hover:text-primary"
                               }`}
                               onClick={() => setOpen(false)}
@@ -103,8 +105,8 @@ function MobileMenu({ isScrolled }: MobileMenuProps) {
                     <Link
                       href={item.link}
                       className={`text-base font-semibold transition-colors duration-200 py-3 block ${
-                        pathname === item.link 
-                          ? "text-primary" 
+                        pathname === item.link
+                          ? "text-primary"
                           : "text-foreground hover:text-primary"
                       }`}
                       onClick={() => setOpen(false)}

@@ -53,9 +53,11 @@ function SiteHeader() {
         {/* Nav Section */}
         <nav className="hidden lg:flex items-center justify-center gap-6">
           {NAVIGATION.menuItems.map((item) => {
-            const isActive = pathname === item.link || 
-                           (item.hasDropdown && item.children?.some(child => pathname === child.link));
-            
+            const isActive =
+              pathname === item.link ||
+              (item.hasDropdown &&
+                item.children?.some((child) => pathname === child.link));
+
             return (
               <div key={item.text}>
                 {item.hasDropdown && item.children ? (
@@ -64,8 +66,8 @@ function SiteHeader() {
                       className={`flex items-center gap-1 text-sm font-semibold tracking-wide transition-colors duration-200 outline-none ${
                         isActive
                           ? "text-primary"
-                          : isScrolled 
-                            ? "text-foreground hover:text-primary" 
+                          : isScrolled
+                            ? "text-foreground hover:text-primary"
                             : "text-white hover:text-primary"
                       }`}
                     >
@@ -79,7 +81,9 @@ function SiteHeader() {
                           <Link
                             href={item.link}
                             className={`font-semibold cursor-pointer ${
-                              pathname === item.link ? "bg-accent text-primary" : ""
+                              pathname === item.link
+                                ? "bg-accent text-primary"
+                                : ""
                             }`}
                           >
                             All {item.text}
@@ -88,10 +92,12 @@ function SiteHeader() {
                       )}
                       {item.children.map((child) => (
                         <DropdownMenuItem key={child.text} asChild>
-                          <Link 
-                            href={child.link} 
+                          <Link
+                            href={child.link}
                             className={`cursor-pointer ${
-                              pathname === child.link ? "bg-accent text-primary" : ""
+                              pathname === child.link
+                                ? "bg-accent text-primary"
+                                : ""
                             }`}
                           >
                             {child.text}
@@ -106,8 +112,8 @@ function SiteHeader() {
                     className={`text-sm font-semibold tracking-wide transition-colors duration-200 ${
                       pathname === item.link
                         ? "text-primary"
-                        : isScrolled 
-                          ? "text-foreground hover:text-primary" 
+                        : isScrolled
+                          ? "text-foreground hover:text-primary"
                           : "text-white hover:text-primary"
                     }`}
                   >
