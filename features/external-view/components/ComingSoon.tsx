@@ -14,16 +14,16 @@ function ComingSoon({ title, description }: ComingSoonProps) {
         <div className="size-20 rounded-full bg-primary/10 flex items-center justify-center">
           <Clock className="size-10 text-primary" />
         </div>
-        
+
         <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight">
           {title}
         </h1>
-        
+
         <p className="text-lg text-muted-foreground max-w-xl">
-          {description || 
+          {description ||
             "We're working hard to bring you this page. Check back soon for updates!"}
         </p>
-        
+
         <div className="flex flex-col sm:flex-row gap-4 mt-4">
           <Button asChild size="lg">
             <Link href="/">
@@ -31,7 +31,7 @@ function ComingSoon({ title, description }: ComingSoonProps) {
               Back to Home
             </Link>
           </Button>
-          
+
           <Button variant="outline" size="lg" asChild>
             <Link href="/contact-us">Contact Us</Link>
           </Button>
