@@ -14,6 +14,16 @@ import {
 import { Separator } from "@/shared/components/ui/separator";
 import { SidebarTrigger } from "@/shared/components/ui/sidebar";
 import { ScrollArea } from "@/shared/components/ui/scroll-area";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/shared/components/ui/sheet";
+import { Button } from "@/shared/components/ui/button";
+import { MessageSquare } from "lucide-react";
 import { FormProvider } from "../../context/FormProviders";
 
 interface FormLayoutContentProps {
@@ -72,7 +82,7 @@ export function FormLayoutContent({ children }: FormLayoutContentProps) {
         </header>
 
         <div
-          className={`grid gap-4 p-4 rounded-lg ${isFormTabActive ? "grid-cols-[1fr_minmax(300px,400px)]" : "grid-cols-1"}`}
+          className={`grid gap-4 p-4 rounded-lg ${isFormTabActive ? "lg:grid-cols-[1fr_minmax(300px,400px)] grid-cols-1" : "grid-cols-1"}`}
         >
           <ScrollArea className="rounded-lg h-[85vh] grid relative  ">
             <div className=" min-h-[85vh] grid">{children}</div>
@@ -81,9 +91,35 @@ export function FormLayoutContent({ children }: FormLayoutContentProps) {
 
           {/* Comments Panel - Only visible on form routes */}
           {isFormTabActive && (
-            <div className="h-[85vh]">
-              <FormComments />
-            </div>
+            <>
+              {/* Desktop: Sidebar comments panel (>= 1024px) */}
+              <div className="hidden lg:block h-[85vh]">
+                <FormComments />
+              </div>
+
+              {/* Mobile: Sheet comments (< 1024px) */}
+              <div className="lg:hidden fixed bottom-4 right-4 z-50">
+                <Sheet>
+                  <SheetTrigger asChild>
+                    <Button size="lg" className="shadow-lg">
+                      <MessageSquare className="mr-2 h-5 w-5" />
+                      Comments
+                    </Button>
+                  </SheetTrigger>
+                  <SheetContent side="right" className="w-full sm:max-w-md">
+                    <SheetHeader>
+                      <SheetTitle>Form Comments</SheetTitle>
+                      <SheetDescription>
+                        View and respond to admin feedback on your form
+                      </SheetDescription>
+                    </SheetHeader>
+                    <div className="mt-4 h-[calc(100vh-120px)]">
+                      <FormComments />
+                    </div>
+                  </SheetContent>
+                </Sheet>
+              </div>
+            </>
           )}
         </div>
       </FormProvider>
