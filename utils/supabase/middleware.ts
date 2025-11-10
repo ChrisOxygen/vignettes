@@ -16,13 +16,13 @@ type RouteType =
 const ROUTE_CONFIG = {
   auth: ["/sign-in", "/sign-up", "/reset-password"],
   admin: ["/admin"],
-  user: ["/app"],
+  user: ["/app/form"],
   onboarding: ["/onboarding"],
   verification: ["/welcome-and-verify"],
   public: ["/", "/about", "/contact", "/pricing"], // Explicit public routes
   redirects: {
     ADMIN: "/admin",
-    USER: "/app",
+    USER: "/app/form",
   },
 } as const;
 
@@ -237,7 +237,11 @@ function protectRoute(
       } else if (hasBasicApplicantData === true) {
         // User has completed onboarding - redirect away from onboarding to main app
         if (routeType === "onboarding") {
-          return createRedirectWithCookies("/app", request, supabaseResponse);
+          return createRedirectWithCookies(
+            "/app/form",
+            request,
+            supabaseResponse
+          );
         }
       }
       // If hasBasicApplicantData is undefined, allow access (backward compatibility)
@@ -245,7 +249,7 @@ function protectRoute(
 
     // User trying to access admin routes - redirect to user dashboard
     if (routeType === "admin") {
-      return createRedirectWithCookies("/app", request, supabaseResponse);
+      return createRedirectWithCookies("/app/form", request, supabaseResponse);
     }
   }
 

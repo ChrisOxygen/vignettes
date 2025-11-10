@@ -1,13 +1,14 @@
 "use server";
 
 import { createClient } from "@/utils/supabase/server";
-import { PrismaClient, FormType, FormStatus } from "@prisma/client";
+import { FormType, FormStatus } from "@prisma/client";
 import { ApiResponse } from "@/features/shared/types/api";
 import { ApiErrorCode } from "@/features/shared/types/error";
 import { generateFormSchema } from "../utils/schema-generator";
 import { ZodError } from "zod";
+import { prisma } from "@/prisma/prisma";
 
-const prisma = new PrismaClient();
+// const prisma = new PrismaClient();
 
 // Types for form submission
 export interface FormSubmissionData {
@@ -27,16 +28,21 @@ export interface UpsertFormSubmissionInput {
 async function getAuthenticatedUser() {
   try {
     const supabase = await createClient();
+
     const { data: authData, error: authError } = await supabase.auth.getUser();
 
     if (authError || !authData.user) {
       throw new Error("Authentication required");
     }
 
+    console.log("authData:", authData);
+
     // Get user from database
     const user = await prisma.user.findUnique({
       where: { email: authData.user.email! },
     });
+
+    console.log("user from DB:", user);
 
     if (!user) {
       throw new Error("User not found in database");

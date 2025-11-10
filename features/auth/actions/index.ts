@@ -10,7 +10,6 @@ import {
 import { ApiResponse } from "@/features/shared/types/api";
 import { ApiErrorCode } from "@/features/shared/types/error";
 import { UserWithBasicApplicantData } from "@/features/shared/types/user";
-import { PrismaClient, User, UserRole } from "@prisma/client";
 import { sendVerificationEmail } from "./email.actions";
 import {
   handleUserCreationError,
@@ -20,8 +19,7 @@ import {
 } from "../utils/errorHandlers";
 import { validateAdminCode } from "../utils/adminHelpers";
 import { generateEmailVerificationToken } from "../utils/tokenGenerator";
-
-const prisma = new PrismaClient();
+import { prisma } from "@/prisma/prisma";
 
 export const _createUser = async (
   input: ZUserCreationData
