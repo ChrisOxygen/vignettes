@@ -57,7 +57,7 @@ export const FormField: React.FC<FormFieldProps> = ({ config, control }) => {
           </FieldLabel>
 
           {config.type === "textarea" ? (
-            <InputGroup>
+            <InputGroup className="border-2 border-gray-300 focus-within:border-primary">
               <InputGroupTextarea
                 {...field}
                 id={config.name}
@@ -82,7 +82,10 @@ export const FormField: React.FC<FormFieldProps> = ({ config, control }) => {
               onValueChange={field.onChange}
               disabled={isFormLocked}
             >
-              <SelectTrigger onClick={handleLockedFieldClick}>
+              <SelectTrigger
+                onClick={handleLockedFieldClick}
+                className="border-2 border-gray-300"
+              >
                 <SelectValue
                   placeholder={
                     config.placeholder || `Select ${config.label.toLowerCase()}`
@@ -106,6 +109,7 @@ export const FormField: React.FC<FormFieldProps> = ({ config, control }) => {
               aria-invalid={fieldState.invalid}
               disabled={isFormLocked}
               onClick={handleLockedFieldClick}
+              className="border-2 border-gray-300"
             />
           )}
 
