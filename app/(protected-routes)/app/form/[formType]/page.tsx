@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import {
   ApplicantInfoForm,
   ExSpouseInfoForm,
+  FamilyMembersForm,
 } from "@/features/user/form/components/forms";
 import { FormType } from "@prisma/client";
 import { NotFoundTemplate } from "@/shared/components";
@@ -22,6 +23,8 @@ const getFormComponent = (formType: FormType) => {
       return <ApplicantInfoForm />;
     case FormType.EX_SPOUSE_INFO:
       return <ExSpouseInfoForm />;
+    case FormType.FAMILY_MEMBERS_INFO:
+      return <FamilyMembersForm />;
 
     default:
       return null;

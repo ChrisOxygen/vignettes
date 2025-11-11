@@ -9,6 +9,10 @@ import {
   EX_SPOUSE_INFO_FIELDS,
   EX_SPOUSE_INFO_YES_NO_FIELDS,
 } from "./fields/ex-spouse-info";
+import {
+  FAMILY_MEMBERS_FIELDS,
+  FAMILY_MEMBERS_YES_NO_FIELDS,
+} from "./fields/family-members";
 
 export interface FormFieldConfiguration {
   fields: Record<string, FieldConfig>;
@@ -30,8 +34,8 @@ export const FORM_FIELD_CONFIGS: Record<FormType, FormFieldConfiguration> = {
   },
   // Placeholder for future forms - will be implemented as needed
   [FormType.FAMILY_MEMBERS_INFO]: {
-    fields: {},
-    yesNoFields: {},
+    fields: FAMILY_MEMBERS_FIELDS,
+    yesNoFields: FAMILY_MEMBERS_YES_NO_FIELDS,
   },
   [FormType.RELATIVES_ABROAD_INFO]: {
     fields: {},
