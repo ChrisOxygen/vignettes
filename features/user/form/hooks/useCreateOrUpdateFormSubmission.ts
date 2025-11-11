@@ -22,8 +22,13 @@ export function useCreateOrUpdateFormSubmission(
     ): Promise<ApiResponse<{ submissionId: string }>> => {
       return await _upsertFormSubmission(data);
     },
-    onSuccess: (result) => {
-      // Invalidate and refetch form-related queries
+    onSuccess: (result, variables) => {
+      // Invalidate the specific formType query to refetch updated status
+      queryClient.invalidateQueries({
+        queryKey: ["formSubmission", variables.formType],
+      });
+
+      // Invalidate general form-related queries
       queryClient.invalidateQueries({ queryKey: ["form-submissions"] });
       queryClient.invalidateQueries({ queryKey: ["user-form-submissions"] });
 

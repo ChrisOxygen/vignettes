@@ -1,5 +1,8 @@
 import React, { useState } from "react";
-import { ApplicantInfoForm } from "@/features/user/form/components/forms";
+import {
+  ApplicantInfoForm,
+  ExSpouseInfoForm,
+} from "@/features/user/form/components/forms";
 import { FormType } from "@prisma/client";
 import { NotFoundTemplate } from "@/shared/components";
 
@@ -17,6 +20,8 @@ const getFormComponent = (formType: FormType) => {
   switch (formType) {
     case FormType.APPLICANT_INFO:
       return <ApplicantInfoForm />;
+    case FormType.EX_SPOUSE_INFO:
+      return <ExSpouseInfoForm />;
 
     default:
       return null;

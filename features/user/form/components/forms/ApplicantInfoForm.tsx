@@ -11,10 +11,15 @@ import {
   CardTitle,
 } from "@/shared/components/ui/card";
 import { Field, FieldGroup } from "@/shared/components/ui/field";
-import { FIELD_CONFIGS, YES_NO_FIELD_CONFIGS } from "../../constants";
+import {
+  APPLICANT_INFO_FIELDS,
+  APPLICANT_INFO_YES_NO_FIELDS,
+} from "../../constants";
 import { FormField } from "../FormField";
 import { YesNoField } from "../YesNoField";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
+import { toast } from "sonner";
+import { FormStatus } from "@prisma/client";
 
 // Main component
 export function ApplicantInfoForm() {
@@ -25,7 +30,11 @@ export function ApplicantInfoForm() {
     resetForm,
     initializeForm,
     isInitialized,
+    isFormLocked,
+    submissionStatus,
   } = useFormProvider();
+
+  const hasShownToast = useRef(false);
 
   // Initialize form on component mount
   useEffect(() => {
@@ -33,6 +42,28 @@ export function ApplicantInfoForm() {
       initializeForm();
     }
   }, [isInitialized, initializeForm]);
+
+  // Show toast when form is locked
+  useEffect(() => {
+    if (isInitialized && isFormLocked && !hasShownToast.current) {
+      hasShownToast.current = true;
+
+      let message = "";
+      if (submissionStatus === FormStatus.APPROVED) {
+        message = "This form has been approved and cannot be modified.";
+      } else if (submissionStatus === FormStatus.UNDER_REVIEW) {
+        message = "This form is currently being reviewed by the admin.";
+      } else if (submissionStatus === FormStatus.SUBMITTED) {
+        message = "This form has been submitted and is awaiting admin review.";
+      }
+
+      if (message) {
+        toast.info("Form Locked", {
+          description: message,
+        });
+      }
+    }
+  }, [isInitialized, isFormLocked, submissionStatus]);
 
   return (
     <Card className="w-full border-0">
@@ -50,19 +81,19 @@ export function ApplicantInfoForm() {
             <div className="space-y-6">
               <h3 className="text-lg font-semibold">Personal Information</h3>
               <FormField
-                config={FIELD_CONFIGS.firstName}
+                config={APPLICANT_INFO_FIELDS.firstName}
                 control={form.control}
               />
               <FormField
-                config={FIELD_CONFIGS.middleName}
+                config={APPLICANT_INFO_FIELDS.middleName}
                 control={form.control}
               />
               <FormField
-                config={FIELD_CONFIGS.lastName}
+                config={APPLICANT_INFO_FIELDS.lastName}
                 control={form.control}
               />
               <FormField
-                config={FIELD_CONFIGS.otherNames}
+                config={APPLICANT_INFO_FIELDS.otherNames}
                 control={form.control}
               />
             </div>
@@ -71,19 +102,19 @@ export function ApplicantInfoForm() {
             <div className="space-y-6">
               <h3 className="text-lg font-semibold">Contact Information</h3>
               <FormField
-                config={FIELD_CONFIGS.cellNumber}
+                config={APPLICANT_INFO_FIELDS.cellNumber}
                 control={form.control}
               />
               <FormField
-                config={FIELD_CONFIGS.phoneNumber}
+                config={APPLICANT_INFO_FIELDS.phoneNumber}
                 control={form.control}
               />
               <FormField
-                config={FIELD_CONFIGS.emailAddress}
+                config={APPLICANT_INFO_FIELDS.emailAddress}
                 control={form.control}
               />
               <FormField
-                config={FIELD_CONFIGS.residentialAddress}
+                config={APPLICANT_INFO_FIELDS.residentialAddress}
                 control={form.control}
               />
             </div>
@@ -91,9 +122,12 @@ export function ApplicantInfoForm() {
             {/* Physical Information Section */}
             <div className="space-y-6">
               <h3 className="text-lg font-semibold">Physical Information</h3>
-              <FormField config={FIELD_CONFIGS.height} control={form.control} />
               <FormField
-                config={FIELD_CONFIGS.eyeColour}
+                config={APPLICANT_INFO_FIELDS.height}
+                control={form.control}
+              />
+              <FormField
+                config={APPLICANT_INFO_FIELDS.eyeColour}
                 control={form.control}
               />
             </div>
@@ -102,19 +136,19 @@ export function ApplicantInfoForm() {
             <div className="space-y-6">
               <h3 className="text-lg font-semibold">Birth Information</h3>
               <FormField
-                config={FIELD_CONFIGS.dateOfBirth}
+                config={APPLICANT_INFO_FIELDS.dateOfBirth}
                 control={form.control}
               />
               <FormField
-                config={FIELD_CONFIGS.cityOfBirth}
+                config={APPLICANT_INFO_FIELDS.cityOfBirth}
                 control={form.control}
               />
               <FormField
-                config={FIELD_CONFIGS.townOfBirth}
+                config={APPLICANT_INFO_FIELDS.townOfBirth}
                 control={form.control}
               />
               <FormField
-                config={FIELD_CONFIGS.countryOfBirth}
+                config={APPLICANT_INFO_FIELDS.countryOfBirth}
                 control={form.control}
               />
             </div>
@@ -125,19 +159,19 @@ export function ApplicantInfoForm() {
                 Citizenship and Residence
               </h3>
               <FormField
-                config={FIELD_CONFIGS.countryOfCitizenship}
+                config={APPLICANT_INFO_FIELDS.countryOfCitizenship}
                 control={form.control}
               />
               <FormField
-                config={FIELD_CONFIGS.countryOfResidence}
+                config={APPLICANT_INFO_FIELDS.countryOfResidence}
                 control={form.control}
               />
               <FormField
-                config={FIELD_CONFIGS.previousCountryOfResidence}
+                config={APPLICANT_INFO_FIELDS.previousCountryOfResidence}
                 control={form.control}
               />
               <FormField
-                config={FIELD_CONFIGS.nativeLanguage}
+                config={APPLICANT_INFO_FIELDS.nativeLanguage}
                 control={form.control}
               />
             </div>
@@ -146,11 +180,11 @@ export function ApplicantInfoForm() {
             <div className="space-y-6">
               <h3 className="text-lg font-semibold">Marital Status</h3>
               <FormField
-                config={FIELD_CONFIGS.maritalStatus}
+                config={APPLICANT_INFO_FIELDS.maritalStatus}
                 control={form.control}
               />
               <FormField
-                config={FIELD_CONFIGS.dateOfMarriage}
+                config={APPLICANT_INFO_FIELDS.dateOfMarriage}
                 control={form.control}
               />
             </div>
@@ -159,35 +193,37 @@ export function ApplicantInfoForm() {
             <div className="space-y-6">
               <h3 className="text-lg font-semibold">Additional Information</h3>
               <YesNoField
-                config={YES_NO_FIELD_CONFIGS.previouslyMarried}
+                config={APPLICANT_INFO_YES_NO_FIELDS.previouslyMarried}
                 control={form.control}
               />
               <YesNoField
-                config={YES_NO_FIELD_CONFIGS.hasNationalId}
+                config={APPLICANT_INFO_YES_NO_FIELDS.hasNationalId}
                 control={form.control}
               />
               <YesNoField
-                config={YES_NO_FIELD_CONFIGS.hasJobInCurrentCountry}
+                config={APPLICANT_INFO_YES_NO_FIELDS.hasJobInCurrentCountry}
                 control={form.control}
               />
               <YesNoField
-                config={YES_NO_FIELD_CONFIGS.ownsBusinessInCurrentCountry}
+                config={
+                  APPLICANT_INFO_YES_NO_FIELDS.ownsBusinessInCurrentCountry
+                }
                 control={form.control}
               />
               <YesNoField
-                config={YES_NO_FIELD_CONFIGS.travelledLast10Years}
+                config={APPLICANT_INFO_YES_NO_FIELDS.travelledLast10Years}
                 control={form.control}
               />
               <YesNoField
-                config={YES_NO_FIELD_CONFIGS.medicalExamLast6Months}
+                config={APPLICANT_INFO_YES_NO_FIELDS.medicalExamLast6Months}
                 control={form.control}
               />
               <YesNoField
-                config={YES_NO_FIELD_CONFIGS.biometricsLast10Years}
+                config={APPLICANT_INFO_YES_NO_FIELDS.biometricsLast10Years}
                 control={form.control}
               />
               <YesNoField
-                config={YES_NO_FIELD_CONFIGS.lawfulPROfAnotherCountry}
+                config={APPLICANT_INFO_YES_NO_FIELDS.lawfulPROfAnotherCountry}
                 control={form.control}
               />
             </div>

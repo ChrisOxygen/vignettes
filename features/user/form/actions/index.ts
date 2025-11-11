@@ -71,7 +71,7 @@ function validateFormData(
 
   // Use the same Zod schema that validates on the client side
   // This ensures consistent validation rules between client and server
-  const formSchema = generateFormSchema();
+  const formSchema = generateFormSchema(formType);
 
   try {
     // Validate form data against the schema

@@ -1,6 +1,5 @@
 import * as React from "react";
 import { Controller } from "react-hook-form";
-import { toast } from "sonner";
 import {
   Field,
   FieldDescription,
@@ -23,6 +22,7 @@ import {
 } from "@/shared/components/ui/select";
 import type { FieldConfig, SelectFieldConfig } from "../types";
 import { useFormProvider } from "../context/FormProviders";
+import { DatePickerField } from "./DatePickerField";
 
 interface FormFieldProps {
   config: FieldConfig;
@@ -32,16 +32,16 @@ interface FormFieldProps {
 export const FormField: React.FC<FormFieldProps> = ({ config, control }) => {
   const { isFormLocked, submissionStatus } = useFormProvider();
 
-  const handleLockedFieldClick = () => {
-    if (isFormLocked) {
-      toast.warning("Form is locked", {
-        description:
-          submissionStatus === "APPROVED"
-            ? "This form has been approved and cannot be modified."
-            : "This form is under review by the admin and cannot be changed.",
-      });
-    }
-  };
+  // Use DatePickerField for date inputs
+  if (config.type === "date") {
+    return (
+      <DatePickerField
+        config={config}
+        control={control}
+        isFormLocked={isFormLocked}
+      />
+    );
+  }
 
   return (
     <Controller
@@ -63,15 +63,14 @@ export const FormField: React.FC<FormFieldProps> = ({ config, control }) => {
                 id={config.name}
                 placeholder={config.placeholder}
                 rows={config.rows || 3}
-                className="min-h-20 resize-none"
+                className="min-h-20 resize-none text-foreground"
                 aria-invalid={fieldState.invalid}
                 disabled={isFormLocked}
-                onClick={handleLockedFieldClick}
               />
               {config.maxLength && (
                 <InputGroupAddon align="block-end">
                   <InputGroupText className="tabular-nums">
-                    {field.value.length}/{config.maxLength} characters
+                    {(field.value || "").length}/{config.maxLength} characters
                   </InputGroupText>
                 </InputGroupAddon>
               )}
@@ -82,10 +81,7 @@ export const FormField: React.FC<FormFieldProps> = ({ config, control }) => {
               onValueChange={field.onChange}
               disabled={isFormLocked}
             >
-              <SelectTrigger
-                onClick={handleLockedFieldClick}
-                className="border-2 border-gray-300"
-              >
+              <SelectTrigger className="border-2 border-gray-300">
                 <SelectValue
                   placeholder={
                     config.placeholder || `Select ${config.label.toLowerCase()}`
@@ -104,12 +100,11 @@ export const FormField: React.FC<FormFieldProps> = ({ config, control }) => {
             <Input
               {...field}
               id={config.name}
-              type={config.type === "date" ? "text" : config.type}
+              type={config.type}
               placeholder={config.placeholder}
               aria-invalid={fieldState.invalid}
               disabled={isFormLocked}
-              onClick={handleLockedFieldClick}
-              className="border-2 border-gray-300"
+              className="border-2 border-gray-300 text-foreground"
             />
           )}
 

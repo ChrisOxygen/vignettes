@@ -13,11 +13,31 @@ import {
 import { Save, Send, Info, MoreVertical } from "lucide-react";
 import { toast } from "sonner";
 import { useFormProvider } from "../../context/FormProviders";
-import { FormStatus } from "@prisma/client";
+import { FormStatus, FormType } from "@prisma/client";
+
+// Helper to convert FormType enum to readable form name
+const getFormDisplayName = (formType: FormType | null): string => {
+  if (!formType) return "Form";
+
+  const formNames: Record<FormType, string> = {
+    [FormType.APPLICANT_INFO]: "Applicant Info",
+    [FormType.EX_SPOUSE_INFO]: "Ex-Spouse Info",
+    [FormType.FAMILY_MEMBERS_INFO]: "Family Members",
+    [FormType.RELATIVES_ABROAD_INFO]: "Relatives Abroad",
+    [FormType.WORK_AND_BUSINESS_INFO]: "Work & Business",
+    [FormType.EDUCATION_INFO]: "Education",
+    [FormType.VISA_AND_PERMITS_INFO]: "Visa & Permits",
+    [FormType.PREVIOUS_TRAVEL_INFO]: "Travel History",
+    [FormType.SECURITY_AND_STATUTORY_QUESTIONS]: "Security Questions",
+  };
+
+  return formNames[formType] || "Form";
+};
 
 export function FormActionButtons() {
   const {
     form,
+    formType,
     onSubmit,
     saveDraft,
     isSubmitting,
@@ -28,6 +48,19 @@ export function FormActionButtons() {
 
   // Track if a toast is currently showing to prevent duplicates
   const toastIdRef = useRef<string | number | null>(null);
+
+  // Get the display name for the current form
+  const formDisplayName = getFormDisplayName(formType);
+
+  // Debug: Log form state
+  React.useEffect(() => {
+    console.log("FormActionButtons - Form State:", {
+      formType,
+      submissionStatus,
+      isFormLocked,
+      isInitializing,
+    });
+  }, [formType, submissionStatus, isFormLocked, isInitializing]);
 
   const handleSaveToDraft = () => {
     const formData = form.getValues();
@@ -136,6 +169,7 @@ export function FormActionButtons() {
               onClick={handleSaveToDraft}
               disabled={isSubmitting || isFormLocked}
               className="h-9 min-w-[160px] cursor-pointer"
+              title={`Save ${formDisplayName} as draft`}
             >
               {isSubmitting ? (
                 <>
@@ -145,7 +179,7 @@ export function FormActionButtons() {
               ) : (
                 <>
                   <Save className="mr-2 h-3 w-3" />
-                  Save to Draft
+                  Save Draft
                 </>
               )}
             </Button>
@@ -156,6 +190,7 @@ export function FormActionButtons() {
               onClick={handleSubmitForReview}
               disabled={isSubmitting || isFormLocked}
               className="h-9 min-w-[160px] cursor-pointer"
+              title={`Submit ${formDisplayName} for review`}
             >
               {isSubmitting ? (
                 <>
@@ -165,7 +200,7 @@ export function FormActionButtons() {
               ) : (
                 <>
                   <Send className="mr-2 h-3 w-3" />
-                  Submit for Review
+                  Submit
                 </>
               )}
             </Button>

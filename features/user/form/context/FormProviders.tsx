@@ -9,8 +9,9 @@ import React, {
   useEffect,
   useState,
   useCallback,
+  useMemo,
 } from "react";
-import { useForm, UseFormReturn, FieldValues } from "react-hook-form";
+import { useForm, UseFormReturn } from "react-hook-form";
 import { useParams } from "next/navigation";
 import { toast } from "sonner";
 import * as z from "zod";
@@ -20,24 +21,20 @@ import { generateDefaultValues } from "../utils/default-values";
 import { useFormSubmission } from "../hooks/useFormSubmission";
 import { useCreateOrUpdateFormSubmission } from "../hooks/useCreateOrUpdateFormSubmission";
 
-// Generate the form schema and infer types
-const formSchema = generateFormSchema();
-type FormData = z.infer<typeof formSchema>;
-
 // Get valid form types from enum
 const VALID_FORM_TYPES = Object.values(FormType);
 
 // Define the form context type
 interface FormContextType {
-  form: UseFormReturn<FormData>;
+  form: UseFormReturn<any>;
   formType: FormType | null;
   isInitializing: boolean;
   isSubmitting: boolean;
   submissionId: string | null;
   submissionStatus: FormStatus;
   isFormLocked: boolean;
-  onSubmit: (data: FormData) => void;
-  saveDraft: (data: FormData) => void;
+  onSubmit: (data: any) => void;
+  saveDraft: (data: any) => void;
   resetForm: () => void;
   initializeForm: () => void;
   isInitialized: boolean;
@@ -57,10 +54,21 @@ export const FormProvider: React.FC<FormProviderProps> = ({ children }) => {
   const [formType, setFormType] = useState<FormType | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
 
-  // Initialize React Hook Form
-  const form = useForm<FormData>({
+  // Generate form schema and default values based on formType
+  const formSchema = useMemo(() => {
+    if (!formType) return z.object({});
+    return generateFormSchema(formType);
+  }, [formType]);
+
+  const defaultValues = useMemo(() => {
+    if (!formType) return {};
+    return generateDefaultValues(formType);
+  }, [formType]);
+
+  // Initialize React Hook Form with dynamic schema
+  const form = useForm({
     resolver: zodResolver(formSchema),
-    defaultValues: generateDefaultValues(),
+    defaultValues,
   });
 
   // Query existing form submission (only enabled when formType is set)
@@ -94,9 +102,9 @@ export const FormProvider: React.FC<FormProviderProps> = ({ children }) => {
       },
     });
 
-  // Initialize form - extract formType from params and load existing data
-  const initializeForm = useCallback(() => {
-    if (params.formType && !isInitialized) {
+  // Watch for URL formType changes and reinitialize
+  useEffect(() => {
+    if (params.formType) {
       // Convert kebab-case to SCREAMING_SNAKE_CASE
       const normalizedFormType = params.formType
         .toUpperCase()
@@ -108,26 +116,69 @@ export const FormProvider: React.FC<FormProviderProps> = ({ children }) => {
       };
 
       if (isValidFormType(normalizedFormType)) {
-        setFormType(normalizedFormType);
-        setIsInitialized(true);
+        // Only update if formType actually changed
+        if (formType !== normalizedFormType) {
+          console.log("FormProvider: FormType changed, reinitializing...", {
+            from: formType,
+            to: normalizedFormType,
+          });
+          setFormType(normalizedFormType);
+          setIsInitialized(true);
+        } else if (!isInitialized) {
+          // First initialization
+          setFormType(normalizedFormType);
+          setIsInitialized(true);
+        }
       } else {
         toast.error("Invalid form type", {
           description: `The form type "${params.formType}" is not valid.`,
         });
       }
     }
-  }, [params.formType, isInitialized]);
+  }, [params.formType]); // Removed isInitialized and formType from deps to allow reinitialization
 
-  // Load existing data when available
+  // Initialize form - for backward compatibility
+  const initializeForm = useCallback(() => {
+    // This is now handled by the useEffect above
+    // Keeping this function for components that call it explicitly
+  }, []);
+
+  // Reset form when formType changes (with new schema and defaults)
+  useEffect(() => {
+    if (formType && defaultValues) {
+      console.log(
+        "FormProvider: Resetting form with default values for",
+        formType
+      );
+      form.reset(defaultValues);
+    }
+  }, [formType, defaultValues, form]);
+
+  // Load existing data when available (this runs after the query fetches data)
   useEffect(() => {
     if (existingSubmission && existingSubmission.formData) {
+      console.log(
+        "FormProvider: Loading existing submission data for",
+        formType,
+        {
+          submissionId: existingSubmission.id,
+          status: existingSubmission.status,
+        }
+      );
       // Reset form with existing data
-      form.reset(existingSubmission.formData as FormData);
+      form.reset(existingSubmission.formData);
+    } else if (formType && !isLoadingSubmission && !existingSubmission) {
+      // No existing submission - ensure form is reset to defaults
+      console.log(
+        "FormProvider: No existing submission, using defaults for",
+        formType
+      );
+      form.reset(defaultValues);
     }
-  }, [existingSubmission, form]);
+  }, [existingSubmission, formType, isLoadingSubmission, defaultValues, form]);
 
   // Handle form submission
-  const onSubmit = (data: FormData) => {
+  const onSubmit = (data: any) => {
     if (!formType) {
       toast.error("Form not initialized", {
         description: "Please refresh the page and try again.",
@@ -144,7 +195,7 @@ export const FormProvider: React.FC<FormProviderProps> = ({ children }) => {
   };
 
   // Handle saving draft
-  const saveDraft = (data: FormData) => {
+  const saveDraft = (data: any) => {
     if (!formType) {
       toast.error("Form not initialized", {
         description: "Please refresh the page and try again.",
@@ -166,7 +217,8 @@ export const FormProvider: React.FC<FormProviderProps> = ({ children }) => {
 
   // Reset form to default values
   const resetForm = () => {
-    form.reset(generateDefaultValues());
+    if (!formType) return;
+    form.reset(generateDefaultValues(formType));
     toast.info("Form has been reset", {
       description: "All fields have been cleared to their default values.",
     });
@@ -181,6 +233,31 @@ export const FormProvider: React.FC<FormProviderProps> = ({ children }) => {
     submissionStatus === FormStatus.UNDER_REVIEW ||
     submissionStatus === FormStatus.APPROVED ||
     submissionStatus === FormStatus.SUBMITTED;
+
+  // Debug: Log form state changes
+  useEffect(() => {
+    console.log("FormProvider State Update:", {
+      formType,
+      submissionStatus,
+      isFormLocked,
+      existingSubmission: existingSubmission
+        ? {
+            id: existingSubmission.id,
+            status: existingSubmission.status,
+            formType: existingSubmission.formType,
+          }
+        : null,
+      isLoadingSubmission,
+      submissionError: submissionError?.message,
+    });
+  }, [
+    formType,
+    submissionStatus,
+    isFormLocked,
+    existingSubmission,
+    isLoadingSubmission,
+    submissionError,
+  ]);
 
   const value: FormContextType = {
     form,
