@@ -98,3 +98,4 @@ export {
   WORK_BUSINESS_CONTROL,
 } from "./fields/work-business";
 export { EDUCATION_FIELD_CONFIGS } from "./fields/education";
+export { TRAVEL_FIELD_CONFIGS } from "./fields/travel";

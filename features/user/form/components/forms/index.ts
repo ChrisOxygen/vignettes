@@ -4,6 +4,7 @@ export { FamilyMembersForm } from "./FamilyMembersForm";
 export { RelativesAbroadForm } from "./RelativesAbroadForm";
 export { WorkBusinessForm } from "./WorkBusinessForm";
 export { EducationInfoForm } from "./EducationInfoForm";
+export { PreviousTravelForm } from "./PreviousTravelForm";
 
 export { FormActionButtons } from "./FormActionButtons";
 export { FormLoadingOverlay } from "./FormLoadingOverlay";

@@ -184,6 +184,26 @@ export const generateFormSchema = (formType: FormType) => {
     });
   }
 
+  if (formType === FormType.PREVIOUS_TRAVEL_INFO) {
+    // Previous Travel form with array of travel entries
+    // Create schema for a single travel entry
+    const travelEntrySchema = z.object({
+      fromDate: z.string().optional(),
+      toDate: z.string().optional(),
+      lengthOfStay: z.string().optional(),
+      destination: z.string().optional(),
+      purposeOfTravel: z.string().optional(),
+      residentAddress: z.string().optional(),
+      familyMembers: z.string().optional(),
+    });
+
+    // Full travel history schema
+    return z.object({
+      travelHistory: z.array(travelEntrySchema).optional(),
+      travelHistoryNA: z.boolean().optional(),
+    });
+  }
+
   // Return base schema for other form types
   return baseSchema;
 };

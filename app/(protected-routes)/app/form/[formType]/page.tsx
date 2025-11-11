@@ -6,6 +6,7 @@ import {
   RelativesAbroadForm,
   WorkBusinessForm,
   EducationInfoForm,
+  PreviousTravelForm,
 } from "@/features/user/form/components/forms";
 import { FormType } from "@prisma/client";
 import { NotFoundTemplate } from "@/shared/components";
@@ -34,6 +35,8 @@ const getFormComponent = (formType: FormType) => {
       return <WorkBusinessForm />;
     case FormType.EDUCATION_INFO:
       return <EducationInfoForm />;
+    case FormType.PREVIOUS_TRAVEL_INFO:
+      return <PreviousTravelForm />;
 
     default:
       return null;

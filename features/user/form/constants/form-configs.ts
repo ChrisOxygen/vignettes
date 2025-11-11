@@ -22,6 +22,7 @@ import {
   WORK_BUSINESS_CONTROL,
 } from "./fields/work-business";
 import { EDUCATION_FIELD_CONFIGS } from "./fields/education";
+import { TRAVEL_FIELD_CONFIGS } from "./fields/travel";
 
 export interface FormFieldConfiguration {
   fields: Record<string, FieldConfig>;
@@ -63,7 +64,7 @@ export const FORM_FIELD_CONFIGS: Record<FormType, FormFieldConfiguration> = {
     yesNoFields: {},
   },
   [FormType.PREVIOUS_TRAVEL_INFO]: {
-    fields: {},
+    fields: TRAVEL_FIELD_CONFIGS,
     yesNoFields: {},
   },
   [FormType.SECURITY_AND_STATUTORY_QUESTIONS]: {

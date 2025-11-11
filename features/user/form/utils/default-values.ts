@@ -137,6 +137,27 @@ export const generateDefaultValues = (formType: FormType) => {
     };
   }
 
+  // Handle special case for Previous Travel form
+  if (formType === FormType.PREVIOUS_TRAVEL_INFO) {
+    // Create default empty travel entry
+    const emptyTravelEntry = {
+      fromDate: "",
+      toDate: "",
+      lengthOfStay: "",
+      destination: "",
+      purposeOfTravel: "",
+      residentAddress: "",
+      familyMembers: "",
+    };
+
+    return {
+      // Dynamic array for travel history - starts with 1 empty entry
+      travelHistory: [{ ...emptyTravelEntry }],
+      // Section-level N/A checkbox
+      travelHistoryNA: false,
+    };
+  }
+
   // Regular fields - empty strings
   Object.keys(formConfig.fields).forEach((key) => {
     defaults[key] = "";
