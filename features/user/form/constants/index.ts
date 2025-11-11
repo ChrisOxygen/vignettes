@@ -89,3 +89,12 @@ export {
   CHILDREN_FLOW_QUESTIONS,
   SIBLINGS_FLOW_QUESTION,
 } from "./fields/family-members";
+export {
+  RELATIVE_ABROAD_FIELD_CONFIGS,
+  RELATIVES_ABROAD_CONTROL,
+} from "./fields/relatives-abroad";
+export {
+  WORK_BUSINESS_FIELD_CONFIGS,
+  WORK_BUSINESS_CONTROL,
+} from "./fields/work-business";
+export { EDUCATION_FIELD_CONFIGS } from "./fields/education";

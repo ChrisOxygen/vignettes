@@ -35,63 +35,105 @@ export const generateDefaultValues = (formType: FormType) => {
       mother: { ...emptyFamilyMember, relationship: "Mother" },
       spouse: { ...emptyFamilyMember, relationship: "Spouse" },
       exSpouse: { ...emptyFamilyMember, relationship: "Ex-Spouse" },
-      // Biological children
-      son1Biological: {
-        ...emptyFamilyMember,
-        relationship: "Biological Son #1",
-      },
-      son2Biological: {
-        ...emptyFamilyMember,
-        relationship: "Biological Son #2",
-      },
-      daughter1Biological: {
-        ...emptyFamilyMember,
-        relationship: "Biological Daughter #1",
-      },
-      daughter2Biological: {
-        ...emptyFamilyMember,
-        relationship: "Biological Daughter #2",
-      },
-      // Step children
-      stepSon1: { ...emptyFamilyMember, relationship: "Step Son #1" },
-      stepSon2: { ...emptyFamilyMember, relationship: "Step Son #2" },
-      stepDaughter1: {
-        ...emptyFamilyMember,
-        relationship: "Step Daughter #1",
-      },
-      stepDaughter2: {
-        ...emptyFamilyMember,
-        relationship: "Step Daughter #2",
-      },
-      // Adopted children
-      son1Adopted: { ...emptyFamilyMember, relationship: "Adopted Son #1" },
-      son2Adopted: { ...emptyFamilyMember, relationship: "Adopted Son #2" },
-      daughter1Adopted: {
-        ...emptyFamilyMember,
-        relationship: "Adopted Daughter #1",
-      },
-      daughter2Adopted: {
-        ...emptyFamilyMember,
-        relationship: "Adopted Daughter #2",
-      },
-      // Siblings - start with empty array
-      siblings: [],
-      // Flow control questions
-      flow: {
-        hasAdditionalBiologicalSons: { value: "No" as const, explanation: "" },
-        hasAdditionalBiologicalDaughters: {
-          value: "No" as const,
-          explanation: "",
-        },
-        hasAdditionalStepSons: { value: "No" as const, explanation: "" },
-        hasAdditionalStepDaughters: { value: "No" as const, explanation: "" },
-        hasAdditionalAdoptedSons: { value: "No" as const, explanation: "" },
-        hasAdditionalAdoptedDaughters: {
-          value: "No" as const,
-          explanation: "",
-        },
-        hasBrothersOrSisters: { value: "No" as const, explanation: "" },
-      },
+      // Dynamic arrays for children - start with one empty entry each
+      biologicalSons: [
+        { ...emptyFamilyMember, relationship: "Biological Son #1" },
+      ],
+      biologicalDaughters: [
+        { ...emptyFamilyMember, relationship: "Biological Daughter #1" },
+      ],
+      stepSons: [{ ...emptyFamilyMember, relationship: "Step Son #1" }],
+      stepDaughters: [
+        { ...emptyFamilyMember, relationship: "Step Daughter #1" },
+      ],
+      adoptedSons: [{ ...emptyFamilyMember, relationship: "Adopted Son #1" }],
+      adoptedDaughters: [
+        { ...emptyFamilyMember, relationship: "Adopted Daughter #1" },
+      ],
+      // Siblings - separate arrays for brothers and sisters
+      brothers: [{ ...emptyFamilyMember, relationship: "Brother #1" }],
+      sisters: [{ ...emptyFamilyMember, relationship: "Sister #1" }],
+      // Section-level N/A checkboxes
+      biologicalSonsNA: false,
+      biologicalDaughtersNA: false,
+      stepSonsNA: false,
+      stepDaughtersNA: false,
+      adoptedSonsNA: false,
+      adoptedDaughtersNA: false,
+      brothersNA: false,
+      sistersNA: false,
+    };
+  }
+
+  // Handle special case for Relatives Abroad form
+  if (formType === FormType.RELATIVES_ABROAD_INFO) {
+    // Create default empty relative
+    const emptyRelative = {
+      relationship: "",
+      lastName: "",
+      givenNames: "",
+      familyNameAtBirth: "",
+      countryOfBirth: "",
+      immigrationStatusAbroad: "",
+      residenceAddress: "",
+      occupation: "",
+    };
+
+    return {
+      // Dynamic array for relatives - starts with 1 empty entry
+      relativesInUK: [{ ...emptyRelative }],
+      // Section-level N/A checkbox
+      relativesInUKNA: false,
+    };
+  }
+
+  // Handle special case for Work & Business form
+  if (formType === FormType.WORK_AND_BUSINESS_INFO) {
+    // Create default empty work entry
+    const emptyWorkEntry = {
+      fromDate: "",
+      toDate: "",
+      employerName: "",
+      cityCountry: "",
+      jobTitle: "",
+      employmentType: "",
+      employmentNature: "",
+      monthlyEarnings: "",
+      jobDescription: "",
+    };
+
+    return {
+      // Dynamic array for work entries - starts with 1 empty entry
+      workHistory: [{ ...emptyWorkEntry }],
+      // Section-level N/A checkbox
+      workHistoryNA: false,
+    };
+  }
+
+  // Handle special case for Education form
+  if (formType === FormType.EDUCATION_INFO) {
+    // Create default empty education entry
+    const emptyEducationEntry = {
+      fromDate: "",
+      toDate: "",
+      schoolName: "",
+      cityTownRegion: "",
+      countryTerritory: "",
+      programFieldOfStudy: "",
+      degreeLevel: "",
+    };
+
+    return {
+      // Dynamic arrays for 4 education levels - each starts with 1 empty entry
+      elementaryPrimary: [{ ...emptyEducationEntry }],
+      secondaryHighSchool: [{ ...emptyEducationEntry }],
+      universityCollege: [{ ...emptyEducationEntry }],
+      tradeSchoolOther: [{ ...emptyEducationEntry }],
+      // Section-level N/A checkboxes for each education level
+      elementaryPrimaryNA: false,
+      secondaryHighSchoolNA: false,
+      universityCollegeNA: false,
+      tradeSchoolOtherNA: false,
     };
   }
 

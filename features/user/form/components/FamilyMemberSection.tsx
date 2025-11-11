@@ -21,6 +21,7 @@ interface FamilyMemberSectionProps {
   relationship: string;
   note?: string;
   isCollapsible?: boolean;
+  showNotApplicable?: boolean;
 }
 
 export const FamilyMemberSection: React.FC<FamilyMemberSectionProps> = ({
@@ -29,6 +30,7 @@ export const FamilyMemberSection: React.FC<FamilyMemberSectionProps> = ({
   relationship,
   note,
   isCollapsible = false,
+  showNotApplicable = true,
 }) => {
   const [isCollapsed, setIsCollapsed] = React.useState(isCollapsible);
 
@@ -96,33 +98,35 @@ export const FamilyMemberSection: React.FC<FamilyMemberSectionProps> = ({
             )}
           </div>
           <div className="flex items-center gap-4">
-            {/* N/A Checkbox */}
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id={`${memberId}-na`}
-                checked={isNotApplicable}
-                onCheckedChange={(checked) => {
-                  // Call the onChange from register to update the form
-                  if (registerProps.onChange) {
-                    registerProps.onChange({
-                      target: {
-                        name: `${memberId}.notApplicable`,
-                        value: checked,
-                        checked: checked as boolean,
-                      },
-                      type: "change",
-                    } as any);
-                  }
-                }}
-              />
-              <input type="checkbox" {...registerProps} className="sr-only" />
-              <Label
-                htmlFor={`${memberId}-na`}
-                className="text-sm font-medium cursor-pointer"
-              >
-                Not Applicable
-              </Label>
-            </div>
+            {/* N/A Checkbox - conditionally rendered */}
+            {showNotApplicable && (
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id={`${memberId}-na`}
+                  checked={isNotApplicable}
+                  onCheckedChange={(checked) => {
+                    // Call the onChange from register to update the form
+                    if (registerProps.onChange) {
+                      registerProps.onChange({
+                        target: {
+                          name: `${memberId}.notApplicable`,
+                          value: checked,
+                          checked: checked as boolean,
+                        },
+                        type: "change",
+                      } as any);
+                    }
+                  }}
+                />
+                <input type="checkbox" {...registerProps} className="sr-only" />
+                <Label
+                  htmlFor={`${memberId}-na`}
+                  className="text-sm font-medium cursor-pointer"
+                >
+                  Not Applicable
+                </Label>
+              </div>
+            )}
 
             {/* Collapse toggle for additional members */}
             {isCollapsible && (

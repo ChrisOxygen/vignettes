@@ -3,6 +3,9 @@ import {
   ApplicantInfoForm,
   ExSpouseInfoForm,
   FamilyMembersForm,
+  RelativesAbroadForm,
+  WorkBusinessForm,
+  EducationInfoForm,
 } from "@/features/user/form/components/forms";
 import { FormType } from "@prisma/client";
 import { NotFoundTemplate } from "@/shared/components";
@@ -25,6 +28,12 @@ const getFormComponent = (formType: FormType) => {
       return <ExSpouseInfoForm />;
     case FormType.FAMILY_MEMBERS_INFO:
       return <FamilyMembersForm />;
+    case FormType.RELATIVES_ABROAD_INFO:
+      return <RelativesAbroadForm />;
+    case FormType.WORK_AND_BUSINESS_INFO:
+      return <WorkBusinessForm />;
+    case FormType.EDUCATION_INFO:
+      return <EducationInfoForm />;
 
     default:
       return null;
@@ -78,18 +87,6 @@ async function FormPage({ params }: FormPageProps) {
   return (
     <div className="relative flex-1 space-y-4 p-4 md:p-8 pt-6">
       {FormComponent}
-
-      {/* Loading Overlay */}
-      {/* {isLoading && (
-        <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="flex flex-col items-center gap-3">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            <p className="text-sm text-muted-foreground font-medium">
-              Saving your form...
-            </p>
-          </div>
-        </div>
-      )} */}
     </div>
   );
 }

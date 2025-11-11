@@ -76,44 +76,8 @@ export const generateFormSchema = (formType: FormType) => {
         .optional(),
     });
 
-    // Flow questions schema
+    // Flow questions schema - only siblings question now
     const flowSchema = z.object({
-      hasAdditionalBiologicalSons: z
-        .object({
-          value: z.enum(["Yes", "No"]).optional(),
-          explanation: z.string().optional(),
-        })
-        .optional(),
-      hasAdditionalBiologicalDaughters: z
-        .object({
-          value: z.enum(["Yes", "No"]).optional(),
-          explanation: z.string().optional(),
-        })
-        .optional(),
-      hasAdditionalStepSons: z
-        .object({
-          value: z.enum(["Yes", "No"]).optional(),
-          explanation: z.string().optional(),
-        })
-        .optional(),
-      hasAdditionalStepDaughters: z
-        .object({
-          value: z.enum(["Yes", "No"]).optional(),
-          explanation: z.string().optional(),
-        })
-        .optional(),
-      hasAdditionalAdoptedSons: z
-        .object({
-          value: z.enum(["Yes", "No"]).optional(),
-          explanation: z.string().optional(),
-        })
-        .optional(),
-      hasAdditionalAdoptedDaughters: z
-        .object({
-          value: z.enum(["Yes", "No"]).optional(),
-          explanation: z.string().optional(),
-        })
-        .optional(),
       hasBrothersOrSisters: z
         .object({
           value: z.enum(["Yes", "No"]).optional(),
@@ -129,25 +93,94 @@ export const generateFormSchema = (formType: FormType) => {
       mother: familyMemberSchema,
       spouse: familyMemberSchema,
       exSpouse: familyMemberSchema,
-      // Biological children
-      son1Biological: familyMemberSchema,
-      son2Biological: familyMemberSchema.optional(),
-      daughter1Biological: familyMemberSchema,
-      daughter2Biological: familyMemberSchema.optional(),
-      // Step children
-      stepSon1: familyMemberSchema,
-      stepSon2: familyMemberSchema.optional(),
-      stepDaughter1: familyMemberSchema,
-      stepDaughter2: familyMemberSchema.optional(),
-      // Adopted children
-      son1Adopted: familyMemberSchema,
-      son2Adopted: familyMemberSchema.optional(),
-      daughter1Adopted: familyMemberSchema,
-      daughter2Adopted: familyMemberSchema.optional(),
-      // Siblings - dynamic array
-      siblings: z.array(familyMemberSchema).optional(),
-      // Flow control questions
-      flow: flowSchema,
+      // Dynamic arrays for children
+      biologicalSons: z.array(familyMemberSchema).optional(),
+      biologicalDaughters: z.array(familyMemberSchema).optional(),
+      stepSons: z.array(familyMemberSchema).optional(),
+      stepDaughters: z.array(familyMemberSchema).optional(),
+      adoptedSons: z.array(familyMemberSchema).optional(),
+      adoptedDaughters: z.array(familyMemberSchema).optional(),
+      // Siblings - separate arrays for brothers and sisters
+      brothers: z.array(familyMemberSchema).optional(),
+      sisters: z.array(familyMemberSchema).optional(),
+      // Section-level N/A checkboxes
+      biologicalSonsNA: z.boolean().optional(),
+      biologicalDaughtersNA: z.boolean().optional(),
+      stepSonsNA: z.boolean().optional(),
+      stepDaughtersNA: z.boolean().optional(),
+      adoptedSonsNA: z.boolean().optional(),
+      adoptedDaughtersNA: z.boolean().optional(),
+      brothersNA: z.boolean().optional(),
+      sistersNA: z.boolean().optional(),
+    });
+  }
+
+  if (formType === FormType.RELATIVES_ABROAD_INFO) {
+    // Relatives abroad have simple structure with N/A checkbox
+    // Create schema for a single relative
+    const relativeAbroadSchema = z.object({
+      relationship: z.string().optional(),
+      lastName: z.string().optional(),
+      givenNames: z.string().optional(),
+      familyNameAtBirth: z.string().optional(),
+      countryOfBirth: z.string().optional(),
+      immigrationStatusAbroad: z.string().optional(),
+      residenceAddress: z.string().optional(),
+      occupation: z.string().optional(),
+    });
+
+    // Full relatives abroad schema
+    return z.object({
+      relativesInUK: z.array(relativeAbroadSchema).optional(),
+      relativesInUKNA: z.boolean().optional(),
+    });
+  }
+
+  if (formType === FormType.WORK_AND_BUSINESS_INFO) {
+    // Work & Business form with array of work entries
+    // Create schema for a single work entry
+    const workEntrySchema = z.object({
+      fromDate: z.string().optional(),
+      toDate: z.string().optional(),
+      employerName: z.string().optional(),
+      cityCountry: z.string().optional(),
+      jobTitle: z.string().optional(),
+      employmentType: z.string().optional(),
+      employmentNature: z.string().optional(),
+      monthlyEarnings: z.string().optional(),
+      jobDescription: z.string().optional(),
+    });
+
+    // Full work & business schema
+    return z.object({
+      workHistory: z.array(workEntrySchema).optional(),
+      workHistoryNA: z.boolean().optional(),
+    });
+  }
+
+  if (formType === FormType.EDUCATION_INFO) {
+    // Education form with 4 arrays for different education levels
+    // Create schema for a single education entry
+    const educationEntrySchema = z.object({
+      fromDate: z.string().optional(),
+      toDate: z.string().optional(),
+      schoolName: z.string().optional(),
+      cityTownRegion: z.string().optional(),
+      countryTerritory: z.string().optional(),
+      programFieldOfStudy: z.string().optional(),
+      degreeLevel: z.string().optional(),
+    });
+
+    // Full education schema with 4 arrays and 4 N/A checkboxes
+    return z.object({
+      elementaryPrimary: z.array(educationEntrySchema).optional(),
+      secondaryHighSchool: z.array(educationEntrySchema).optional(),
+      universityCollege: z.array(educationEntrySchema).optional(),
+      tradeSchoolOther: z.array(educationEntrySchema).optional(),
+      elementaryPrimaryNA: z.boolean().optional(),
+      secondaryHighSchoolNA: z.boolean().optional(),
+      universityCollegeNA: z.boolean().optional(),
+      tradeSchoolOtherNA: z.boolean().optional(),
     });
   }
 
