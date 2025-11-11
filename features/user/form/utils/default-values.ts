@@ -158,6 +158,26 @@ export const generateDefaultValues = (formType: FormType) => {
     };
   }
 
+  // Handle special case for Visa & Permits form
+  if (formType === FormType.VISA_AND_PERMITS_INFO) {
+    // Create default empty visa/permit entry
+    const emptyVisaPermitEntry = {
+      countryAppliedTo: "",
+      applicationDate: "",
+      visaPermitType: "",
+      applicationOutcome: "",
+      outcomeDate: "",
+      familyMembers: "",
+    };
+
+    return {
+      // Dynamic array for visa/permit history - starts with 1 empty entry
+      visaPermitHistory: [{ ...emptyVisaPermitEntry }],
+      // Section-level N/A checkbox
+      visaPermitHistoryNA: false,
+    };
+  }
+
   // Regular fields - empty strings
   Object.keys(formConfig.fields).forEach((key) => {
     defaults[key] = "";

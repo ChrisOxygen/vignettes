@@ -23,6 +23,7 @@ import {
 } from "./fields/work-business";
 import { EDUCATION_FIELD_CONFIGS } from "./fields/education";
 import { TRAVEL_FIELD_CONFIGS } from "./fields/travel";
+import { VISA_PERMIT_FIELD_CONFIGS } from "./fields/visa-permit";
 
 export interface FormFieldConfiguration {
   fields: Record<string, FieldConfig>;
@@ -60,7 +61,7 @@ export const FORM_FIELD_CONFIGS: Record<FormType, FormFieldConfiguration> = {
     yesNoFields: {},
   },
   [FormType.VISA_AND_PERMITS_INFO]: {
-    fields: {},
+    fields: VISA_PERMIT_FIELD_CONFIGS,
     yesNoFields: {},
   },
   [FormType.PREVIOUS_TRAVEL_INFO]: {

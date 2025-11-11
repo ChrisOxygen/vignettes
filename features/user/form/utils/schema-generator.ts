@@ -204,6 +204,25 @@ export const generateFormSchema = (formType: FormType) => {
     });
   }
 
+  if (formType === FormType.VISA_AND_PERMITS_INFO) {
+    // Visa & Permits form with array of visa/permit entries
+    // Create schema for a single visa/permit entry
+    const visaPermitEntrySchema = z.object({
+      countryAppliedTo: z.string().optional(),
+      applicationDate: z.string().optional(),
+      visaPermitType: z.string().optional(),
+      applicationOutcome: z.string().optional(),
+      outcomeDate: z.string().optional(),
+      familyMembers: z.string().optional(),
+    });
+
+    // Full visa/permit history schema
+    return z.object({
+      visaPermitHistory: z.array(visaPermitEntrySchema).optional(),
+      visaPermitHistoryNA: z.boolean().optional(),
+    });
+  }
+
   // Return base schema for other form types
   return baseSchema;
 };
