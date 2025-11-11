@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-A Next.js 15 visa/immigration form management system with Supabase Auth, Prisma ORM, and TanStack Query. Features multi-step form workflows, role-based access control, and admin/user collaboration through field-level commenting.
+Next.js 15 visa/immigration form management system with Supabase Auth, Prisma ORM, and TanStack Query. Features multi-step form workflows, role-based access control (USER/ADMIN), email verification flows, and admin/user collaboration through field-level commenting on form submissions.
 
 ## Architecture Patterns
 
@@ -21,14 +21,46 @@ A Next.js 15 visa/immigration form management system with Supabase Auth, Prisma 
    - `utils/supabase/client.ts` - Client Components (browser storage)
    - `utils/supabase/middleware.ts` - Edge middleware (route protection)
 3. **Custom Prisma User model** extends Supabase auth with roles (`USER|ADMIN`) and status (`PENDING_VERIFICATION|ACTIVE|SUSPENDED|DEACTIVATED`)
-4. **Email verification** required before account activation - uses token-based flow
+4. **Email verification** required before account activation:
+   - Uses token-based flow with `EmailVerificationToken` table
+   - Tokens stored with expiry timestamp
+   - Verification endpoint: `/api/verify-email/[token]`
+   - Email service: Resend API with React Email templates
+5. **Admin invitation system**: Admins require invitation codes (`AdminInvitation` table) to register
 
 ### State Management Architecture
 
 - **TanStack Query** (`@tanstack/react-query`) for server state (API calls, caching)
-- **React Context + useReducer** for complex client state (see `features/onboarding/context`, `features/user/form/context`)
-- **Custom hooks pattern**: Each feature exports specialized hooks (e.g., `useCreateUser`, `useFormSubmission`)
-- Example: `features/auth/hooks/useCreateUserWithCredentials.ts` wraps mutation logic with callbacks
+  - Custom hooks wrap mutations/queries with callbacks (see `features/auth/hooks/useCreateUserWithCredentials.ts`)
+  - Mutations auto-invalidate related queries (e.g., `['users']`, `['current-user']`)
+  - Query keys follow feature-based namespacing
+- **React Context + useReducer** for complex client state:
+  - `features/onboarding/context` - Multi-step onboarding form with localStorage persistence
+  - `features/user/form/context` - Self-initializing FormProvider with URL-based form type detection
+- **Custom hooks pattern**: Each feature exports specialized hooks wrapping server actions
+- Example mutation hook structure:
+  ```typescript
+  export function useCreateUser(options?: UseCreateUserOptions) {
+    const queryClient = useQueryClient();
+
+    const mutation = useMutation({
+      mutationFn: async (data: ZUserCreationData) => {
+        const result = await _createUser(data);
+        if (!result.success) throw new Error(result.message);
+        return result;
+      },
+      onSuccess: (result) => {
+        queryClient.invalidateQueries({ queryKey: ["users"] });
+        options?.onSuccess?.(result);
+      },
+      onError: (error: Error) => {
+        options?.onError?.(error.message);
+      },
+    });
+
+    return { mutate, isPending, isError, error, isSuccess, data };
+  }
+  ```
 
 ### Form System - Dynamic Schema Generation
 
@@ -70,11 +102,32 @@ Located in `features/user/form/`:
 
 ```bash
 npm run dev                        # Start dev server (localhost:3000)
+npm run build                      # Production build (runs prisma generate first)
 npm run email                      # React Email preview server (localhost:3600)
 npx prisma studio                  # Database GUI
 npx prisma migrate dev --name xyz  # Create and apply migration
 npx prisma generate                # Regenerate Prisma Client after schema changes
 ```
+
+### Working with Supabase Clients
+
+**CRITICAL**: Always use the correct Supabase client for your context:
+
+```typescript
+// Server Components/Actions - AWAITS cookies
+import { createClient } from "@/utils/supabase/server";
+const supabase = await createClient();
+
+// Client Components - Browser storage
+import { createClient } from "@/utils/supabase/client";
+const supabase = createClient();
+
+// Middleware - Edge runtime
+import { createServerClient } from "@supabase/ssr";
+// Use createServerClient directly in middleware.ts
+```
+
+**Never** mix client types - using server client in client components or vice versa will cause auth failures.
 
 ### Server Actions Pattern
 
@@ -82,6 +135,7 @@ npx prisma generate                # Regenerate Prisma Client after schema chang
 - **Return type**: Always use `ApiResponse` from `@/features/shared/types/api`
 - **Error handling**: Feature-specific error handlers (see `features/auth/utils/errorHandlers.ts`)
 - **Validation**: Zod schemas defined in `features/*/validators/`
+- **Transaction pattern**: Use Prisma transactions for operations affecting multiple tables
 - **Example structure**:
   ```typescript
   export const _createUser = async (
@@ -89,7 +143,29 @@ npx prisma generate                # Regenerate Prisma Client after schema chang
   ): Promise<ApiResponse> => {
     try {
       const validated = userCreationSchema.parse(input);
-      // ... logic
+
+      // Use transaction for data consistency
+      await prisma.$transaction(async (tx) => {
+        // 1. Create Supabase auth user first
+        const { error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: { name, role: "USER", status: "PENDING_VERIFICATION" },
+          },
+        });
+        if (error) throw new Error(`Auth failed: ${error.message}`);
+
+        // 2. Create database user record
+        const newUser = await tx.user.create({ data: { email, name } });
+
+        // 3. Create verification token
+        const { token, expiresAt } = generateEmailVerificationToken();
+        await tx.emailVerificationToken.create({
+          data: { userId: newUser.id, token, expiresAt },
+        });
+      });
+
       return { success: true, data, message: "Success" };
     } catch (error) {
       return handleUserCreationError(error);
