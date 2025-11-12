@@ -7,7 +7,7 @@ function ScotlandVisaPage() {
       <PagesHeader title="Scotland Visa" />
       <ComingSoon
         title="Scotland Visa Services"
-        description="Specialized guidance for Scotland visa applications including student and work visas. This page is currently under development."
+        description="Specialized guidance for Scotland visa applications including study abroad and global talent mobility programs. This page is currently under development."
       />
     </div>
   );

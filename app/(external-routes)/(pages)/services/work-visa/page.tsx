@@ -4,9 +4,9 @@ import PagesHeader from "@/features/external-view/components/PagesHeader";
 function WorkVisaPage() {
   return (
     <div className="flex flex-col w-full">
-      <PagesHeader title="Work Visa" />
+      <PagesHeader title="Global Talent Mobility" />
       <ComingSoon
-        title="Work Visa Services"
+        title="Global Talent Mobility Services"
         description="Professional support for securing employment visas and work permits globally. This page is currently under development."
       />
     </div>

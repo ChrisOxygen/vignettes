@@ -4,9 +4,9 @@ import PagesHeader from "@/features/external-view/components/PagesHeader";
 function TouristVisaPage() {
   return (
     <div className="flex flex-col w-full">
-      <PagesHeader title="Tourist Visa" />
+      <PagesHeader title="Tourism" />
       <ComingSoon
-        title="Tourist Visa Services"
+        title="Tourism Services"
         description="Hassle-free tourist visa services for your perfect vacation abroad. This page is currently under development."
       />
     </div>

@@ -9,7 +9,7 @@ function ServicesSection() {
       <div className="mx-auto py-16 sm:py-20 lg:py-26 max-w-7xl flex flex-col items-center gap-10 w-full">
         <SectionTitle
           subtitle="Services We Provide"
-          title="Explore Our Visa Citizenship & Immigration Services"
+          title="Explore Our Wide Range of Professional Services"
           className="max-w-4xl"
         />
 

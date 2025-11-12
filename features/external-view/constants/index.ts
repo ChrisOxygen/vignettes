@@ -9,10 +9,10 @@ export const PAGES = [
 
 // Services Array
 export const SERVICES = [
-  "Business Visa",
-  "Student Visa",
-  "Work visa",
-  "Tourist visa",
+  "Business Plans and Travels",
+  "Study Abroad",
+  "Global Talent Mobility",
+  "Tourism",
   "Canada Visa",
   "UK Visa",
   "Germany Visa",
@@ -24,25 +24,25 @@ export const SERVICES = [
 export const SERVICES_SNIPPET = [
   {
     link: "/services/student-visa",
-    title: "Student Visa",
+    title: "Study Abroad",
     description:
       "Expert guidance for international students pursuing academic dreams worldwide.",
   },
   {
     link: "/services/work-visa",
-    title: "Work Visa",
+    title: "Global Talent Mobility",
     description:
       "Professional support for securing employment visas and work permits globally.",
   },
   {
     link: "/services/business-visa",
-    title: "Business Visa",
+    title: "Business Plans and Travels",
     description:
       "Streamlined business visa applications for entrepreneurs and corporate travelers.",
   },
   {
     link: "/services/tourist-visa",
-    title: "Tourist Visa",
+    title: "Tourism",
     description:
       "Hassle-free tourist visa services for your perfect vacation abroad.",
   },

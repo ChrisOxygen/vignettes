@@ -1,3 +1,8 @@
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/shared/components/ui/avatar";
 import Image from "next/image";
 import { BiSolidQuoteLeft } from "react-icons/bi";
 import { FaStar } from "react-icons/fa6";
@@ -15,6 +20,18 @@ function TestimonialCard({
   testimonialText,
   imageIndex,
 }: TestimonialCardProps) {
+  // Generate initials from name (e.g., "Sarah Chen" -> "SC")
+  const getInitials = (fullName: string): string => {
+    const words = fullName.trim().split(/\s+/);
+    if (words.length === 1) {
+      return words[0].substring(0, 2).toUpperCase();
+    }
+    return (words[0][0] + words[words.length - 1][0]).toUpperCase();
+  };
+
+  const initials = getInitials(name);
+  const avatarAlt = `${name}'s profile picture`;
+
   return (
     <div className="relative flex flex-col gap-5 px-5 py-8 rounded-2xl bg-gray-500/10 w-full h-full overflow-hidden">
       {/* Animated rotating border */}
@@ -34,13 +51,16 @@ function TestimonialCard({
           <BiSolidQuoteLeft />
         </span>
         <div className="flex items-center gap-5">
-          <Image
-            src={`/assets/service-snippet-img-2.webp`}
-            alt={name}
-            width={100}
-            height={100}
-            className="rounded-full size-16 object-cover object-center overflow-hidden flex-shrink-0"
-          />
+          <Avatar className="rounded-full size-16 ">
+            <AvatarImage
+              src=""
+              alt={avatarAlt}
+              className="rounded-full size-16 object-cover object-center overflow-hidden flex-shrink-0"
+            />
+            <AvatarFallback className="rounded-full grid place-items-center bg-primary/10 text-black text-2xl size-16 overflow-hidden flex-shrink-0">
+              {initials}
+            </AvatarFallback>
+          </Avatar>
           <div className="flex flex-col">
             <h5 className="text-lg font-semibold">{name}</h5>
             <span className="text-gray-600">{position}</span>
