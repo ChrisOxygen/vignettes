@@ -8,9 +8,10 @@ import { generateFormSchema } from "../utils/schema-generator";
 import { ZodError } from "zod";
 import { prisma } from "@/prisma/prisma";
 
-// Export comment-related actions
-export * from "./comments.actions";
-export * from "./edit-requests.actions";
+// Note: Comment-related actions are in:
+// - ./comments.actions.ts
+// - ./edit-requests.actions.ts
+// Import them directly from those files instead of from index.ts
 
 // const prisma = new PrismaClient();
 
@@ -29,7 +30,7 @@ export interface UpsertFormSubmissionInput {
 }
 
 // Utility function to get authenticated user
-async function getAuthenticatedUser() {
+export async function getAuthenticatedUser() {
   try {
     const supabase = await createClient();
 

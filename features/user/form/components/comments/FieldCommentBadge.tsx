@@ -29,9 +29,7 @@ export function FieldCommentBadge({
     >
       <MessageSquare className="h-3 w-3" />
       <span>{commentCount}</span>
-      {hasUnresolved && (
-        <AlertCircle className="h-3 w-3 text-orange-500" />
-      )}
+      {hasUnresolved && <AlertCircle className="h-3 w-3 text-orange-500" />}
     </Button>
   );
 }

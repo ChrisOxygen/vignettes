@@ -5,17 +5,7 @@ import { Card, CardContent } from "@/shared/components/ui/card";
 import { Button } from "@/shared/components/ui/button";
 import { Badge } from "@/shared/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/shared/components/ui/avatar";
-import {
-  CheckCircle2,
-  XCircle,
-  Clock,
-  User as UserIcon,
-} from "lucide-react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import {
-  approveEditRequest,
-  denyEditRequest,
-} from "../../actions/edit-requests.actions";
+import { CheckCircle2, XCircle, Clock, User as UserIcon } from "lucide-react";
 import { EditRequestStatus } from "@prisma/client";
 import { toast } from "sonner";
 import { Textarea } from "@/shared/components/ui/textarea";
@@ -27,6 +17,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/shared/components/ui/dialog";
+import { useApproveEditRequest, useDenyEditRequest } from "../../hooks";
 
 interface EditRequestCardProps {
   request: any; // FieldComment with edit request data
@@ -41,14 +32,11 @@ export function EditRequestCard({
 }: EditRequestCardProps) {
   const [showDenyDialog, setShowDenyDialog] = useState(false);
   const [denyReason, setDenyReason] = useState("");
-  const queryClient = useQueryClient();
 
-  const approveMutation = useMutation({
-    mutationFn: () => approveEditRequest(request.id),
+  const approveMutation = useApproveEditRequest({
+    submissionId,
     onSuccess: (result) => {
       if (result.success) {
-        queryClient.invalidateQueries({ queryKey: ["comments", submissionId] });
-        queryClient.invalidateQueries({ queryKey: ["formSubmission"] });
         toast.success("Edit request approved", {
           description: "The form has been unlocked for editing.",
         });
@@ -60,11 +48,10 @@ export function EditRequestCard({
     },
   });
 
-  const denyMutation = useMutation({
-    mutationFn: (reason: string) => denyEditRequest(request.id, reason),
+  const denyMutation = useDenyEditRequest({
+    submissionId,
     onSuccess: (result) => {
       if (result.success) {
-        queryClient.invalidateQueries({ queryKey: ["comments", submissionId] });
         setShowDenyDialog(false);
         setDenyReason("");
         toast.success("Edit request denied", {
@@ -145,36 +132,38 @@ export function EditRequestCard({
               </p>
 
               {/* Admin Actions - Only show if pending and user is admin */}
-              {isAdmin && request.editRequestStatus === EditRequestStatus.PENDING && (
-                <div className="flex gap-2 pt-2 border-t">
-                  <Button
-                    size="sm"
-                    onClick={() => approveMutation.mutate()}
-                    disabled={approveMutation.isPending}
-                    className="gap-1"
-                  >
-                    <CheckCircle2 className="h-4 w-4" />
-                    {approveMutation.isPending ? "Approving..." : "Approve"}
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="destructive"
-                    onClick={() => setShowDenyDialog(true)}
-                    disabled={denyMutation.isPending}
-                    className="gap-1"
-                  >
-                    <XCircle className="h-4 w-4" />
-                    Deny
-                  </Button>
-                </div>
-              )}
+              {isAdmin &&
+                request.editRequestStatus === EditRequestStatus.PENDING && (
+                  <div className="flex gap-2 pt-2 border-t">
+                    <Button
+                      size="sm"
+                      onClick={() => approveMutation.mutate(request.id)}
+                      disabled={approveMutation.isPending}
+                      className="gap-1"
+                    >
+                      <CheckCircle2 className="h-4 w-4" />
+                      {approveMutation.isPending ? "Approving..." : "Approve"}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      onClick={() => setShowDenyDialog(true)}
+                      disabled={denyMutation.isPending}
+                      className="gap-1"
+                    >
+                      <XCircle className="h-4 w-4" />
+                      Deny
+                    </Button>
+                  </div>
+                )}
 
               {/* User View - Show status message */}
-              {!isAdmin && request.editRequestStatus === EditRequestStatus.PENDING && (
-                <p className="text-xs text-muted-foreground italic pt-2 border-t">
-                  Awaiting admin review...
-                </p>
-              )}
+              {!isAdmin &&
+                request.editRequestStatus === EditRequestStatus.PENDING && (
+                  <p className="text-xs text-muted-foreground italic pt-2 border-t">
+                    Awaiting admin review...
+                  </p>
+                )}
             </div>
           </div>
         </CardContent>
@@ -204,7 +193,12 @@ export function EditRequestCard({
             </Button>
             <Button
               variant="destructive"
-              onClick={() => denyMutation.mutate(denyReason)}
+              onClick={() =>
+                denyMutation.mutate({
+                  commentId: request.id,
+                  reason: denyReason,
+                })
+              }
               disabled={denyMutation.isPending}
             >
               {denyMutation.isPending ? "Denying..." : "Deny Request"}

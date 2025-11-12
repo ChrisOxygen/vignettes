@@ -1,33 +1,22 @@
 "use server";
 
 import { prisma } from "@/prisma/prisma";
-import { createClient } from "@/utils/supabase/server";
 import { ApiResponse } from "@/features/shared/types/api";
 import { EditRequestStatus, FormStatus, CommentType } from "@prisma/client";
+import { getAuthenticatedUser } from "./index";
 
 // ============================================
 // APPROVE EDIT REQUEST
 // ============================================
-export async function approveEditRequest(
+export async function _approveEditRequest(
   commentId: string
 ): Promise<ApiResponse> {
   try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
-      return { success: false, message: "Unauthorized" };
-    }
-
-    const dbUser = await prisma.user.findUnique({
-      where: { id: user.id },
-      select: { id: true, name: true, role: true },
-    });
+    // Get authenticated user from database
+    const dbUser = await getAuthenticatedUser();
 
     // Only admins can approve edit requests
-    if (dbUser?.role !== "ADMIN") {
+    if (dbUser.role !== "ADMIN") {
       return {
         success: false,
         message: "Only admins can approve edit requests",
@@ -59,7 +48,7 @@ export async function approveEditRequest(
         data: {
           editRequestStatus: EditRequestStatus.APPROVED,
           editRequestResolvedAt: new Date(),
-          editRequestResolvedBy: user.id,
+          editRequestResolvedBy: dbUser.id,
         },
       }),
 
@@ -76,7 +65,7 @@ export async function approveEditRequest(
           formType: comment.formType,
           commentType: CommentType.SYSTEM,
           content: `Edit request approved by ${dbUser.name}. Form is now unlocked for editing.`,
-          authorId: user.id,
+          authorId: dbUser.id,
           authorName: dbUser.name,
           authorRole: "ADMIN",
         },
@@ -99,26 +88,15 @@ export async function approveEditRequest(
 // ============================================
 // DENY EDIT REQUEST
 // ============================================
-export async function denyEditRequest(
+export async function _denyEditRequest(
   commentId: string,
   reason?: string
 ): Promise<ApiResponse> {
   try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    // Get authenticated user from database
+    const dbUser = await getAuthenticatedUser();
 
-    if (!user) {
-      return { success: false, message: "Unauthorized" };
-    }
-
-    const dbUser = await prisma.user.findUnique({
-      where: { id: user.id },
-      select: { id: true, name: true, role: true },
-    });
-
-    if (dbUser?.role !== "ADMIN") {
+    if (dbUser.role !== "ADMIN") {
       return {
         success: false,
         message: "Only admins can deny edit requests",
@@ -149,7 +127,7 @@ export async function denyEditRequest(
         data: {
           editRequestStatus: EditRequestStatus.DENIED,
           editRequestResolvedAt: new Date(),
-          editRequestResolvedBy: user.id,
+          editRequestResolvedBy: dbUser.id,
         },
       }),
     ];
@@ -164,7 +142,7 @@ export async function denyEditRequest(
             commentType: CommentType.ADMIN_FEEDBACK,
             content: reason,
             parentCommentId: commentId, // Reply to edit request
-            authorId: user.id,
+            authorId: dbUser.id,
             authorName: dbUser.name,
             authorRole: "ADMIN",
           },
@@ -190,23 +168,12 @@ export async function denyEditRequest(
 // ============================================
 // GET PENDING EDIT REQUESTS (Admin Dashboard)
 // ============================================
-export async function getPendingEditRequests(): Promise<ApiResponse> {
+export async function _getPendingEditRequests(): Promise<ApiResponse> {
   try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    // Get authenticated user from database
+    const dbUser = await getAuthenticatedUser();
 
-    if (!user) {
-      return { success: false, message: "Unauthorized" };
-    }
-
-    const dbUser = await prisma.user.findUnique({
-      where: { id: user.id },
-      select: { role: true },
-    });
-
-    if (dbUser?.role !== "ADMIN") {
+    if (dbUser.role !== "ADMIN") {
       return { success: false, message: "Admin access required" };
     }
 

@@ -13,10 +13,9 @@ import {
 } from "@/shared/components/ui/dialog";
 import { Textarea } from "@/shared/components/ui/textarea";
 import { Unlock } from "lucide-react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { createComment } from "../../actions/comments.actions";
 import { CommentType, FormType } from "@prisma/client";
 import { toast } from "sonner";
+import { useCreateComment } from "../../hooks";
 
 interface RequestEditAccessButtonProps {
   submissionId: string;
@@ -29,26 +28,14 @@ export function RequestEditAccessButton({
 }: RequestEditAccessButtonProps) {
   const [open, setOpen] = useState(false);
   const [reason, setReason] = useState("");
-  const queryClient = useQueryClient();
 
-  const { mutate, isPending } = useMutation({
-    mutationFn: async (content: string) => {
-      return await createComment({
-        submissionId,
-        content,
-        commentType: CommentType.EDIT_REQUEST,
-        fieldPath: null, // Form-level
-        fieldLabel: null,
-      });
-    },
+  const { mutate, isPending } = useCreateComment({
     onSuccess: (result) => {
       if (result.success) {
-        queryClient.invalidateQueries({ queryKey: ["comments", submissionId] });
         setOpen(false);
         setReason("");
         toast.success("Edit request sent", {
-          description:
-            "An admin will review your request and respond shortly.",
+          description: "An admin will review your request and respond shortly.",
         });
       } else {
         toast.error("Failed to send request", {
@@ -56,12 +43,22 @@ export function RequestEditAccessButton({
         });
       }
     },
-    onError: (error: Error) => {
+    onError: (error) => {
       toast.error("Error", {
-        description: error.message,
+        description: error,
       });
     },
   });
+
+  const handleSubmit = () => {
+    mutate({
+      submissionId,
+      content: reason,
+      commentType: CommentType.EDIT_REQUEST,
+      fieldPath: null,
+      fieldLabel: null,
+    });
+  };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -92,10 +89,7 @@ export function RequestEditAccessButton({
           <Button variant="ghost" onClick={() => setOpen(false)}>
             Cancel
           </Button>
-          <Button
-            onClick={() => mutate(reason)}
-            disabled={!reason.trim() || isPending}
-          >
+          <Button onClick={handleSubmit} disabled={!reason.trim() || isPending}>
             {isPending ? "Sending..." : "Send Request"}
           </Button>
         </DialogFooter>

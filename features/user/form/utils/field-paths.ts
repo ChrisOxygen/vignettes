@@ -10,10 +10,7 @@ import type { FieldConfig } from "../types";
  * - "workHistory.0.companyName" → "Work History → Entry 1 → Company Name"
  * - "familyMembers.biologicalSons.count" → "Family Members → Biological Sons"
  */
-export function formatFieldPath(
-  fieldPath: string,
-  formType: FormType
-): string {
+export function formatFieldPath(fieldPath: string, formType: FormType): string {
   const parts = fieldPath.split(".");
   const formatted: string[] = [];
 

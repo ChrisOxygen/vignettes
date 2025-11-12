@@ -1,14 +1,14 @@
 "use server";
 
 import { prisma } from "@/prisma/prisma";
-import { createClient } from "@/utils/supabase/server";
 import { ApiResponse } from "@/features/shared/types/api";
 import { CommentType, EditRequestStatus, FormType } from "@prisma/client";
+import { getAuthenticatedUser } from "./index";
 
 // ============================================
 // CREATE COMMENT
 // ============================================
-export async function createComment(input: {
+export async function _createComment(input: {
   submissionId: string;
   content: string;
   fieldPath?: string | null;
@@ -17,24 +17,8 @@ export async function createComment(input: {
   parentCommentId?: string | null;
 }): Promise<ApiResponse> {
   try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
-      return { success: false, message: "Unauthorized" };
-    }
-
-    // Get user info from database
-    const dbUser = await prisma.user.findUnique({
-      where: { id: user.id },
-      select: { id: true, name: true, role: true },
-    });
-
-    if (!dbUser) {
-      return { success: false, message: "User not found" };
-    }
+    // Get authenticated user from database
+    const dbUser = await getAuthenticatedUser();
 
     // Get submission to verify ownership and get formType
     const submission = await prisma.formSubmission.findUnique({
@@ -47,7 +31,7 @@ export async function createComment(input: {
     }
 
     // Verify user owns submission OR is admin
-    if (submission.userId !== user.id && dbUser.role !== "ADMIN") {
+    if (submission.userId !== dbUser.id && dbUser.role !== "ADMIN") {
       return {
         success: false,
         message: "Not authorized to comment on this form",
@@ -118,28 +102,10 @@ export async function createComment(input: {
 // ============================================
 // GET COMMENTS FOR SUBMISSION
 // ============================================
-export async function getComments(
-  submissionId: string
-): Promise<ApiResponse> {
+export async function _getComments(submissionId: string): Promise<ApiResponse> {
   try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
-      return { success: false, message: "Unauthorized" };
-    }
-
-    // Get user role
-    const dbUser = await prisma.user.findUnique({
-      where: { id: user.id },
-      select: { id: true, role: true },
-    });
-
-    if (!dbUser) {
-      return { success: false, message: "User not found" };
-    }
+    // Get authenticated user from database
+    const dbUser = await getAuthenticatedUser();
 
     // Verify access to submission
     const submission = await prisma.formSubmission.findUnique({
@@ -151,7 +117,7 @@ export async function getComments(
       return { success: false, message: "Form submission not found" };
     }
 
-    if (submission.userId !== user.id && dbUser.role !== "ADMIN") {
+    if (submission.userId !== dbUser.id && dbUser.role !== "ADMIN") {
       return { success: false, message: "Not authorized" };
     }
 
@@ -189,26 +155,15 @@ export async function getComments(
 // ============================================
 // RESOLVE/UNRESOLVE COMMENT
 // ============================================
-export async function toggleResolveComment(
+export async function _toggleResolveComment(
   commentId: string
 ): Promise<ApiResponse> {
   try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
-      return { success: false, message: "Unauthorized" };
-    }
-
-    const dbUser = await prisma.user.findUnique({
-      where: { id: user.id },
-      select: { role: true },
-    });
+    // Get authenticated user from database
+    const dbUser = await getAuthenticatedUser();
 
     // Only admins can resolve comments
-    if (dbUser?.role !== "ADMIN") {
+    if (dbUser.role !== "ADMIN") {
       return { success: false, message: "Only admins can resolve comments" };
     }
 
@@ -242,25 +197,14 @@ export async function toggleResolveComment(
 // ============================================
 // PIN/UNPIN COMMENT (Admin only)
 // ============================================
-export async function togglePinComment(
+export async function _togglePinComment(
   commentId: string
 ): Promise<ApiResponse> {
   try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    // Get authenticated user from database
+    const dbUser = await getAuthenticatedUser();
 
-    if (!user) {
-      return { success: false, message: "Unauthorized" };
-    }
-
-    const dbUser = await prisma.user.findUnique({
-      where: { id: user.id },
-      select: { role: true },
-    });
-
-    if (dbUser?.role !== "ADMIN") {
+    if (dbUser.role !== "ADMIN") {
       return { success: false, message: "Only admins can pin comments" };
     }
 
