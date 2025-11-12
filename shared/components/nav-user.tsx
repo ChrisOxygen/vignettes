@@ -68,7 +68,7 @@ export function NavUser() {
     );
   }
 
-  const displayName = user.name || user.email?.split("@")[0] || "User";
+  const displayName = user.firstName || user.email?.split("@")[0] || "User";
   const userInitials = getUserInitials(displayName);
 
   const handleSignOut = () => {

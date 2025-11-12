@@ -110,7 +110,7 @@ export async function GET(
         });
 
         await sendWelcomeEmail(
-          verificationToken.user.name,
+          verificationToken.user.firstName,
           verificationToken.user.email
         );
 

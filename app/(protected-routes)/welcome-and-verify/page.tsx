@@ -48,7 +48,9 @@ function WelcomeAndVerifyPage() {
   };
 
   const getUserName = () => {
-    return user?.user_metadata?.name || user?.email?.split("@")[0] || "there";
+    return (
+      user?.user_metadata?.firstName || user?.email?.split("@")[0] || "there"
+    );
   };
 
   return (
