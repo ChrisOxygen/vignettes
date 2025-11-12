@@ -2,6 +2,7 @@
 
 import VerifyEmail from "@/emails/VerifyEmail";
 import WelcomeEmail from "@/emails/WelcomeEmail";
+import ResetPasswordEmail from "@/emails/ResetPasswordEmail";
 import { Resend } from "resend";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
@@ -75,6 +76,46 @@ export async function sendVerificationEmail(
     return {
       ok: false,
       message: "Failed to send verification email",
+    };
+  }
+}
+
+export async function sendPasswordResetEmail(
+  email: string,
+  name: string,
+  resetToken: string
+) {
+  try {
+    // Validate the required fields
+    if (!name || !email || !resetToken) {
+      throw new Error("Name, email, and resetToken are required");
+    }
+
+    // Send the password reset email
+    const { data, error } = await resend.emails.send({
+      from: "reset@insights4globaltalents.com",
+      to: email,
+      subject: "Reset Your Password - Insights & Vignettes",
+      react: ResetPasswordEmail({
+        name,
+        resetToken,
+      }),
+    });
+
+    if (error) {
+      throw new Error(`Resend error: ${error.message}`);
+    }
+
+    return {
+      ok: true,
+      message: "Password reset email sent successfully",
+      data,
+    };
+  } catch (error) {
+    console.error("Error sending password reset email:", error);
+    return {
+      ok: false,
+      message: "Failed to send password reset email",
     };
   }
 }

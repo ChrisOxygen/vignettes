@@ -19,3 +19,20 @@ export function generateEmailVerificationToken() {
     expiresAt,
   };
 }
+
+/**
+ * Generate a password reset token using UUID
+ * @returns Object containing the plain UUID token and hashed token for database storage
+ */
+export function generatePasswordResetToken() {
+  // Generate UUID for the reset token
+  const uuid = crypto.randomUUID();
+
+  // Hash the token for secure storage in database
+  const hashedToken = crypto.createHash("sha256").update(uuid).digest("hex");
+
+  return {
+    token: uuid, // Plain token to send in email/URL
+    hashedToken, // Hashed token to store in database
+  };
+}

@@ -2,19 +2,26 @@
 
 import { useMutation } from "@tanstack/react-query";
 import { ApiResponse } from "@/features/shared/types/api";
-import { ZEmailInput } from "../validators/user.validator";
-import { _createPasswordResetCode } from "../actions/password-reset.actions";
+import { ZResetPasswordWithTokenInput } from "../validators/user.validator";
+import { _resetUserPassword } from "../actions/password-reset.actions";
 
-interface UseResetPasswordOptions {
+interface UseConfirmPasswordResetOptions {
   onSuccess?: (response: ApiResponse) => void;
   onError?: (error: string) => void;
 }
 
-// Hook to request password reset using custom server action
-export function useResetPassword(options?: UseResetPasswordOptions) {
+/**
+ * Hook to confirm password reset using token from email
+ * This is the second step after user clicks the reset link
+ */
+export function useConfirmPasswordReset(
+  options?: UseConfirmPasswordResetOptions
+) {
   const mutation = useMutation({
-    mutationFn: async (data: ZEmailInput): Promise<ApiResponse> => {
-      const result = await _createPasswordResetCode(data);
+    mutationFn: async (
+      data: ZResetPasswordWithTokenInput
+    ): Promise<ApiResponse> => {
+      const result = await _resetUserPassword(data);
 
       if (!result.success) {
         throw new Error(result.message);

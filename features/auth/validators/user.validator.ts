@@ -92,6 +92,29 @@ export const resetPasswordSchema = z
 
 export type ZResetPasswordInput = z.infer<typeof resetPasswordSchema>;
 
+// Password reset with token schema
+export const resetPasswordWithTokenSchema = z
+  .object({
+    token: z.string().min(1, "Reset token is required"),
+    password: z
+      .string()
+      .min(8, "Password must be at least 8 characters long")
+      .max(128, "Password must not exceed 128 characters")
+      .regex(
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
+        "Password must contain at least one uppercase letter, one lowercase letter, and one number"
+      ),
+    confirmPassword: z.string().min(1, "Please confirm your password"),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+  });
+
+export type ZResetPasswordWithTokenInput = z.infer<
+  typeof resetPasswordWithTokenSchema
+>;
+
 // Admin signup schema (extends base signup with admin code)
 export const adminSignUpSchema = baseSignUpSchema
   .extend({

@@ -80,7 +80,7 @@ export function SignInForm() {
       // Use navigation instead of refresh to avoid potential issues
       setTimeout(() => {
         // Redirect to the app dashboard
-        router.push("/app");
+        router.push("/app/form");
       }, 1000); // Give user time to see success message
     },
     onError: (error) => {
@@ -193,7 +193,7 @@ export function SignInForm() {
               />
 
               <Link
-                href="/reset-password"
+                href="/forgot-password"
                 className="text-sm text-primary underline self-end justify-self-end text-right w-max hover:text-primary/80 transition-colors"
               >
                 Forgot password?

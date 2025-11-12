@@ -1,8 +1,5 @@
-import React from "react";
 import { ResetPasswordForm } from "@/features/auth/components/ResetPasswordForm";
 
-function ResetPasswordPage() {
+export default function ResetPasswordPage() {
   return <ResetPasswordForm />;
 }
-
-export default ResetPasswordPage;

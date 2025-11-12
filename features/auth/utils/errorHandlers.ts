@@ -208,3 +208,126 @@ export const handleUserRetrievalError = (error: unknown): ApiResponse<any> => {
     error: ApiErrorCode.INTERNAL_ERROR,
   };
 };
+
+// Error handling function for password reset token creation
+export const handlePasswordResetError = (error: unknown): ApiResponse => {
+  console.error("Error creating password reset token:", error);
+
+  if (error instanceof Error) {
+    // Handle user not found error
+    if (error.message.includes("User not found")) {
+      return {
+        success: false,
+        message: "No account found with this email address",
+        error: ApiErrorCode.USER_NOT_FOUND,
+      };
+    }
+
+    // Handle account status errors
+    if (error.message.includes("Account is not active")) {
+      return {
+        success: false,
+        message:
+          "Your account is not active. Please verify your email or contact support.",
+        error: ApiErrorCode.ACCOUNT_NOT_VERIFIED,
+      };
+    }
+
+    // Handle Prisma connection errors
+    if (
+      error.message.includes("Connection") ||
+      error.message.includes("ECONNREFUSED")
+    ) {
+      return {
+        success: false,
+        message: "Database connection failed. Please try again later.",
+        error: ApiErrorCode.DATABASE_CONNECTION_ERROR,
+      };
+    }
+
+    // Handle validation errors
+    if (error.message.includes("Invalid email")) {
+      return {
+        success: false,
+        message: "Please provide a valid email address",
+        error: ApiErrorCode.VALIDATION_ERROR,
+      };
+    }
+  }
+
+  // Default error response
+  return {
+    success: false,
+    message: "An unexpected error occurred. Please try again.",
+    error: ApiErrorCode.INTERNAL_ERROR,
+  };
+};
+
+// Error handling function for password reset verification and update
+export const handlePasswordResetVerificationError = (
+  error: unknown
+): ApiResponse => {
+  console.error("Error resetting password:", error);
+
+  if (error instanceof Error) {
+    // Handle invalid or expired token
+    if (
+      error.message.includes("Invalid reset token") ||
+      error.message.includes("Token not found")
+    ) {
+      return {
+        success: false,
+        message:
+          "Invalid or expired reset link. Please request a new password reset.",
+        error: ApiErrorCode.INVALID_DATA,
+      };
+    }
+
+    // Handle token expiration
+    if (error.message.includes("Reset token has expired")) {
+      return {
+        success: false,
+        message:
+          "This reset link has expired. Please request a new password reset.",
+        error: ApiErrorCode.INVALID_DATA,
+      };
+    }
+
+    // Handle Supabase auth update errors
+    if (error.message.includes("Supabase auth update failed")) {
+      return {
+        success: false,
+        message: "Failed to update password. Please try again.",
+        error: ApiErrorCode.AUTH_CREATION_FAILED,
+      };
+    }
+
+    // Handle validation errors
+    if (error.message.includes("Invalid password")) {
+      return {
+        success: false,
+        message: "Please provide a valid password",
+        error: ApiErrorCode.VALIDATION_ERROR,
+      };
+    }
+
+    // Handle Prisma connection errors
+    if (
+      error.message.includes("Connection") ||
+      error.message.includes("ECONNREFUSED")
+    ) {
+      return {
+        success: false,
+        message: "Database connection failed. Please try again later.",
+        error: ApiErrorCode.DATABASE_CONNECTION_ERROR,
+      };
+    }
+  }
+
+  // Default error response
+  return {
+    success: false,
+    message: "An unexpected error occurred. Please try again.",
+    error: ApiErrorCode.INTERNAL_ERROR,
+  };
+};

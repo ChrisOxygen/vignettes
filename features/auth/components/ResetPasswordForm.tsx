@@ -1,11 +1,16 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
-import { emailSchema, type ZEmailInput } from "../validators/user.validator";
-import { useResetPassword } from "../hooks/useResetPassword";
+import { useRouter, useParams } from "next/navigation";
+import { FaRegEye, FaRegEyeSlash } from "react-icons/fa6";
+import {
+  resetPasswordSchema,
+  type ZResetPasswordInput,
+} from "../validators/user.validator";
+import { useConfirmPasswordReset } from "../hooks";
 import {
   Form,
   FormControl,
@@ -19,10 +24,17 @@ import { Button } from "@/shared/components/ui/button";
 import Image from "next/image";
 
 export function ResetPasswordForm() {
-  const form = useForm<ZEmailInput>({
-    resolver: zodResolver(emailSchema),
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const router = useRouter();
+  const params = useParams();
+  const token = params.token as string;
+
+  const form = useForm<ZResetPasswordInput>({
+    resolver: zodResolver(resetPasswordSchema),
     defaultValues: {
-      email: "",
+      password: "",
+      confirmPassword: "",
     },
   });
 
@@ -32,21 +44,32 @@ export function ResetPasswordForm() {
     isError,
     error,
     isSuccess,
-  } = useResetPassword({
+  } = useConfirmPasswordReset({
     onSuccess: (response) => {
       // Reset form on success
       form.reset();
-      // You can add toast notification here
-      console.log("Password reset email sent:", response.message);
+      console.log("Password reset successful:", response.message);
     },
     onError: (error) => {
-      // You can add toast notification here
       form.setError("root", { message: error });
     },
   });
 
-  const onSubmit = (data: ZEmailInput) => {
-    resetPassword(data);
+  const onSubmit = (data: ZResetPasswordInput) => {
+    if (!token) {
+      form.setError("root", {
+        message: "Invalid reset link. Please request a new password reset.",
+      });
+      return;
+    }
+
+    // Remove confirmPassword and add token
+    const { confirmPassword, ...passwordData } = data;
+    resetPassword({
+      token,
+      password: passwordData.password,
+      confirmPassword,
+    });
   };
 
   return (
@@ -75,7 +98,7 @@ export function ResetPasswordForm() {
         />
 
         {isSuccess ? (
-          // Success State - Show friendly message
+          // Success State - Show success message
           <div className="text-center space-y-6">
             <div className="w-16 h-16 mx-auto bg-green-100 rounded-full flex items-center justify-center">
               <svg
@@ -88,38 +111,26 @@ export function ResetPasswordForm() {
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   strokeWidth={2}
-                  d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                  d="M5 13l4 4L19 7"
                 />
               </svg>
             </div>
             <div className="space-y-2">
               <h1 className="text-xl sm:text-2xl font-light text-foreground">
-                Check Your Email
+                Password Reset Successful!
               </h1>
               <p className="text-sm sm:text-base text-muted-foreground">
-                A password reset link has been sent to your mailbox. Please
-                check your email and follow the instructions to reset your
-                password.
+                Your password has been successfully reset. You can now sign in
+                with your new password.
               </p>
             </div>
-            <div className="text-xs sm:text-sm text-slate-500 text-center">
-              Didn't receive the email? Check your spam folder or{" "}
-              <button
-                onClick={() => window.location.reload()}
-                className="text-primary underline hover:text-primary/80 transition-colors"
-              >
-                try again
-              </button>
-            </div>
             <div className="flex flex-col gap-3 pt-4">
-              <Link
-                href="/sign-in"
-                className="text-xs sm:text-sm text-slate-700 text-center"
+              <Button
+                onClick={() => router.push("/sign-in")}
+                className="rounded h-10 sm:h-12 w-full bg-primary hover:bg-primary/90 text-primary-foreground transition-colors text-sm sm:text-base"
               >
-                <span className="text-primary underline hover:text-primary/80 transition-colors">
-                  Back to Sign In
-                </span>
-              </Link>
+                Go to Sign In
+              </Button>
             </div>
           </div>
         ) : (
@@ -127,10 +138,10 @@ export function ResetPasswordForm() {
           <>
             <div className="text-center space-y-2">
               <h1 className="text-xl sm:text-2xl font-light text-foreground">
-                Reset Password
+                Create New Password
               </h1>
               <p className="text-sm sm:text-base text-muted-foreground">
-                Enter your email address and we'll send you a reset link
+                Enter your new password below
               </p>
             </div>
 
@@ -142,22 +153,72 @@ export function ResetPasswordForm() {
                 >
                   <FormField
                     control={form.control}
-                    name="email"
+                    name="password"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Email</FormLabel>
+                        <FormLabel>New Password</FormLabel>
                         <FormControl>
-                          <Input
-                            placeholder="Enter your email address"
-                            type="email"
-                            disabled={isResettingPassword}
-                            className={`h-10 sm:h-12 rounded bg-white text-sm sm:text-base focus-visible:ring-0 focus-visible:ring-offset-0 ${
-                              form.formState.errors.email
-                                ? "border-destructive"
-                                : ""
-                            }`}
-                            {...field}
-                          />
+                          <div className="relative">
+                            <Input
+                              placeholder="Enter your new password"
+                              type={showPassword ? "text" : "password"}
+                              disabled={isResettingPassword}
+                              className={`h-10 sm:h-12 rounded pr-10 bg-white text-sm sm:text-base focus-visible:ring-0 focus-visible:ring-offset-0 ${
+                                form.formState.errors.password
+                                  ? "border-destructive"
+                                  : ""
+                              }`}
+                              {...field}
+                            />
+                            <button
+                              type="button"
+                              disabled={isResettingPassword}
+                              onClick={() => setShowPassword(!showPassword)}
+                              className="absolute right-2 sm:right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              {showPassword ? <FaRegEyeSlash /> : <FaRegEye />}
+                            </button>
+                          </div>
+                        </FormControl>
+                        <FormMessage className="text-destructive text-sm" />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="confirmPassword"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Confirm New Password</FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <Input
+                              placeholder="Confirm your new password"
+                              type={showConfirmPassword ? "text" : "password"}
+                              disabled={isResettingPassword}
+                              className={`h-10 sm:h-12 rounded pr-10 bg-white text-sm sm:text-base focus-visible:ring-0 focus-visible:ring-offset-0 ${
+                                form.formState.errors.confirmPassword
+                                  ? "border-destructive"
+                                  : ""
+                              }`}
+                              {...field}
+                            />
+                            <button
+                              type="button"
+                              disabled={isResettingPassword}
+                              onClick={() =>
+                                setShowConfirmPassword(!showConfirmPassword)
+                              }
+                              className="absolute right-2 sm:right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              {showConfirmPassword ? (
+                                <FaRegEyeSlash />
+                              ) : (
+                                <FaRegEye />
+                              )}
+                            </button>
+                          </div>
                         </FormControl>
                         <FormMessage className="text-destructive text-sm" />
                       </FormItem>
@@ -166,18 +227,18 @@ export function ResetPasswordForm() {
 
                   <Button
                     type="submit"
-                    disabled={isResettingPassword}
+                    disabled={isResettingPassword || !token}
                     className="rounded h-10 sm:h-12 w-full bg-primary hover:bg-primary/90 text-primary-foreground transition-colors cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed text-sm sm:text-base"
                   >
                     {isResettingPassword ? (
                       <div className="flex items-center gap-2">
                         <div className="animate-spin rounded-full h-3 w-3 sm:h-4 sm:w-4 border-2 border-white border-t-transparent"></div>
                         <span className="text-xs sm:text-sm">
-                          Sending Reset Link...
+                          Resetting Password...
                         </span>
                       </div>
                     ) : (
-                      "Send Reset Link"
+                      "Reset Password"
                     )}
                   </Button>
 
@@ -186,6 +247,15 @@ export function ResetPasswordForm() {
                     <div className="p-2 sm:p-3 bg-red-50 border border-red-200 rounded-lg">
                       <span className="text-red-600 text-xs sm:text-sm">
                         {error}
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Invalid token warning */}
+                  {!token && (
+                    <div className="p-2 sm:p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                      <span className="text-amber-600 text-xs sm:text-sm">
+                        Invalid reset link. Please request a new password reset.
                       </span>
                     </div>
                   )}
@@ -199,16 +269,6 @@ export function ResetPasswordForm() {
                   className="text-primary underline hover:text-primary/80 transition-colors"
                 >
                   Sign In
-                </Link>
-              </div>
-
-              <div className="text-xs sm:text-sm text-slate-700 text-center">
-                Don't have an account?{" "}
-                <Link
-                  href="/sign-up"
-                  className="text-primary underline hover:text-primary/80 transition-colors"
-                >
-                  Sign Up
                 </Link>
               </div>
             </div>
