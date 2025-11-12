@@ -141,25 +141,65 @@ enum FormStatus {
   REJECTED
 }
 
+enum CommentType {
+  GENERAL           // Regular comment/question
+  ADMIN_FEEDBACK    // Admin providing feedback
+  CHANGE_REQUEST    // Admin requesting changes to field
+  EDIT_REQUEST      // User requesting edit access (FORM-LEVEL only)
+  SYSTEM            // System-generated (e.g., "Form submitted", "Edit request approved")
+}
+
+enum EditRequestStatus {
+  PENDING           // Awaiting admin review
+  APPROVED          // Admin approved, form unlocked
+  DENIED            // Admin denied request
+  WITHDRAWN         // User withdrew request
+}
+
 model FieldComment {
-  id              String   @id @default(uuid()) @db.Uuid
-  submissionId    String   @db.Uuid
-  fieldPath       String   @db.VarChar(255)
-  parentCommentId String?  @db.Uuid
-  authorId        String   @db.Uuid
-  authorRole      String   @db.VarChar(50)
-  content         String   @db.Text
-  isResolved      Boolean  @default(false)
-  createdAt       DateTime @default(now()) @db.Timestamptz
-  updatedAt       DateTime @updatedAt @db.Timestamptz
+  id              String      @id @default(uuid()) @db.Uuid
+  submissionId    String      @db.Uuid
+  formType        FormType    // Denormalized for efficient querying
+  
+  // Field tagging (null = form-level comment)
+  fieldPath       String?     @db.VarChar(255)
+  fieldLabel      String?     @db.VarChar(255)  // Human-readable: "Passport Number"
+  
+  // Comment metadata
+  commentType     CommentType @default(GENERAL)
+  content         String      @db.Text
+  
+  // Threading
+  parentCommentId String?     @db.Uuid
+  
+  // Author info (denormalized for performance)
+  authorId        String      @db.Uuid
+  authorName      String      @db.VarChar(100)
+  authorRole      UserRole    // USER or ADMIN
+  
+  // Status flags
+  isResolved      Boolean     @default(false)
+  isPinned        Boolean     @default(false)  // Admins can pin important comments
+  
+  // Edit request specific (only for EDIT_REQUEST type)
+  editRequestStatus       EditRequestStatus? @default(PENDING)
+  editRequestResolvedAt   DateTime?          @db.Timestamptz
+  editRequestResolvedBy   String?            @db.Uuid
+  
+  createdAt       DateTime    @default(now()) @db.Timestamptz
+  updatedAt       DateTime    @updatedAt @db.Timestamptz
 
   submission    FormSubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
   parentComment FieldComment?  @relation("CommentReplies", fields: [parentCommentId], references: [id])
   replies       FieldComment[] @relation("CommentReplies")
 
+  @@index([submissionId])
   @@index([submissionId, fieldPath])
+  @@index([submissionId, commentType])
   @@index([authorId])
   @@index([isResolved])
+  @@index([isPinned])
+  @@index([editRequestStatus])
   @@index([createdAt])
   @@map("field_comments")
 }

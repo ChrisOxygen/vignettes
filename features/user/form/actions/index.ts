@@ -8,6 +8,10 @@ import { generateFormSchema } from "../utils/schema-generator";
 import { ZodError } from "zod";
 import { prisma } from "@/prisma/prisma";
 
+// Export comment-related actions
+export * from "./comments.actions";
+export * from "./edit-requests.actions";
+
 // const prisma = new PrismaClient();
 
 // Types for form submission
