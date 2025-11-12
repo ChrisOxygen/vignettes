@@ -94,6 +94,7 @@ export const PreviousTravelForm: React.FC = () => {
                   <Checkbox
                     id="travelHistoryNA"
                     checked={travelHistoryNA}
+                    disabled={isFormLocked}
                     onCheckedChange={(checked) => {
                       form.setValue("travelHistoryNA", checked as boolean);
                     }}

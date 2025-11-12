@@ -89,6 +89,7 @@ export const RelativesAbroadForm: React.FC = () => {
                   <Checkbox
                     id="relativesInUKNA"
                     checked={relativesInUKNA}
+                    disabled={isFormLocked}
                     onCheckedChange={(checked) => {
                       form.setValue("relativesInUKNA", checked as boolean);
                     }}

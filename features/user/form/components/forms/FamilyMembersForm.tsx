@@ -235,12 +235,13 @@ export const FamilyMembersForm: React.FC = () => {
 
             {/* Biological Sons */}
             <div className="space-y-4">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between gap-2 flex-wrap">
                 <h3 className="text-lg font-medium">Biological Sons</h3>
                 <div className="flex items-center space-x-2">
                   <Checkbox
                     id="biologicalSonsNA"
                     checked={biologicalSonsNA}
+                    disabled={isFormLocked}
                     onCheckedChange={(checked) => {
                       const registerProps =
                         form.control.register("biologicalSonsNA");
@@ -323,6 +324,7 @@ export const FamilyMembersForm: React.FC = () => {
                   <Checkbox
                     id="biologicalDaughtersNA"
                     checked={biologicalDaughtersNA}
+                    disabled={isFormLocked}
                     onCheckedChange={(checked) => {
                       form.setValue(
                         "biologicalDaughtersNA",
@@ -406,6 +408,7 @@ export const FamilyMembersForm: React.FC = () => {
                   <Checkbox
                     id="stepSonsNA"
                     checked={stepSonsNA}
+                    disabled={isFormLocked}
                     onCheckedChange={(checked) => {
                       form.setValue("stepSonsNA", checked as boolean);
                     }}
@@ -468,6 +471,7 @@ export const FamilyMembersForm: React.FC = () => {
                   <Checkbox
                     id="stepDaughtersNA"
                     checked={stepDaughtersNA}
+                    disabled={isFormLocked}
                     onCheckedChange={(checked) => {
                       form.setValue("stepDaughtersNA", checked as boolean);
                     }}
@@ -548,6 +552,7 @@ export const FamilyMembersForm: React.FC = () => {
                   <Checkbox
                     id="adoptedSonsNA"
                     checked={adoptedSonsNA}
+                    disabled={isFormLocked}
                     onCheckedChange={(checked) => {
                       form.setValue("adoptedSonsNA", checked as boolean);
                     }}
@@ -613,6 +618,7 @@ export const FamilyMembersForm: React.FC = () => {
                   <Checkbox
                     id="adoptedDaughtersNA"
                     checked={adoptedDaughtersNA}
+                    disabled={isFormLocked}
                     onCheckedChange={(checked) => {
                       form.setValue("adoptedDaughtersNA", checked as boolean);
                     }}
@@ -693,6 +699,7 @@ export const FamilyMembersForm: React.FC = () => {
                   <Checkbox
                     id="brothersNA"
                     checked={brothersNA}
+                    disabled={isFormLocked}
                     onCheckedChange={(checked) => {
                       form.setValue("brothersNA", checked as boolean);
                     }}
@@ -756,6 +763,7 @@ export const FamilyMembersForm: React.FC = () => {
                   <Checkbox
                     id="sistersNA"
                     checked={sistersNA}
+                    disabled={isFormLocked}
                     onCheckedChange={(checked) => {
                       form.setValue("sistersNA", checked as boolean);
                     }}

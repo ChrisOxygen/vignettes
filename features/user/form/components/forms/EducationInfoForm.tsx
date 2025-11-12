@@ -134,6 +134,7 @@ export const EducationInfoForm: React.FC = () => {
                   <Checkbox
                     id="elementaryPrimaryNA"
                     checked={elementaryPrimaryNA}
+                    disabled={isFormLocked}
                     onCheckedChange={(checked) => {
                       form.setValue("elementaryPrimaryNA", checked as boolean);
                     }}
@@ -227,6 +228,7 @@ export const EducationInfoForm: React.FC = () => {
                   <Checkbox
                     id="secondaryHighSchoolNA"
                     checked={secondaryHighSchoolNA}
+                    disabled={isFormLocked}
                     onCheckedChange={(checked) => {
                       form.setValue(
                         "secondaryHighSchoolNA",
@@ -324,6 +326,7 @@ export const EducationInfoForm: React.FC = () => {
                   <Checkbox
                     id="universityCollegeNA"
                     checked={universityCollegeNA}
+                    disabled={isFormLocked}
                     onCheckedChange={(checked) => {
                       form.setValue("universityCollegeNA", checked as boolean);
                     }}
@@ -419,6 +422,7 @@ export const EducationInfoForm: React.FC = () => {
                   <Checkbox
                     id="tradeSchoolOtherNA"
                     checked={tradeSchoolOtherNA}
+                    disabled={isFormLocked}
                     onCheckedChange={(checked) => {
                       form.setValue("tradeSchoolOtherNA", checked as boolean);
                     }}

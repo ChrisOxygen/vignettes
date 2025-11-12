@@ -100,6 +100,7 @@ export const VisaPermitForm: React.FC = () => {
                   <Checkbox
                     id="visaPermitHistoryNA"
                     checked={visaPermitHistoryNA}
+                    disabled={isFormLocked}
                     onCheckedChange={(checked) => {
                       form.setValue("visaPermitHistoryNA", checked as boolean);
                     }}

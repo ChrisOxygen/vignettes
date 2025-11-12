@@ -91,6 +91,7 @@ export const WorkBusinessForm: React.FC = () => {
                   <Checkbox
                     id="workHistoryNA"
                     checked={workHistoryNA}
+                    disabled={isFormLocked}
                     onCheckedChange={(checked) => {
                       form.setValue("workHistoryNA", checked as boolean);
                     }}
