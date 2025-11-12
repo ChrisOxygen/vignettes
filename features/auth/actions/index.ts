@@ -37,7 +37,8 @@ export const _createUser = async (
       };
     }
 
-    const { email, password, name } = validationResult.data;
+    const { email, password, firstName, lastName, middleName } =
+      validationResult.data;
 
     // Use transaction to ensure data consistency
     await prisma.$transaction(async (tx) => {
@@ -53,6 +54,11 @@ export const _createUser = async (
 
       console.log("Email is unique, proceeding to create user");
 
+      // Create full name for Supabase metadata
+      const fullName = middleName
+        ? `${firstName} ${middleName} ${lastName}`.trim()
+        : `${firstName} ${lastName}`.trim();
+
       // Create Supabase auth user first
       const supabase = await createClient();
       const { error: authError } = await supabase.auth.signUp({
@@ -60,7 +66,10 @@ export const _createUser = async (
         password,
         options: {
           data: {
-            name,
+            firstName,
+            lastName,
+            middleName: middleName || null,
+            fullName,
             role: "USER", // Set role in auth metadata
             email_confirm: false,
             status: "PENDING_VERIFICATION",
@@ -81,7 +90,9 @@ export const _createUser = async (
       const newUser = await tx.user.create({
         data: {
           email,
-          name,
+          firstName,
+          lastName,
+          middleName: middleName || null,
           accountStatus: "PENDING_VERIFICATION", // New users need to verify email
         },
       });
@@ -102,7 +113,7 @@ export const _createUser = async (
 
       // Send verification email
       // Note: Supabase will also send its own verification email, but we're using our custom flow
-      await sendVerificationEmail(email, name, verificationToken);
+      await sendVerificationEmail(email, fullName, verificationToken);
     });
 
     return {
@@ -167,7 +178,7 @@ export const _createEmailVerificationToken = async (
       });
 
       // Send verification email within the transaction
-      await sendVerificationEmail(user.email, user.name, token);
+      await sendVerificationEmail(user.email, user.firstName, token);
     });
 
     return {
@@ -197,7 +208,8 @@ export const _createAdminUser = async (
       };
     }
 
-    const { email, password, name, adminCode } = validationResult.data;
+    const { email, password, firstName, lastName, middleName, adminCode } =
+      validationResult.data;
 
     // Use transaction to ensure data consistency
     await prisma.$transaction(async (tx) => {
@@ -221,6 +233,11 @@ export const _createAdminUser = async (
         "Email is unique and admin code is valid, proceeding to create admin user"
       );
 
+      // Create full name for Supabase metadata
+      const fullName = middleName
+        ? `${firstName} ${middleName} ${lastName}`.trim()
+        : `${firstName} ${lastName}`.trim();
+
       // 3. Create user in Supabase Auth first
       const supabase = await createClient();
       const { error: authError } = await supabase.auth.signUp({
@@ -228,7 +245,10 @@ export const _createAdminUser = async (
         password,
         options: {
           data: {
-            name,
+            firstName,
+            lastName,
+            middleName: middleName || null,
+            fullName,
             role: "ADMIN", // Set role in auth metadata
           },
           emailRedirectTo: `${process.env.SITE_URL}/admin`,
@@ -243,7 +263,9 @@ export const _createAdminUser = async (
       const newUser = await tx.user.create({
         data: {
           email,
-          name,
+          firstName,
+          lastName,
+          middleName: middleName || null,
           role: "ADMIN", // Assign ADMIN role
         },
       });
@@ -387,7 +409,7 @@ export const _resendVerificationEmail = async (
     // Resend the existing verification token
     await sendVerificationEmail(
       email,
-      user.name || "User",
+      user.firstName || "User",
       user.emailVerificationToken.token
     );
 

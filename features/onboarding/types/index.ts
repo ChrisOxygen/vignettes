@@ -6,8 +6,6 @@ export type CountryCode = (typeof COUNTRIES)[number]["value"];
 // Types for the onboarding form data
 export interface OnboardingFormData {
   fullLegalName: string;
-  currentCountryOfResidence: CountryCode;
-  nationality: CountryCode;
   dateOfBirth: string;
   phoneNumber: string;
   passportNumber: string;
@@ -55,17 +53,6 @@ export interface OnboardingContextType {
   setSubmitted: (isSubmitted: boolean) => void;
   resetForm: () => void;
   resetState: () => void;
-  // Country-specific helpers
-  updateCountryField: (
-    field: "currentCountryOfResidence" | "nationality",
-    countryCode: CountryCode
-  ) => void;
-  getCountryLabel: (code: CountryCode) => string;
-  getCountryFlag: (code: CountryCode) => string;
-  getCountryData: (code: CountryCode) => (typeof COUNTRIES)[number] | null;
-  getCountryCode: (label: string) => CountryCode | null;
-  isValidCountryCode: (code: string) => code is CountryCode;
-  countries: typeof COUNTRIES;
   // Validation functions
   validateFormData: () => {
     success: boolean;

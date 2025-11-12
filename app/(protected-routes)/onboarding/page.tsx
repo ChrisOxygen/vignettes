@@ -18,16 +18,11 @@ import {
   Calendar,
   Phone,
   FileText,
-  Globe,
   Lock,
 } from "lucide-react";
 import { ScrollArea } from "@/shared/components/ui/scroll-area";
 import { useOnboarding } from "@/features/onboarding/context";
-import {
-  CountrySelect,
-  DatePicker,
-  TextInput,
-} from "@/features/onboarding/components";
+import { DatePicker, TextInput } from "@/features/onboarding/components";
 import { useCreateBasicApplicantData } from "@/features/onboarding/hooks";
 
 import { useRouter } from "next/navigation";
@@ -148,48 +143,6 @@ function OnboardingPage() {
                       {errors.fullLegalName}
                     </p>
                   )}
-                </div>
-
-                <div className="grid gap-6 md:grid-cols-2">
-                  {/* Current Country of Residence */}
-                  <div className="space-y-2">
-                    <Label className="text-base font-medium flex items-center gap-2">
-                      <Globe className="w-4 h-4" />
-                      Current Country of Residence
-                    </Label>
-                    <CountrySelect
-                      field="currentCountryOfResidence"
-                      placeholder="Select your current country..."
-                    />
-                    <p className="text-sm text-muted-foreground">
-                      The country where you currently live
-                    </p>
-                    {errors.currentCountryOfResidence && (
-                      <p className="text-sm text-destructive">
-                        {errors.currentCountryOfResidence}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Nationality */}
-                  <div className="space-y-2">
-                    <Label className="text-base font-medium flex items-center gap-2">
-                      <FileText className="w-4 h-4" />
-                      Nationality
-                    </Label>
-                    <CountrySelect
-                      field="nationality"
-                      placeholder="Select your nationality..."
-                    />
-                    <p className="text-sm text-muted-foreground">
-                      Your citizenship/country of passport
-                    </p>
-                    {errors.nationality && (
-                      <p className="text-sm text-destructive">
-                        {errors.nationality}
-                      </p>
-                    )}
-                  </div>
                 </div>
 
                 <div className="grid gap-6 md:grid-cols-2">

@@ -28,7 +28,9 @@ export function SignUpForm() {
   const form = useForm<ZSignUpSchema>({
     resolver: zodResolver(signUpSchema),
     defaultValues: {
-      name: "",
+      firstName: "",
+      lastName: "",
+      middleName: "",
       email: "",
       password: "",
       confirmPassword: "",
@@ -141,16 +143,62 @@ export function SignUpForm() {
               >
                 <FormField
                   control={form.control}
-                  name="name"
+                  name="firstName"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Name</FormLabel>
+                      <FormLabel>First Name</FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="Enter your full name"
+                          placeholder="Enter your first name"
                           disabled={isCreatingUser}
                           className={`h-10 sm:h-12 rounded bg-white text-sm sm:text-base focus-visible:ring-0 focus-visible:ring-offset-0 ${
-                            form.formState.errors.name
+                            form.formState.errors.firstName
+                              ? "border-destructive"
+                              : ""
+                          }`}
+                          {...field}
+                        />
+                      </FormControl>
+
+                      <FormMessage className="text-destructive text-sm" />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="lastName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Last Name / Surname</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Enter your last name"
+                          disabled={isCreatingUser}
+                          className={`h-10 sm:h-12 rounded bg-white text-sm sm:text-base focus-visible:ring-0 focus-visible:ring-offset-0 ${
+                            form.formState.errors.lastName
+                              ? "border-destructive"
+                              : ""
+                          }`}
+                          {...field}
+                        />
+                      </FormControl>
+
+                      <FormMessage className="text-destructive text-sm" />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="middleName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Middle Name (Optional)</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Enter your middle name"
+                          disabled={isCreatingUser}
+                          className={`h-10 sm:h-12 rounded bg-white text-sm sm:text-base focus-visible:ring-0 focus-visible:ring-offset-0 ${
+                            form.formState.errors.middleName
                               ? "border-destructive"
                               : ""
                           }`}

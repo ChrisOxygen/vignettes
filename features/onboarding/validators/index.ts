@@ -1,13 +1,6 @@
 import { z } from "zod";
-import { COUNTRIES } from "../constants";
-import type { CountryCode, OnboardingFormData } from "../types";
+import type { OnboardingFormData } from "../types";
 import { isValidDateFormat, isValidDateOfBirth } from "../utils/dateUtils";
-
-// Extract valid country codes from COUNTRIES constant
-const validCountryCodes = COUNTRIES.map((country) => country.value) as [
-  CountryCode,
-  ...CountryCode[],
-];
 
 // Zod schema for onboarding form validation
 export const onboardingFormSchema = z.object({
@@ -24,14 +17,6 @@ export const onboardingFormSchema = z.object({
       (name) => name.trim().split(/\s+/).length >= 2,
       "Please provide at least your first and last name"
     ),
-
-  currentCountryOfResidence: z.enum(validCountryCodes, {
-    message: "Please select a valid country",
-  }),
-
-  nationality: z.enum(validCountryCodes, {
-    message: "Please select a valid nationality",
-  }),
 
   dateOfBirth: z
     .string()

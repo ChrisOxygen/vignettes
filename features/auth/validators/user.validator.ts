@@ -2,12 +2,38 @@ import { z } from "zod";
 
 // Base signup schema without refinement
 const baseSignUpSchema = z.object({
-  name: z
+  firstName: z
     .string()
-    .min(2, "Name must be at least 2 characters long")
-    .max(50, "Name must not exceed 50 characters")
-    .regex(/^[a-zA-Z\s]+$/, "Name can only contain letters and spaces")
+    .min(1, "First name is required")
+    .min(2, "First name must be at least 2 characters long")
+    .max(50, "First name must not exceed 50 characters")
+    .regex(
+      /^[a-zA-Z\s'-]+$/,
+      "First name can only contain letters, spaces, hyphens, and apostrophes"
+    )
     .transform((name) => name.trim()),
+
+  lastName: z
+    .string()
+    .min(1, "Last name is required")
+    .min(2, "Last name must be at least 2 characters long")
+    .max(50, "Last name must not exceed 50 characters")
+    .regex(
+      /^[a-zA-Z\s'-]+$/,
+      "Last name can only contain letters, spaces, hyphens, and apostrophes"
+    )
+    .transform((name) => name.trim()),
+
+  middleName: z
+    .string()
+    .max(50, "Middle name must not exceed 50 characters")
+    .regex(
+      /^[a-zA-Z\s'-]*$/,
+      "Middle name can only contain letters, spaces, hyphens, and apostrophes"
+    )
+    .transform((name) => name.trim())
+    .optional()
+    .or(z.literal("")),
 
   email: z
     .string()

@@ -2,14 +2,11 @@ import type {
   OnboardingState,
   OnboardingAction,
   OnboardingFormData,
-  CountryCode,
 } from "../types";
 
 // Initial form data
 export const initialFormData: OnboardingFormData = {
   fullLegalName: "",
-  currentCountryOfResidence: "" as CountryCode,
-  nationality: "" as CountryCode,
   dateOfBirth: "",
   phoneNumber: "",
   passportNumber: "",

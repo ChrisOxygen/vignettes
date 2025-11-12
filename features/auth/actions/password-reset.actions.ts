@@ -51,7 +51,9 @@ export const _createPasswordResetCode = async (
         select: {
           id: true,
           email: true,
-          name: true,
+          firstName: true,
+          lastName: true,
+          middleName: true,
           accountStatus: true,
         },
       });
@@ -84,9 +86,14 @@ export const _createPasswordResetCode = async (
         },
       });
 
+      // Create full name for email
+      const fullName = user.middleName
+        ? `${user.firstName} ${user.middleName} ${user.lastName}`.trim()
+        : `${user.firstName} ${user.lastName}`.trim();
+
       return {
         userId: user.id,
-        userName: user.name,
+        userName: fullName,
         userEmail: user.email,
         resetToken: token, // Return plain token for email
       };
@@ -159,7 +166,9 @@ export const _resetUserPassword = async (
             select: {
               id: true,
               email: true,
-              name: true,
+              firstName: true,
+              lastName: true,
+              middleName: true,
               accountStatus: true,
             },
           },
@@ -187,10 +196,15 @@ export const _resetUserPassword = async (
         where: { id: resetToken.id },
       });
 
+      // Create full name
+      const fullName = resetToken.user.middleName
+        ? `${resetToken.user.firstName} ${resetToken.user.middleName} ${resetToken.user.lastName}`.trim()
+        : `${resetToken.user.firstName} ${resetToken.user.lastName}`.trim();
+
       return {
         userId: resetToken.user.id,
         userEmail: resetToken.user.email,
-        userName: resetToken.user.name,
+        userName: fullName,
       };
     });
 

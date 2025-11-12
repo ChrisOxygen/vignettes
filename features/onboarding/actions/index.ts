@@ -77,8 +77,6 @@ export const _createBasicApplicantData = async (
         data: {
           userId: dbUser.id,
           fullLegalName: validatedData.fullLegalName,
-          currentCountryOfResidence: validatedData.currentCountryOfResidence,
-          nationality: validatedData.nationality,
           dateOfBirth,
           phoneNumber: validatedData.phoneNumber,
           passportNumber: validatedData.passportNumber,
@@ -278,8 +276,6 @@ export const _updateBasicApplicantData = async (
         where: { userId: dbUser.id },
         data: {
           fullLegalName: validatedData.fullLegalName,
-          currentCountryOfResidence: validatedData.currentCountryOfResidence,
-          nationality: validatedData.nationality,
           dateOfBirth,
           phoneNumber: validatedData.phoneNumber,
           passportNumber: validatedData.passportNumber,

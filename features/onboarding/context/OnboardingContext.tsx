@@ -1,30 +1,14 @@
 "use client";
 
 import React, { createContext, useContext, useReducer, useMemo } from "react";
-import { COUNTRIES } from "../constants";
 import {
   onboardingReducer,
   initialState,
   initialFormData,
 } from "../reducer/onboardingReducer";
 import { loadFromStorage, isBrowserEnvironment } from "../utils/storageUtils";
-import {
-  getCountryLabelOptimized as getCountryLabel,
-  getCountryFlagOptimized as getCountryFlag,
-  getCountryDataOptimized as getCountryData,
-  getCountryCode,
-  isValidCountryCode,
-} from "../utils/countryUtils";
 import { useStorage, useValidation, useFormActions } from "../hooks";
-import type {
-  CountryCode,
-  OnboardingContextType,
-  OnboardingProviderProps,
-} from "../types";
-
-// Re-export CONSTANTS and types for convenience
-export { COUNTRIES };
-export type { CountryCode } from "../types";
+import type { OnboardingContextType, OnboardingProviderProps } from "../types";
 
 // Create context
 const OnboardingContext = createContext<OnboardingContextType | undefined>(
@@ -77,15 +61,9 @@ export function OnboardingProvider({
 
   const hasAllRequiredFieldsTouched = useMemo(() => {
     const requiredFields = [
-      "firstName",
-      "lastName",
+      "fullLegalName",
       "dateOfBirth",
-      "gender",
-      "maritalStatus",
-      "nationality",
-      "countryOfResidence",
       "phoneNumber",
-      "email",
       "passportNumber",
     ];
     return requiredFields.every((field) => field in state.touchedFields);
@@ -98,13 +76,6 @@ export function OnboardingProvider({
       dispatch,
       // Form actions (memoized in useFormActions)
       ...formActions,
-      // Country-specific helpers (memoized with Map lookup)
-      getCountryLabel,
-      getCountryFlag,
-      getCountryData,
-      getCountryCode,
-      isValidCountryCode,
-      countries: COUNTRIES,
       // Validation functions (memoized in useValidation)
       validateFormData,
       validateSingleField,

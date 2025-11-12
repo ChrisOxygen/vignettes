@@ -59,8 +59,6 @@ model BasicApplicantData {
   id                        String   @id @default(uuid()) @db.Uuid
   userId                    String   @unique @db.Uuid
   fullLegalName             String   @db.VarChar(200)
-  currentCountryOfResidence String   @db.VarChar(100)
-  nationality               String   @db.VarChar(100)
   dateOfBirth               DateTime @db.Date
   phoneNumber               String   @db.VarChar(20)
   passportNumber            String   @db.VarChar(50)
@@ -77,7 +75,9 @@ model BasicApplicantData {
 model User {
   id            String        @id @default(uuid()) @db.Uuid
   email         String        @unique @db.VarChar(255)
-  name          String        @db.VarChar(100)
+  firstName     String        @db.VarChar(100)
+  lastName      String        @db.VarChar(100)
+  middleName    String?       @db.VarChar(100)
   accountStatus AccountStatus @default(PENDING_VERIFICATION)
 
   role      UserRole @default(USER)

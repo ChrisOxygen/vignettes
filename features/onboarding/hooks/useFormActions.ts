@@ -1,9 +1,5 @@
 import { useCallback, useMemo } from "react";
-import type {
-  OnboardingFormData,
-  OnboardingAction,
-  CountryCode,
-} from "../types";
+import type { OnboardingFormData, OnboardingAction } from "../types";
 
 interface UseFormActionsProps {
   dispatch: React.Dispatch<OnboardingAction>;
@@ -21,17 +17,6 @@ export const useFormActions = ({ dispatch }: UseFormActionsProps) => {
   const updateMultipleFields = useCallback(
     (fields: Partial<OnboardingFormData>) => {
       dispatch({ type: "UPDATE_MULTIPLE_FIELDS", fields });
-    },
-    [dispatch]
-  );
-
-  // Country-specific helper function
-  const updateCountryField = useCallback(
-    (
-      field: "currentCountryOfResidence" | "nationality",
-      countryCode: CountryCode
-    ) => {
-      dispatch({ type: "UPDATE_FIELD", field, value: countryCode });
     },
     [dispatch]
   );
@@ -96,7 +81,6 @@ export const useFormActions = ({ dispatch }: UseFormActionsProps) => {
     () => ({
       updateField,
       updateMultipleFields,
-      updateCountryField,
       setFieldError,
       clearFieldError,
       clearAllErrors,
@@ -110,7 +94,6 @@ export const useFormActions = ({ dispatch }: UseFormActionsProps) => {
     [
       updateField,
       updateMultipleFields,
-      updateCountryField,
       setFieldError,
       clearFieldError,
       clearAllErrors,

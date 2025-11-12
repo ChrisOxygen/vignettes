@@ -64,9 +64,9 @@ export async function _approveEditRequest(
           submissionId: comment.submissionId,
           formType: comment.formType,
           commentType: CommentType.SYSTEM,
-          content: `Edit request approved by ${dbUser.name}. Form is now unlocked for editing.`,
+          content: `Edit request approved by ${dbUser.firstName}. Form is now unlocked for editing.`,
           authorId: dbUser.id,
-          authorName: dbUser.name,
+          authorName: dbUser.firstName,
           authorRole: "ADMIN",
         },
       }),
@@ -143,7 +143,7 @@ export async function _denyEditRequest(
             content: reason,
             parentCommentId: commentId, // Reply to edit request
             authorId: dbUser.id,
-            authorName: dbUser.name,
+            authorName: dbUser.firstName,
             authorRole: "ADMIN",
           },
         })
@@ -186,7 +186,7 @@ export async function _getPendingEditRequests(): Promise<ApiResponse> {
         submission: {
           include: {
             user: {
-              select: { name: true, email: true },
+              select: { firstName: true, email: true },
             },
           },
         },

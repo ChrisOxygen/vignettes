@@ -71,7 +71,7 @@ export async function _createComment(input: {
         content: input.content,
         parentCommentId: input.parentCommentId,
         authorId: dbUser.id,
-        authorName: dbUser.name,
+        authorName: dbUser.firstName,
         authorRole: dbUser.role,
         editRequestStatus:
           commentType === CommentType.EDIT_REQUEST
