@@ -24,6 +24,7 @@ import {
 import { EDUCATION_FIELD_CONFIGS } from "./fields/education";
 import { TRAVEL_FIELD_CONFIGS } from "./fields/travel";
 import { VISA_PERMIT_FIELD_CONFIGS } from "./fields/visa-permit";
+import { STATUTORY_QUESTIONS_CONFIGS } from "./fields/security-statutory";
 
 export interface FormFieldConfiguration {
   fields: Record<string, FieldConfig>;
@@ -70,6 +71,6 @@ export const FORM_FIELD_CONFIGS: Record<FormType, FormFieldConfiguration> = {
   },
   [FormType.SECURITY_AND_STATUTORY_QUESTIONS]: {
     fields: {},
-    yesNoFields: {},
+    yesNoFields: STATUTORY_QUESTIONS_CONFIGS,
   },
 };

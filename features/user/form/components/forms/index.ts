@@ -6,6 +6,7 @@ export { WorkBusinessForm } from "./WorkBusinessForm";
 export { EducationInfoForm } from "./EducationInfoForm";
 export { PreviousTravelForm } from "./PreviousTravelForm";
 export { VisaPermitForm } from "./VisaPermitForm";
+export { SecurityStatutoryForm } from "./SecurityStatutoryForm";
 
 export { FormActionButtons } from "./FormActionButtons";
 export { FormLoadingOverlay } from "./FormLoadingOverlay";

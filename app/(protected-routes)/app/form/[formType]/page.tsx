@@ -8,6 +8,7 @@ import {
   EducationInfoForm,
   PreviousTravelForm,
   VisaPermitForm,
+  SecurityStatutoryForm,
 } from "@/features/user/form/components/forms";
 import { FormType } from "@prisma/client";
 import { NotFoundTemplate } from "@/shared/components";
@@ -40,6 +41,8 @@ const getFormComponent = (formType: FormType) => {
       return <PreviousTravelForm />;
     case FormType.VISA_AND_PERMITS_INFO:
       return <VisaPermitForm />;
+    case FormType.SECURITY_AND_STATUTORY_QUESTIONS:
+      return <SecurityStatutoryForm />;
 
     default:
       return null;

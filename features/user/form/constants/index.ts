@@ -100,3 +100,4 @@ export {
 export { EDUCATION_FIELD_CONFIGS } from "./fields/education";
 export { TRAVEL_FIELD_CONFIGS } from "./fields/travel";
 export { VISA_PERMIT_FIELD_CONFIGS } from "./fields/visa-permit";
+export { STATUTORY_QUESTIONS_CONFIGS } from "./fields/security-statutory";
