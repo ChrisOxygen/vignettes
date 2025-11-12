@@ -8,12 +8,20 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from "@/shared/components/ui/sidebar";
 import { FORM_NAV } from "@/features/user/form/constants";
 import { cn } from "@/shared/lib/utils";
 
 export function FormTabNav() {
   const pathname = usePathname();
+  const { isMobile, setOpenMobile } = useSidebar();
+
+  const handleLinkClick = () => {
+    if (isMobile) {
+      setOpenMobile(false);
+    }
+  };
 
   return (
     <SidebarGroup>
@@ -34,7 +42,7 @@ export function FormTabNav() {
                     "bg-primary/10 text-sidebar-accent-foreground border-l-2 border-primary shadow-sm"
                 )}
               >
-                <Link href={item.url}>
+                <Link href={item.url} onClick={handleLinkClick}>
                   <item.icon className="size-5" />
                   <span>{item.title}</span>
                 </Link>

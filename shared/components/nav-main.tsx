@@ -18,6 +18,7 @@ import {
   SidebarMenuSub,
   SidebarMenuSubButton,
   SidebarMenuSubItem,
+  useSidebar,
 } from "@/shared/components/ui/sidebar";
 import Link from "next/link";
 import { cn } from "@/shared/lib/utils";
@@ -36,6 +37,13 @@ export function NavMain({
   }[];
 }) {
   const pathname = usePathname();
+  const { isMobile, setOpenMobile } = useSidebar();
+
+  const handleLinkClick = () => {
+    if (isMobile) {
+      setOpenMobile(false);
+    }
+  };
 
   return (
     <SidebarGroup>
@@ -54,7 +62,7 @@ export function NavMain({
                     "bg-primary/10 text-sidebar-accent-foreground border-l-2 border-primary shadow-sm"
                 )}
               >
-                <Link href={item.url}>
+                <Link href={item.url} onClick={handleLinkClick}>
                   <item.icon className="size-5" />
                   <span>{item.title}</span>
                 </Link>
@@ -72,7 +80,7 @@ export function NavMain({
                       {item.items?.map((subItem) => (
                         <SidebarMenuSubItem key={subItem.title}>
                           <SidebarMenuSubButton asChild>
-                            <a href={subItem.url}>
+                            <a href={subItem.url} onClick={handleLinkClick}>
                               <span>{subItem.title}</span>
                             </a>
                           </SidebarMenuSubButton>
