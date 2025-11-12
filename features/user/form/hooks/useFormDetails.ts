@@ -2,16 +2,17 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { generateFormSchema } from "../utils/schema-generator";
 import { generateDefaultValues } from "../utils/default-values";
+import { FormType } from "@prisma/client";
 import z from "zod";
 
-export default function useFormDetails() {
+export default function useFormDetails(formType: FormType) {
   // Placeholder for form details logic
-  const formSchema = generateFormSchema();
+  const formSchema = generateFormSchema(formType);
 
   // Type inference from schema
   type FormData = z.infer<typeof formSchema>;
 
-  const defaultValues = generateDefaultValues();
+  const defaultValues = generateDefaultValues(formType);
 
   const {
     handleSubmit,

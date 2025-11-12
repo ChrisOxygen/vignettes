@@ -61,7 +61,7 @@ export function ExSpouseInfoForm() {
 
   return (
     <Card className="w-full border-0">
-      <CardHeader>
+      <CardHeader className="p-0">
         <CardTitle>Ex-Spouse Information Form</CardTitle>
         <CardDescription>
           Please provide information about your previous marriage if applicable.
@@ -69,7 +69,7 @@ export function ExSpouseInfoForm() {
           Applicable" in the relevant fields or leave them blank.
         </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-0">
         <form id="ex-spouse-info-form" onSubmit={form.handleSubmit(onSubmit)}>
           <FieldGroup className="space-y-6">
             {/* Ex-Spouse Personal Information */}

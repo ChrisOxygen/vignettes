@@ -81,8 +81,8 @@ export const FamilyMemberSection: React.FC<FamilyMemberSectionProps> = ({
   };
 
   return (
-    <Card className="relative border">
-      <CardHeader className="px-4">
+    <Card className="relative border-0 ">
+      <CardHeader className="px-0">
         <div className="flex items-center justify-between">
           <div className="flex-1">
             <CardTitle className="text-lg flex items-center gap-2">
@@ -143,7 +143,7 @@ export const FamilyMemberSection: React.FC<FamilyMemberSectionProps> = ({
       </CardHeader>
 
       {!isCollapsed && (
-        <CardContent className="space-y-4 px-4">
+        <CardContent className="space-y-4 px-0">
           {isNotApplicable ? (
             <div className="p-4 bg-muted rounded-md text-center text-muted-foreground">
               This section is marked as Not Applicable

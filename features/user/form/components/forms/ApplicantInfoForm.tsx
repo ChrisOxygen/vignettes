@@ -66,15 +66,15 @@ export function ApplicantInfoForm() {
   }, [isInitialized, isFormLocked, submissionStatus]);
 
   return (
-    <Card className="w-full border-0">
-      <CardHeader>
+    <Card className="w-full border-0 p-0">
+      <CardHeader className="p-0">
         <CardTitle>Applicant Information Form</CardTitle>
         <CardDescription>
           Please fill out all required fields with accurate information. Fields
           marked with * are required.
         </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-0">
         <form id="applicant-info-form" onSubmit={form.handleSubmit(onSubmit)}>
           <FieldGroup className="space-y-6">
             {/* Personal Information Section */}
