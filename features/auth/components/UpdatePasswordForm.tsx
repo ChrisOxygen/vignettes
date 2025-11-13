@@ -74,13 +74,15 @@ export function UpdatePasswordForm() {
         }}
       />
       <div className="w-full max-w-[320px] sm:max-w-[400px] items-center relative gap-6 sm:gap-8 flex flex-col">
-        <Image
-          src="/I&V-no-bg.png"
-          alt="I&V Logo"
-          width={400}
-          height={150}
-          className="w-[160px] sm:w-[200px] object-contain"
-        />
+        <Link href="/">
+          <Image
+            src="/I&V-no-bg.png"
+            alt="I&V Logo"
+            width={400}
+            height={150}
+            className="w-[160px] sm:w-[200px] object-contain cursor-pointer hover:opacity-80 transition-opacity"
+          />
+        </Link>
 
         <div className="text-center space-y-2">
           <h1 className="text-xl sm:text-2xl font-light text-foreground">

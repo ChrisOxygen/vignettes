@@ -13,11 +13,11 @@ export const SERVICES = [
   "Study Abroad",
   "Global Talent Mobility",
   "Tourism",
-  "Canada Visa",
-  "UK Visa",
-  "Germany Visa",
-  "Scotland Visa",
-  "Japan Visa",
+  // "Canada Visa",
+  // "UK Visa",
+  // "Germany Visa",
+  // "Scotland Visa",
+  // "Japan Visa",
 ];
 
 // Services Snippets for Homepage
@@ -152,27 +152,22 @@ const NAVIGATION = {
       hasDropdown: true,
       children: [
         {
-          text: "Canada Visa",
+          text: "Global Talent Mobility",
           href: "/services",
           link: "/services",
         },
         {
-          text: "UK Visa",
+          text: "Business Plans and Travels",
           href: "/services",
           link: "/services",
         },
         {
-          text: "Germany Visa",
+          text: "Tourism",
           href: "/services",
           link: "/services",
         },
         {
-          text: "Scotland Visa",
-          href: "/services",
-          link: "/services",
-        },
-        {
-          text: "Japan Visa",
+          text: "Study Abroad",
           href: "/services",
           link: "/services",
         },

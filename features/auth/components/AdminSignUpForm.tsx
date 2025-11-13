@@ -83,13 +83,15 @@ export function AdminSignUpForm() {
       />
       <div className="w-full max-w-[320px] sm:max-w-[400px] items-center relative gap-6 sm:gap-8 flex flex-col">
         <div className="flex flex-col items-center gap-2">
-          <Image
-            src="/I&V-no-bg.png"
-            alt="Vignettes Logo"
-            width={400}
-            height={150}
-            className="w-[160px] sm:w-[200px] object-contain"
-          />
+          <Link href="/">
+            <Image
+              src="/I&V-no-bg.png"
+              alt="Vignettes Logo"
+              width={400}
+              height={150}
+              className="w-[160px] sm:w-[200px] object-contain cursor-pointer hover:opacity-80 transition-opacity"
+            />
+          </Link>
           <div className="text-center">
             <h1 className="text-xl sm:text-2xl font-semibold text-foreground">
               Admin Sign Up
