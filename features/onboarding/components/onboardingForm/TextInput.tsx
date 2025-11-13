@@ -24,7 +24,8 @@ export function TextInput({
     updateField,
   } = useOnboarding();
 
-  const value = formData[field];
+  // Ensure value is always a string (never undefined) for controlled input
+  const value = formData[field] || "";
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let newValue = e.target.value;

@@ -30,7 +30,25 @@ export function DatePicker({
     updateField,
   } = useOnboarding();
 
-  const selectedDate = formData[field] ? new Date(formData[field]) : undefined;
+  // Parse DD/MM/YYYY string to Date object
+  const parseDate = (dateString: string): Date | undefined => {
+    if (!dateString) return undefined;
+
+    const parts = dateString.split("/");
+    if (parts.length !== 3) return undefined;
+
+    const [day, month, year] = parts.map(Number);
+    if (!day || !month || !year) return undefined;
+
+    const date = new Date(year, month - 1, day);
+
+    // Validate the date is valid
+    if (isNaN(date.getTime())) return undefined;
+
+    return date;
+  };
+
+  const selectedDate = parseDate(formData[field]);
 
   const handleDateSelect = (date: Date | undefined) => {
     if (date) {
