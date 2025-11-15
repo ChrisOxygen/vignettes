@@ -4,7 +4,7 @@ export const PAGES = [
   "Services",
   "Partner Institutions",
   "Assessments",
-  "Contact Us",
+  "Contact",
 ];
 
 // Services Array
@@ -13,11 +13,6 @@ export const SERVICES = [
   "Study Abroad",
   "Global Talent Mobility",
   "Tourism",
-  // "Canada Visa",
-  // "UK Visa",
-  // "Germany Visa",
-  // "Scotland Visa",
-  // "Japan Visa",
 ];
 
 // Services Snippets for Homepage

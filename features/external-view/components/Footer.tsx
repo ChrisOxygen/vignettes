@@ -3,6 +3,8 @@ import Link from "next/link";
 import { FaFacebookF, FaInstagram, FaXTwitter } from "react-icons/fa6";
 import { PAGES, SERVICES } from "../constants";
 
+import { BiPhoneCall } from "react-icons/bi";
+
 function Footer() {
   return (
     <footer className="w-full flex flex-col gap-10 bg-black text-white py-12 px-6 md:px-12 lg:px-16">
@@ -88,21 +90,28 @@ function Footer() {
 
           <div className="flex flex-col gap-2">
             <span className="text-white font-medium text-sm flex items-center gap-2">
-              <span className="text-base">🇨🇦</span> Canada
+              <span className="text-base">
+                <BiPhoneCall />
+              </span>{" "}
+              Call us
             </span>
-            <span className="text-white/70 text-xs leading-relaxed">
-              570 8th Ave, New York, NY 10018 United States
-            </span>
+            <div className="flex flex-col">
+              <Link href="tel:+2347039594474">
+                <span className="text-white/70 text-xs leading-relaxed">
+                  +234 703 959 4474
+                </span>
+              </Link>
+            </div>
           </div>
 
-          <div className="flex flex-col gap-2">
+          {/* <div className="flex flex-col gap-2">
             <span className="text-white font-medium text-sm flex items-center gap-2">
               <span className="text-base">🇬🇧</span> United Kingdom
             </span>
             <span className="text-white/70 text-xs leading-relaxed">
               570 8th Ave, New York, NY 10018 United States
             </span>
-          </div>
+          </div> */}
         </div>
       </div>
 
