@@ -1,3 +1,5 @@
+"use client";
+
 import {
   SidebarTrigger,
   SidebarProvider,
@@ -6,6 +8,7 @@ import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/shared/components/ui/card";
@@ -18,6 +21,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/shared/components/ui/breadcrumb";
+import { Button } from "@/shared/components/ui/button";
 
 function AdminDashboard() {
   return (
@@ -40,36 +44,96 @@ function AdminDashboard() {
         </div>
       </header>
       <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-        <div className="grid auto-rows-min gap-4 md:grid-cols-3">
-          <Card>
-            <CardHeader>
-              <CardTitle>Total Applicants</CardTitle>
-              <CardDescription>Active users in the system</CardDescription>
+        <div className="grid auto-rows-min gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <Card className="transition-all hover:shadow-md p-3 flex flex-col gap-3">
+            <CardHeader className="!px-3">
+              <CardTitle className="text-base font-semibold sm:text-lg">
+                Total Applicants
+              </CardTitle>
+              <CardDescription className="text-xs sm:text-sm">
+                Active users in the system
+              </CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="text-4xl font-bold">0</div>
+            <CardContent className="!px-3">
+              <div className="text-3xl font-bold tracking-tight sm:text-4xl">
+                0
+              </div>
             </CardContent>
+            <CardFooter className="border-t !pt-3 !px-3  ">
+              <div className="text-xs text-muted-foreground sm:text-sm">
+                <span className="font-medium text-green-600">+2</span> new this
+                month
+              </div>
+            </CardFooter>
           </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle>Pending Reviews</CardTitle>
-              <CardDescription>Forms awaiting review</CardDescription>
+          <Card className="transition-all hover:shadow-md p-3 flex flex-col gap-3">
+            <CardHeader className="!px-3">
+              <CardTitle className="text-base font-semibold sm:text-lg">
+                Pending Reviews
+              </CardTitle>
+              <CardDescription className="text-xs sm:text-sm">
+                Forms awaiting review
+              </CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="text-4xl font-bold">0</div>
+            <CardContent className="!px-3">
+              <div className="text-3xl font-bold tracking-tight sm:text-4xl">
+                0
+              </div>
             </CardContent>
+            <CardFooter className="border-t !pt-3 !px-3">
+              <div className="flex flex-col gap-1 text-xs text-muted-foreground sm:flex-row sm:items-center sm:gap-4 sm:text-sm">
+                <span className="flex items-center gap-1.5">
+                  <span className="h-2 w-2 rounded-full bg-yellow-500" />
+                  <span className="font-medium">3</span> drafts
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <span className="h-2 w-2 rounded-full bg-orange-500" />
+                  <span className="font-medium">3</span> change requests
+                </span>
+              </div>
+            </CardFooter>
           </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle>Approved Forms</CardTitle>
-              <CardDescription>Successfully processed</CardDescription>
+          <Card className="transition-all hover:shadow-md p-3 flex flex-col gap-3 sm:col-span-2 lg:col-span-1">
+            <CardHeader className="!px-3">
+              <CardTitle className="text-base font-semibold sm:text-lg">
+                Approved Forms
+              </CardTitle>
+              <CardDescription className="text-xs sm:text-sm">
+                Successfully processed
+              </CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="text-4xl font-bold">0</div>
+            <CardContent className="!px-3">
+              <div className="text-3xl font-bold tracking-tight sm:text-4xl">
+                0
+              </div>
             </CardContent>
+            <CardFooter className="border-t !pt-3 !px-3">
+              <button className="text-xs font-medium text-primary hover:underline sm:text-sm">
+                View all approved forms →
+              </button>
+            </CardFooter>
           </Card>
         </div>
-        <div className="min-h-[100vh] flex-1 rounded-xl bg-muted/50 md:min-h-min" />
+        <Button
+          className="w-full"
+          variant="outline"
+          size="lg"
+          onClick={() => {}}
+        >
+          Generate Admin Code
+        </Button>
+        <div className="flex-1 rounded-xl border bg-muted/50 p-8 md:min-h-[400px]">
+          <div className="flex h-full items-center justify-center text-center">
+            <div>
+              <h3 className="mb-1 text-base font-semibold text-muted-foreground sm:mb-2 sm:text-lg">
+                Analytics Dashboard Coming Soon
+              </h3>
+              <p className="text-xs text-muted-foreground sm:text-sm">
+                Charts and detailed analytics will be displayed here
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
     </>
   );
