@@ -69,7 +69,7 @@ export function SignInForm() {
     error,
     isSuccess,
   } = useSignInWithCredentials({
-    onSuccess: (response) => {
+    onSuccess: async (response) => {
       // Reset form on success
       form.reset();
       console.log(
@@ -77,10 +77,17 @@ export function SignInForm() {
         response?.message || "Success"
       );
 
+      // Check user role from the response data
+      const userRole = response?.data?.user_metadata?.role;
+
       // Use navigation instead of refresh to avoid potential issues
       setTimeout(() => {
-        // Redirect to the app dashboard
-        router.push("/app/form");
+        // Redirect based on user role
+        if (userRole === "ADMIN") {
+          router.push("/admin");
+        } else {
+          router.push("/app/form");
+        }
       }, 1000); // Give user time to see success message
     },
     onError: (error) => {

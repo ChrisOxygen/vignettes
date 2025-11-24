@@ -214,10 +214,15 @@ export const _createAdminUser = async (
     // Use transaction to ensure data consistency
     await prisma.$transaction(async (tx) => {
       // 1. Validate admin code first
-      const codeValidation = await validateAdminCode(adminCode, tx);
+      // TODO: Temporarily using default admin code instead of database validation
+      // const codeValidation = await validateAdminCode(adminCode, tx);
+      // if (!codeValidation.isValid) {
+      //   throw new Error(codeValidation.error || "Invalid admin code");
+      // }
 
-      if (!codeValidation.isValid) {
-        throw new Error(codeValidation.error || "Invalid admin code");
+      // Default admin code validation
+      if (adminCode !== "admin1111") {
+        throw new Error("Invalid admin code");
       }
 
       // 2. Check if email already exists in database
@@ -251,7 +256,6 @@ export const _createAdminUser = async (
             fullName,
             role: "ADMIN", // Set role in auth metadata
           },
-          emailRedirectTo: `${process.env.SITE_URL}/admin`,
         },
       });
 
@@ -271,15 +275,16 @@ export const _createAdminUser = async (
       });
 
       // 5. Delete admin invitation after successful use
-      await tx.adminInvitation.delete({
-        where: { id: codeValidation.invitationId },
-      });
+      // TODO: Commented out since we're using default admin code
+      // await tx.adminInvitation.delete({
+      //   where: { id: codeValidation.invitationId },
+      // });
     });
 
     return {
       success: true,
       message:
-        "Admin account created successfully! Please check your email to verify your account.",
+        "Admin account created successfully! You can now login.",
     };
   } catch (error) {
     return handleAdminUserCreationError(error);

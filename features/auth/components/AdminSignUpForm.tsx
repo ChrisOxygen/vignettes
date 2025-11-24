@@ -104,12 +104,12 @@ export function AdminSignUpForm() {
 
         {isSuccess ? (
           // Success message component
-          <div className="flex flex-col gap-4 sm:gap-6 w-full text-center">
-            <div className="p-6 sm:p-8 bg-green-50 border border-green-200 rounded-lg">
-              <div className="flex flex-col items-center gap-4">
-                <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+          <div className="flex flex-col gap-4 sm:gap-6 w-full">
+            <div className="p-6 sm:p-8 bg-white border border-border rounded-lg shadow-sm">
+              <div className="flex flex-col items-center gap-4 sm:gap-6 text-center">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-green-100 rounded-full flex items-center justify-center">
                   <svg
-                    className="w-6 h-6 text-green-600"
+                    className="w-8 h-8 sm:w-10 sm:h-10 text-green-600"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -122,25 +122,22 @@ export function AdminSignUpForm() {
                     />
                   </svg>
                 </div>
-                <div>
-                  <h2 className="text-lg sm:text-xl font-semibold text-green-800 mb-2">
-                    Admin Account Created!
+                <div className="space-y-2">
+                  <h2 className="text-xl sm:text-2xl font-semibold text-foreground">
+                    Admin Account Created Successfully!
                   </h2>
-                  <p className="text-sm sm:text-base text-green-700">
-                    Your admin account has been created successfully. Please
-                    check your email to verify your account before signing in.
+                  <p className="text-sm sm:text-base text-muted-foreground">
+                    Your admin account has been created. You can now sign in to
+                    access the admin dashboard.
                   </p>
                 </div>
+                <Button
+                  asChild
+                  className="w-full h-10 sm:h-12 bg-primary hover:bg-primary/90 text-primary-foreground transition-colors text-sm sm:text-base"
+                >
+                  <Link href="/sign-in">Go to Sign In</Link>
+                </Button>
               </div>
-            </div>
-            <div className="text-xs sm:text-sm text-slate-700 text-center">
-              Ready to sign in?{" "}
-              <Link
-                href="/sign-in"
-                className="text-primary underline hover:text-primary/80 transition-colors"
-              >
-                Go to Sign In
-              </Link>
             </div>
           </div>
         ) : (
