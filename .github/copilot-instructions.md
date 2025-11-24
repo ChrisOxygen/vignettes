@@ -39,6 +39,7 @@ Next.js 15 visa/immigration form management system with Supabase Auth, Prisma OR
   - `features/user/form/context` - Self-initializing FormProvider with URL-based form type detection
 - **Custom hooks pattern**: Each feature exports specialized hooks wrapping server actions
 - Example mutation hook structure:
+
   ```typescript
   export function useCreateUser(options?: UseCreateUserOptions) {
     const queryClient = useQueryClient();
@@ -66,25 +67,27 @@ Next.js 15 visa/immigration form management system with Supabase Auth, Prisma OR
 
 Located in `features/user/form/`:
 
-- **`constants/index.ts`**: `FIELD_CONFIGS` object defines all form fields declaratively
-- **`utils/schema-generator.ts`**: Generates Zod schemas from `FIELD_CONFIGS` at runtime
-- **`utils/default-values.ts`**: Auto-generates form defaults from same config
-- **FormProvider context**: Self-initializing provider that:
-  - Extracts `formType` from URL params using `useParams`
+- **`constants/form-configs.ts`**: `FORM_FIELD_CONFIGS` maps each `FormType` enum to field configurations
+- **`utils/schema-generator.ts`**: Generates Zod schemas from field configs at runtime via `generateFormSchema(formType)`
+- **`utils/default-values.ts`**: Auto-generates form defaults via `generateDefaultValues(formType)`
+- **FormProvider context** (`features/user/form/context/FormProviders.tsx`): Self-initializing provider that:
+  - Watches URL params changes via `useParams()` and automatically reinitializes on formType change
   - Normalizes kebab-case to SCREAMING_SNAKE_CASE (`applicant-info` → `APPLICANT_INFO`)
-  - Automatically loads existing form data from database on initialization
-  - Form components call `initializeForm()` in `useEffect` on mount
-- **URL pattern**: `/app/form/[formType]` where formType is kebab-case (e.g., `applicant-info`)
-- **Form initialization pattern**:
+  - Validates formType against `FormType` enum before initialization
+  - Queries existing submission with `useFormSubmission` and populates form with saved data
+  - Provides `form` (react-hook-form), `saveDraft`, `onSubmit`, `isFormLocked` state
+- **URL pattern**: `/app/form/[formType]` where formType is kebab-case (e.g., `applicant-info`, `ex-spouse-info`)
+- **Form usage pattern** - FormProvider handles initialization automatically:
 
   ```tsx
-  const { form, initializeForm, isInitialized } = useFormProvider();
+  export default function FormPage() {
+    const { form, formType, isInitializing } = useFormProvider();
 
-  React.useEffect(() => {
-    if (!isInitialized) {
-      initializeForm();
-    }
-  }, [isInitialized, initializeForm]);
+    if (!formType) return <NotFoundTemplate />;
+    if (isInitializing) return <LoadingSpinner />;
+
+    return <FormContent />;
+  }
   ```
 
 ### Prisma Schema Conventions
@@ -137,6 +140,7 @@ import { createServerClient } from "@supabase/ssr";
 - **Validation**: Zod schemas defined in `features/*/validators/`
 - **Transaction pattern**: Use Prisma transactions for operations affecting multiple tables
 - **Example structure**:
+
   ```typescript
   export const _createUser = async (
     input: ZUserCreationData
@@ -189,9 +193,19 @@ File: `utils/supabase/middleware.ts`
 
 1. User fills dynamic form (react-hook-form + Zod validation)
 2. Data saved as DRAFT in `FormSubmission` table (JSON field stores form data)
-3. Admin reviews, adds `FieldComment` records (supports threading via `parentCommentId`)
-4. Status transitions: `DRAFT` → `SUBMITTED` → `UNDER_REVIEW` → `CHANGES_REQUESTED` | `APPROVED` | `REJECTED`
-5. Comments panel (`features/user/form/components/comments`) shows field-level feedback
+3. Admin reviews, adds `FieldComment` records with field-level targeting via `fieldPath`
+4. **Comment types** (`CommentType` enum):
+   - `GENERAL`: Regular questions/discussion
+   - `ADMIN_FEEDBACK`: Admin providing guidance
+   - `CHANGE_REQUEST`: Admin requesting field changes
+   - `EDIT_REQUEST`: **Form-level only** - user requests edit access to locked form
+   - `SYSTEM`: Auto-generated status messages
+5. **Edit request workflow** (when form is locked):
+   - User creates `EDIT_REQUEST` comment with `editRequestStatus: PENDING`
+   - Admin reviews and sets status: `APPROVED` (unlocks form) | `DENIED` | `WITHDRAWN`
+   - Tracked in `editRequestResolvedAt` and `editRequestResolvedBy` fields
+6. **Form status transitions**: `DRAFT` → `SUBMITTED` → `UNDER_REVIEW` → `CHANGES_REQUESTED` | `APPROVED` | `REJECTED`
+7. Comments panel (`features/user/form/components/comments`) shows field-level feedback with threading support via `parentCommentId`
 
 ## Component Organization
 
@@ -250,11 +264,11 @@ features/[feature-name]/
 
 ## Important Files
 
-- **`middleware.ts`**: Entry point for auth/route protection
+- **`middleware.ts`**: Entry point for auth/route protection (delegates to `utils/supabase/middleware.ts`)
 - **`prisma/schema.prisma`**: Database schema (run `prisma generate` after edits)
-- **`features/user/form/constants/index.ts`**: Single source of truth for all form fields
+- **`features/user/form/constants/form-configs.ts`**: Central mapping of `FormType` to field configurations
 - **`utils/supabase/*.ts`**: Supabase client factories - use correct one for context
-- **`shared/providers/index.tsx`**: Root provider composition
+- **`shared/providers/index.tsx`**: Root provider composition (AuthProvider, TanstackQueryProvider)
 - **`app/layout.tsx`**: Root layout with font optimization and global providers
 
 ## Common Tasks

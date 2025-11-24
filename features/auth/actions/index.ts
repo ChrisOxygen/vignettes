@@ -283,8 +283,7 @@ export const _createAdminUser = async (
 
     return {
       success: true,
-      message:
-        "Admin account created successfully! You can now login.",
+      message: "Admin account created successfully! You can now login.",
     };
   } catch (error) {
     return handleAdminUserCreationError(error);
