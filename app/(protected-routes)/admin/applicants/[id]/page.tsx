@@ -231,7 +231,7 @@ function ApplicantPage() {
                   {/* Action Button */}
                   <div className="flex justify-self-end">
                     <Link
-                      href={`/admin/submissions/${submission.id}`}
+                      href={`/admin/form-submissions/${submission.id}`}
                       className="text-primary underline shrink-0 text-sm sm:text-base"
                     >
                       View Details
