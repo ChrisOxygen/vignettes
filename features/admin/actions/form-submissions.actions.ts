@@ -162,6 +162,11 @@ export async function _getApplicantFormSubmissions(
         updatedAt: true,
         createdAt: true,
         formData: true,
+        _count: {
+          select: {
+            comments: true,
+          },
+        },
       },
     });
 
@@ -451,6 +456,84 @@ export async function _getAllApplicantsWithSubmissions(): Promise<
       success: false,
       message:
         error instanceof Error ? error.message : "Failed to get applicants",
+      error: ApiErrorCode.INTERNAL_ERROR,
+    };
+  }
+}
+
+/**
+ * Get a single applicant by ID with their submission details
+ * Admin can view any applicant's full profile
+ */
+export async function _getApplicantById(
+  applicantId: string
+): Promise<ApiResponse<ApplicantWithSubmissions>> {
+  try {
+    // Verify admin authentication
+    await getAuthenticatedAdmin();
+
+    // Validate applicantId
+    if (!applicantId) {
+      return {
+        success: false,
+        message: "Applicant ID is required",
+        error: ApiErrorCode.MISSING_FIELDS,
+      };
+    }
+
+    // Get user with USER role and their submission count
+    const applicant = await prisma.user.findUnique({
+      where: { id: applicantId },
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        middleName: true,
+        accountStatus: true,
+        createdAt: true,
+        _count: {
+          select: {
+            formSubmissions: true,
+          },
+        },
+      },
+    });
+
+    if (!applicant) {
+      return {
+        success: false,
+        message: "Applicant not found",
+        error: ApiErrorCode.RESOURCE_NOT_FOUND,
+      };
+    }
+
+    // Verify user has USER role
+    const userRole = await prisma.user.findUnique({
+      where: { id: applicantId },
+      select: { role: true },
+    });
+
+    if (userRole?.role !== UserRole.USER) {
+      return {
+        success: false,
+        message: "User is not an applicant",
+        error: ApiErrorCode.VALIDATION_ERROR,
+      };
+    }
+
+    return {
+      success: true,
+      message: "Applicant retrieved successfully",
+      data: applicant,
+    };
+  } catch (error) {
+    console.error("Error getting applicant by ID:", error);
+
+    return {
+      success: false,
+      message:
+        error instanceof Error ? error.message : "Failed to get applicant",
       error: ApiErrorCode.INTERNAL_ERROR,
     };
   }

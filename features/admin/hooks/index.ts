@@ -9,3 +9,4 @@ export { useFormSubmissionDetails } from "./useFormSubmissionDetails";
 export { useUpdateSubmissionStatus } from "./useUpdateSubmissionStatus";
 export { useSubmissionStatistics } from "./useSubmissionStatistics";
 export { useAllApplicants } from "./useAllApplicants";
+export { useApplicantById } from "./useApplicantById";

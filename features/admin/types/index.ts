@@ -38,6 +38,11 @@ export type ApplicantFormSubmission = Prisma.FormSubmissionGetPayload<{
     updatedAt: true;
     createdAt: true;
     formData: true;
+    _count: {
+      select: {
+        comments: true;
+      };
+    };
   };
 }>;
 
@@ -77,6 +82,11 @@ export type ApplicantWithSubmissions = Prisma.UserGetPayload<{
 
 // Hook option types
 export interface UseAllApplicantsOptions {
+  enabled?: boolean;
+}
+
+export interface UseApplicantByIdOptions {
+  applicantId: string;
   enabled?: boolean;
 }
 
