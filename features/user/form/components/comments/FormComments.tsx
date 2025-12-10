@@ -41,9 +41,9 @@ import { toast } from "sonner";
 import { FieldTagSelector } from "./FieldTagSelector";
 import { EditRequestCard } from "./EditRequestCard";
 import { RequestEditAccessButton } from "./RequestEditAccessButton";
+import { FormCommentsSkeleton } from "./FormCommentsSkeleton";
 import { CommentType } from "@prisma/client";
 import type { FieldComment } from "@prisma/client";
-import { Skeleton } from "@/shared/components/ui/skeleton";
 
 type CommentFilter = "all" | "unresolved" | "pinned";
 
@@ -58,7 +58,8 @@ export function FormComments() {
 
   const isAdmin = user?.user_metadata?.role === "ADMIN";
 
-  const { data: commentsData, isLoading } = useComments(submissionId);
+  const { data: commentsData, isPending: isLoading } =
+    useComments(submissionId);
   const { mutate: createComment, isPending: isCreating } = useCreateComment({
     onSuccess: () => {
       toast.success("Comment added successfully");
@@ -270,17 +271,19 @@ export function FormComments() {
     );
   };
 
+  if (isLoading) {
+    return <FormCommentsSkeleton />;
+  }
+
   return (
     <Card className="h-full flex flex-col">
       <CardHeader className="pb-3">
         <CardTitle className="text-lg flex items-center gap-2">
           <MessageSquare className="h-5 w-5" />
           Comments & Feedback
-          {!isLoading && (
-            <Badge variant="outline" className="ml-auto">
-              {commentsData?.data?.length || 0}
-            </Badge>
-          )}
+          <Badge variant="outline" className="ml-auto">
+            {commentsData?.data?.length || 0}
+          </Badge>
         </CardTitle>
       </CardHeader>
 
@@ -399,20 +402,7 @@ export function FormComments() {
         {/* Comments List */}
         <ScrollArea className="flex-1">
           <div className="p-4 space-y-4">
-            {isLoading ? (
-              <div className="space-y-4">
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className="flex gap-3">
-                    <Skeleton className="h-8 w-8 rounded-full" />
-                    <div className="flex-1 space-y-2">
-                      <Skeleton className="h-4 w-32" />
-                      <Skeleton className="h-16 w-full" />
-                      <Skeleton className="h-3 w-24" />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : !submissionId ? (
+            {!submissionId ? (
               <div className="text-center py-8 text-muted-foreground">
                 <AlertCircle className="h-12 w-12 mx-auto mb-3 opacity-50" />
                 <p className="text-sm">No active form</p>

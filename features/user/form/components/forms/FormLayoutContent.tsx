@@ -93,9 +93,9 @@ export function FormLayoutContent({ children }: FormLayoutContentProps) {
           {isFormTabActive && (
             <>
               {/* Desktop: Sidebar comments panel (>= 1024px) */}
-              <div className="hidden lg:block h-[85vh]">
+              <ScrollArea className="rounded-lg h-[85vh] grid relative pr-5  ">
                 <FormComments />
-              </div>
+              </ScrollArea>
 
               {/* Mobile: Sheet comments (< 1024px) */}
               <div className="lg:hidden fixed bottom-4 right-4 z-50">
