@@ -2,6 +2,7 @@
 import React from "react";
 import { useParams } from "next/navigation";
 import { useFormSubmissionDetails } from "@/features/admin/hooks";
+import { AdminFormComments } from "@/features/admin/components";
 import { FORM_FIELD_CONFIGS } from "@/features/user/form/constants/form-configs";
 import { ScrollArea } from "@/shared/components/ui/scroll-area";
 import { Button } from "@/shared/components/ui/button";
@@ -179,8 +180,8 @@ function SubmissionDetailsPage() {
 
                     {/* Sub-explanation if exists */}
                     {field.hasSubExplanation && field.explanation && (
-                      <div className="pl-4 mt-2 border-l-2 border-muted">
-                        <p className="text-xs font-semibold text-muted-foreground mb-1">
+                      <div className="px-2 mt-2 border-l-2 border-gray-400 bg-gray-100/50 py-3">
+                        <p className="text-xs font-bold text-gray-700 mb-1">
                           Explanation:
                         </p>
                         <p className="text-sm text-muted-foreground">
@@ -208,14 +209,13 @@ function SubmissionDetailsPage() {
       {/* Comments Panel */}
       <>
         {/* Desktop: Sidebar comments panel (>= 1024px) */}
-        <div className="hidden lg:block h-[85vh]">
-          <div className="p-3 border rounded-lg h-full">
-            <h2 className="text-2xl font-semibold mb-4">
-              Comments ({submission.comments.length})
-            </h2>
-            {/* Comments content will go here */}
-          </div>
-        </div>
+        <ScrollArea className="rounded-lg h-[85vh] grid relative pr-5">
+          <AdminFormComments
+            submissionId={id}
+            formType={submission.formType}
+            comments={submission.comments}
+          />
+        </ScrollArea>
 
         {/* Mobile: Sheet comments (< 1024px) */}
         <div className="lg:hidden fixed bottom-4 right-4 z-50">
@@ -234,7 +234,11 @@ function SubmissionDetailsPage() {
                 </SheetDescription>
               </SheetHeader>
               <div className="mt-4 h-[calc(100vh-120px)]">
-                {/* Comments content will go here */}
+                <AdminFormComments
+                  submissionId={id}
+                  formType={submission.formType}
+                  comments={submission.comments}
+                />
               </div>
             </SheetContent>
           </Sheet>
