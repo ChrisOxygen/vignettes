@@ -39,7 +39,8 @@ interface AdminFormCommentsProps {
   onAddComment?: (
     content: string,
     fieldPath?: string,
-    fieldLabel?: string
+    fieldLabel?: string,
+    parentCommentId?: string
   ) => void;
 }
 
@@ -55,6 +56,8 @@ export function AdminFormComments({
   const [selectedFieldPath, setSelectedFieldPath] = useState<string>();
   const [selectedFieldLabel, setSelectedFieldLabel] = useState<string>();
   const [filter, setFilter] = useState<CommentFilter>("all");
+  const [replyingTo, setReplyingTo] = useState<string | null>(null);
+  const [replyContent, setReplyContent] = useState("");
 
   const handleAddComment = () => {
     if (!newComment.trim()) {
@@ -68,6 +71,19 @@ export function AdminFormComments({
       setIsAddingComment(false);
       setSelectedFieldPath(undefined);
       setSelectedFieldLabel(undefined);
+    }
+  };
+
+  const handleReply = (parentCommentId: string) => {
+    if (!replyContent.trim()) {
+      toast.error("Please enter a reply");
+      return;
+    }
+
+    if (onAddComment) {
+      onAddComment(replyContent.trim(), undefined, undefined, parentCommentId);
+      setReplyContent("");
+      setReplyingTo(null);
     }
   };
 
@@ -225,9 +241,57 @@ export function AdminFormComments({
                   </>
                 )}
               </div>
+
+              {/* Reply Button */}
+              <div className="mt-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 text-xs text-muted-foreground hover:text-foreground"
+                  onClick={() => setReplyingTo(comment.id)}
+                >
+                  <MessageSquare className="h-3 w-3 mr-1" />
+                  Reply
+                </Button>
+              </div>
             </div>
           </div>
         </Card>
+
+        {/* Reply Input */}
+        {replyingTo === comment.id && (
+          <Card className="ml-11 p-3">
+            <div className="space-y-2">
+              <Textarea
+                placeholder="Write your reply..."
+                value={replyContent}
+                onChange={(e) => setReplyContent(e.target.value)}
+                className="min-h-[60px] resize-none text-sm"
+                autoFocus
+              />
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  onClick={() => handleReply(comment.id)}
+                  disabled={!replyContent.trim()}
+                >
+                  <Send className="h-3 w-3 mr-1" />
+                  Reply
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => {
+                    setReplyingTo(null);
+                    setReplyContent("");
+                  }}
+                >
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          </Card>
+        )}
 
         {/* Render replies */}
         {replies.length > 0 && (

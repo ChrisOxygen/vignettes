@@ -3,6 +3,7 @@ import React from "react";
 import { useParams } from "next/navigation";
 import { useFormSubmissionDetails } from "@/features/admin/hooks";
 import { AdminFormComments } from "@/features/admin/components";
+import { useCreateComment } from "@/features/user/form/hooks";
 import { FORM_FIELD_CONFIGS } from "@/features/user/form/constants/form-configs";
 import { ScrollArea } from "@/shared/components/ui/scroll-area";
 import { Button } from "@/shared/components/ui/button";
@@ -17,7 +18,8 @@ import {
   SheetTrigger,
 } from "@/shared/components/ui/sheet";
 import { MessageSquare } from "lucide-react";
-import { FormType } from "@prisma/client";
+import { FormType, CommentType } from "@prisma/client";
+import { toast } from "sonner";
 
 interface FormattedField {
   question: string;
@@ -89,6 +91,32 @@ function SubmissionDetailsPage() {
     isError,
     error,
   } = useFormSubmissionDetails({ submissionId: id });
+
+  const { mutate: createComment, isPending: isCreatingComment } =
+    useCreateComment({
+      onSuccess: () => {
+        toast.success("Comment added successfully");
+      },
+      onError: (error) => {
+        toast.error(error || "Failed to add comment");
+      },
+    });
+
+  const handleAddComment = (
+    content: string,
+    fieldPath?: string,
+    fieldLabel?: string,
+    parentCommentId?: string
+  ) => {
+    createComment({
+      submissionId: id,
+      content,
+      fieldPath: fieldPath || null,
+      fieldLabel: fieldLabel || null,
+      commentType: CommentType.ADMIN_FEEDBACK,
+      parentCommentId: parentCommentId || null,
+    });
+  };
 
   const formattedFields = submission
     ? formatDetails(
@@ -214,6 +242,8 @@ function SubmissionDetailsPage() {
             submissionId={id}
             formType={submission.formType}
             comments={submission.comments}
+            isLoading={isCreatingComment}
+            onAddComment={handleAddComment}
           />
         </ScrollArea>
 
@@ -238,6 +268,8 @@ function SubmissionDetailsPage() {
                   submissionId={id}
                   formType={submission.formType}
                   comments={submission.comments}
+                  isLoading={isCreatingComment}
+                  onAddComment={handleAddComment}
                 />
               </div>
             </SheetContent>

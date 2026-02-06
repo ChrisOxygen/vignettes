@@ -41,6 +41,11 @@ export function useCreateComment(options?: UseCreateCommentOptions) {
         queryKey: ["comments", variables.submissionId],
       });
 
+      // Also invalidate admin form submission query if exists
+      queryClient.invalidateQueries({
+        queryKey: ["admin", "formSubmission", variables.submissionId],
+      });
+
       // Call the success callback with the API response
       if (result) {
         options?.onSuccess?.(result);
