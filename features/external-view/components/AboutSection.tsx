@@ -50,25 +50,32 @@ function AboutSection() {
             Republic of Ireland, United Arab Emirate (UAE), Germany, France, and
             Switzerland.
           </p>
-          <div className="flex flex-col sm:flex-row w-full sm:items-center justify-center sm:justify-between gap-4 sm:gap-6 px-4 sm:px-6 py-6 rounded-lg">
+          <div className="flex flex-col sm:flex-row  flex-wrap w-full sm:items-center justify-start md:justify-between gap-4 sm:gap-6 px-4 sm:px-6 py-6 rounded-lg">
             <div className="flex items-center gap-3 text-center sm:text-left">
-              <IoCheckmarkCircleOutline className="text-primary text-xl sm:hidden" />
-              <span className="font-semibold text-sm sm:text-base">
-                Immigration & Visa Consulting
+              <IoCheckmarkCircleOutline className="text-primary shrink-0 text-xl  md:hidden" />
+              <span className="font-semibold text-sm shrink-0 sm:text-base">
+                Study Abroad
               </span>
             </div>
-            <div className="hidden sm:block h-8 w-[2px] bg-primary flex-shrink-0" />
+            <div className="hidden md:block h-8 w-[2px] bg-primary flex-shrink-0" />
             <div className="flex items-center gap-3 text-center sm:text-left">
-              <IoCheckmarkCircleOutline className="text-primary text-xl sm:hidden" />
-              <span className="font-semibold text-sm sm:text-base">
-                International Student Recruitment
-              </span>
-            </div>
-            <div className="hidden sm:block h-8 w-[2px] bg-primary flex-shrink-0" />
-            <div className="flex items-center gap-3 text-center sm:text-left">
-              <IoCheckmarkCircleOutline className="text-primary text-xl sm:hidden" />
-              <span className="font-semibold text-sm sm:text-base">
+              <IoCheckmarkCircleOutline className="text-primary shrink-0 text-xl md:hidden" />
+              <span className="font-semibold text-sm shrink-0 sm:text-base">
                 Global Talent Mobility
+              </span>
+            </div>
+            <div className="hidden md:block h-8 w-[2px] bg-primary flex-shrink-0" />
+            <div className="flex items-center gap-3 text-center sm:text-left">
+              <IoCheckmarkCircleOutline className="text-primary shrink-0 text-xl md:hidden" />
+              <span className="font-semibold text-sm shrink-0 sm:text-base">
+                Business Plans and Travels
+              </span>
+            </div>
+            <div className="hidden md:block h-8 w-[2px] bg-primary flex-shrink-0" />
+            <div className="flex items-center gap-3 text-center sm:text-left">
+              <IoCheckmarkCircleOutline className="text-primary shrink-0 text-xl md:hidden" />
+              <span className="font-semibold text-sm shrink-0 sm:text-base">
+                Tourism
               </span>
             </div>
           </div>
