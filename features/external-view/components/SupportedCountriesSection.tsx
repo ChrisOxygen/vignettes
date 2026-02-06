@@ -2,7 +2,7 @@
 
 import React from "react";
 import SectionTitle from "./SectionTitle";
-import { VISA_TYPES } from "../constants";
+import { COUNTRIES_WE_HANDLE } from "../constants";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -20,24 +20,43 @@ function SupportedCountriesSection() {
         />
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 grid-rows-6 md:grid-rows-3 lg:grid-rows-2 gap-4 lg:gap-6 w-full">
-          {VISA_TYPES.map((item, index) => (
-            <div
-              key={index}
-              className="flex items-center gap-6 p-4 bg-white rounded-lg border border-gray/20 hover:border-primary hover:scale-[1.02] transition-all duration-300"
-            >
-              <Image
-                src={`/assets/${item.country.toLowerCase().replace(/\s+/g, "-")}.webp`}
-                alt={item.country}
-                width={100}
-                height={100}
-                className="rounded-full size-20 object-cover object-center overflow-hidden flex-shrink-0"
-              />
-              <div className="flex flex-col ">
-                <h5 className="text-lg font-semibold">{item.country}</h5>
-                <p className="text-gray-600 text-sm">{item.visaTypes}</p>
+          {COUNTRIES_WE_HANDLE.map((item, index) => {
+            return item.active ? (
+              <div
+                key={index}
+                className="flex items-center gap-6 p-4 bg-white rounded-lg border border-gray/20 hover:border-primary hover:scale-[1.02] transition-all duration-300"
+              >
+                <Image
+                  src={`https://flagcdn.com/w320/${item.countryInitials.toLocaleLowerCase()}.png`}
+                  alt={item.country}
+                  width={192}
+                  height={192}
+                  className="rounded-full size-20 object-cover object-center overflow-hidden flex-shrink-0"
+                />
+                <div className="flex flex-col ">
+                  <h5 className="text-lg font-semibold">{item.country}</h5>
+                  <p className="text-gray-600 text-sm">{item.visaTypes}</p>
+                </div>
               </div>
-            </div>
-          ))}
+            ) : (
+              <div
+                key={index}
+                className="flex items-center gap-6 p-4 bg-white rounded-lg border border-gray/20 hover:border-primary hover:scale-[1.02] transition-all duration-300"
+              >
+                <Image
+                  src={`https://flagcdn.com/w320/${item.countryInitials.toLocaleLowerCase()}.png`}
+                  alt={item.country}
+                  width={192}
+                  height={192}
+                  className="rounded-full size-20 object-cover object-center overflow-hidden flex-shrink-0"
+                />
+                <div className="flex flex-col ">
+                  <h5 className="text-lg font-semibold">{item.country}</h5>
+                  <p className="text-gray-600 text-sm">{item.visaTypes}</p>
+                </div>
+              </div>
+            );
+          })}
         </div>
 
         {/* CTA Section - Hidden on Partner Institutions page */}

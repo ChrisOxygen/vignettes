@@ -95,36 +95,60 @@ export const TESTIMONIALS = [
   },
 ];
 
-export const VISA_TYPES = [
+export const COUNTRIES_WE_HANDLE = [
   {
     country: "United States",
+    countryInitials: "US",
     visaTypes:
       "Tourist visa, Work visa, Student visa, Business visa, Transit visa",
+    active: true,
+  },
+  {
+    country: "United Kingdom",
+    countryInitials: "GB",
+    visaTypes:
+      "Tourist visa, Work visa, Student visa, Business visa, Transit visa",
+    active: true,
   },
   {
     country: "Canada",
+    countryInitials: "CA",
     visaTypes:
       "Work visa, Student visa, Visitor visa, Family visa, Business visa",
+    active: true,
+  },
+  {
+    country: "The Republic of Ireland",
+    countryInitials: "IE",
+    visaTypes:
+      "Student visa, Tourist visa, Work visa, Business visa, Transit visa",
+    active: true,
   },
   {
     country: "Scotland",
+    countryInitials: "GB-SCT",
     visaTypes:
       "Student visa, Tourist visa, Family visa, Work visa, Transit visa",
+    active: false,
   },
-  {
-    country: "France",
-    visaTypes:
-      "Business visa, Tourist visa, Investment visa, Student visa, Work visa",
-  },
-  {
-    country: "Turkey",
-    visaTypes:
-      "Tourist visa, Business visa, Work visa, Transit visa, Student visa",
-  },
+  // {
+  //   country: "France",
+  //   visaTypes:
+  //     "Business visa, Tourist visa, Investment visa, Student visa, Work visa",
+  //   active: false,
+  // },
+  // {
+  //   country: "Turkey",
+  //   visaTypes:
+  //     "Tourist visa, Business visa, Work visa, Transit visa, Student visa",
+  //   active: false,
+  // },
   {
     country: "Australia",
+    countryInitials: "AU",
     visaTypes:
       "Work visa, Tourist visa, Student visa, Business visa, Investor visa",
+    active: false,
   },
 ];
 
