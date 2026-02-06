@@ -25,7 +25,7 @@ import { useSendContactForm } from "@/features/external-view/hooks";
 
 function ContactPage() {
   const [successMessage, setSuccessMessage] = React.useState<string | null>(
-    null
+    null,
   );
 
   const form = useForm<ContactFormData>({
@@ -74,7 +74,9 @@ function ContactPage() {
     {
       icon: MapPin,
       title: "Visit Our Office",
-      content: ["TheBunker, 279 Hebert Marcaulay Way, Yaba"],
+      content: [
+        "TheBunker, 279 Herbert Macaulay Way, Alagomeji, Yaba, Lagos, Nigeria",
+      ],
       href: "https://maps.google.com/?q=TheBunker,279+Hebert+Marcaulay+Way,Alagomeji,Yaba",
     },
   ];

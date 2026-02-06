@@ -40,7 +40,7 @@ function FloatingWhatsappBtn() {
       href={whatsappUrl}
       target="_blank"
       rel="noopener noreferrer"
-      className={`fixed cursor-pointer z-50 size-16 hover:scale-105 transition-all duration-1000 bottom-5 right-5 text-6xl text-green-700  ${
+      className={`fixed cursor-pointer z-50 size-12 hover:scale-105 transition-all duration-1000 bottom-6 right-6 text-6xl text-green-700  ${
         isVisible ? "opacity-100" : "opacity-0"
       } ${isBuzzing ? "animate-buzz" : ""}`}
     >
@@ -49,10 +49,10 @@ function FloatingWhatsappBtn() {
         alt="WhatsApp Logo"
         width={100}
         height={100}
-        className="cursor-pointer size-16"
+        className="cursor-pointer size-12"
         style={{
           filter:
-            "drop-shadow(0 15px 60px rgba(0, 0, 0, 0.116)) drop-shadow(0 5px 15px rgba(0, 0, 0, 0.404))",
+            "drop-shadow(0 15px 60px rgba(0, 0, 0, 0.116)) drop-shadow(0 5px 15px rgba(0, 0, 0, 0.104))",
         }}
       />
       <style jsx>{`

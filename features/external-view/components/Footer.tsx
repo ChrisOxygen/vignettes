@@ -84,7 +84,7 @@ function Footer() {
               <span className="text-base">🇳🇬</span> Nigeria
             </span>
             <span className="text-white/70 text-xs leading-relaxed">
-              TheBunker, 279 Herbert Macaulay Way, Alagomeji, Yaba
+              TheBunker, 279 Herbert Macaulay Way, Alagomeji, Yaba, Lagos
             </span>
           </div>
 
@@ -118,7 +118,7 @@ function Footer() {
       {/* Copyright Section */}
       <div className="w-full max-w-7xl mx-auto border-t border-white/10 pt-8">
         <p className="text-white/60 text-sm text-center">
-          Copyright © 2025 Insights and Vignettes. All Rights Reserved.
+          Copyright © 2026 Insights and Vignettes. All Rights Reserved.
         </p>
       </div>
     </footer>
